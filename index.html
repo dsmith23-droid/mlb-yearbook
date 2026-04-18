@@ -1986,14 +1986,19 @@ function renderMTP(){
       const code=box[ck],tb=box[side];
       for(const p of tb.l||[]){const s=getS(p.n,code);s.g++;s.ab+=p.ab||0;s.h+=p.h||0;s.hr+=p.hr||0;s.rbi+=p.rbi||0;s.bb+=p.bb||0;s.k+=p.k||0;}
       for(const p of tb.b||[]){if(!p.a)continue;const s=getS(p.n,code);s.g++;s.ab+=p.ab||0;s.h+=p.h||0;s.hr+=p.hr||0;s.rbi+=p.rbi||0;s.bb+=p.bb||0;s.k+=p.k||0;}
+      // Track which pitchers we've seen in this game to avoid double-counting
+      const seenPit=new Set();
       for(const p of tb.p||[]){
         const s=getS(p.n,code);
         const ou=p.ip?(+p.ip.split('.')[0]*3+(+p.ip.split('.')[1]||0)):0;
         s.g++;s.ip+=ou;s.er+=p.er||0;s.pbb+=p.bb||0;s.pk+=p.k||0;s.ph+=p.h||0;
         if(p.gs)s.gs++;if(p.dec==='W')s.w++;if(p.dec==='L')s.l++;if(p.dec==='S')s.sv++;
+        seenPit.add(p.n);
       }
+      // bp[] only for pitchers not already counted in p[]
       for(const p of tb.bp||[]){
-        if(!p.a)continue;const s=getS(p.n,code);
+        if(!p.a||seenPit.has(p.n))continue;
+        const s=getS(p.n,code);
         const ou=p.ip?(+p.ip.split('.')[0]*3+(+p.ip.split('.')[1]||0)):0;
         s.g++;s.ip+=ou;s.er+=p.er||0;s.pbb+=p.bb||0;s.pk+=p.k||0;s.ph+=p.h||0;
         if(p.dec==='W')s.w++;if(p.dec==='L')s.l++;if(p.dec==='S')s.sv++;
