@@ -245,6 +245,19 @@ body{font-family:'Archivo Narrow',sans-serif;background:var(--bg);color:var(--te
 .cs-tbl tr:last-child td{border-bottom:none}
 .cs-loading{padding:10px 16px;font-family:'Roboto Mono',monospace;font-size:.72rem;color:var(--dim)}
 
+.mtp-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden}
+.mtp-name{font-family:'Archivo',sans-serif;font-weight:800;font-size:.85rem;padding:8px 12px;color:#fff;transition:opacity .12s}.mtp-name:hover{opacity:.85}
+.mtp-tbl{width:100%;border-collapse:collapse;font-size:.73rem}
+.mtp-tbl th{font-family:'Roboto Mono',monospace;font-size:.6rem;letter-spacing:.06em;color:var(--dim);padding:4px 8px;text-align:right;background:var(--surface2);border-bottom:1px solid var(--border);font-weight:500}
+.mtp-tbl th:first-child{text-align:left}
+.mtp-tbl td{font-family:'Roboto Mono',monospace;padding:4px 8px;text-align:right;border-bottom:1px solid var(--border);color:var(--muted)}
+.mtp-tbl td:first-child{text-align:left;font-family:'Archivo Narrow',sans-serif;font-size:.8rem;color:var(--text);font-weight:500}
+.mtp-tbl tr.mtp-tot td{font-weight:700;color:var(--text);background:var(--surface2);border-top:1px solid var(--border)}
+.mtp-tbl td.hi{color:var(--text)}
+.splits-bar{display:flex;flex-wrap:wrap;gap:8px;padding:8px 16px;background:var(--surface2);border-bottom:1px solid var(--border);margin-bottom:14px;border-radius:0 0 var(--radius2) var(--radius2)}
+.split-pill{display:flex;align-items:center;gap:6px;padding:4px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;font-family:'Roboto Mono',monospace;font-size:.72rem}
+.split-team{font-weight:700;font-size:.72rem}
+.split-stats{color:var(--muted)}
 /* misc */
 @media(max-width:768px){
   .bteams{grid-template-columns:1fr}
@@ -285,6 +298,7 @@ body{font-family:'Archivo Narrow',sans-serif;background:var(--bg);color:var(--te
       <button class="nb active" id="nb-schedule" onclick="showView('calendar')" style="display:none">Schedule</button>
       <button class="nb" id="nb-standings" onclick="showView('standings')" style="display:none">Standings</button>
       <button class="nb" id="nb-players" onclick="showView('players')" style="display:none">Players</button>
+      <button class="nb" id="nb-mtp" onclick="showView('mtp')" style="display:none">Traded</button>
       <button class="nb" id="nb-career" onclick="showView('career')">Career</button>
       <button class="nb" id="dm-toggle" onclick="toggleDark()" title="Toggle dark mode" style="font-size:.9rem;padding:6px 10px">&#9790;</button>
     </nav>
@@ -373,6 +387,22 @@ body{font-family:'Archivo Narrow',sans-serif;background:var(--bg);color:var(--te
     </div>
     <div class="sbar"><input type="text" class="sinp" id="psrch" placeholder="Search by name..." oninput="filterPlayers(this.value)"></div>
     <div class="pres" id="pres"></div>
+  </div>
+
+  <div id="vmtp" class="view">
+    <div class="page-header" style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <div>
+        <div class="page-title">Multi-Team Players</div>
+        <div class="page-sub" id="mtp-sub"></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <label style="font-family:'Roboto Mono',monospace;font-size:.72rem;color:var(--muted)">Show:</label>
+        <button class="bbk" id="mtp-btn-bat" onclick="mtpFilter('bat')" style="border-color:var(--accent);color:var(--accent)">Batters</button>
+        <button class="bbk" id="mtp-btn-pit" onclick="mtpFilter('pit')">Pitchers</button>
+        <button class="bbk" id="mtp-btn-all" onclick="mtpFilter('all')">All</button>
+      </div>
+    </div>
+    <div id="mtp-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px;margin-top:16px"></div>
   </div>
 
   <div id="vcs" class="view">
@@ -666,7 +696,7 @@ function goHome(){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById('vhome').classList.add('active');
   document.getElementById('mnav').innerHTML='';
-  ['nb-schedule','nb-standings','nb-players'].forEach(id=>document.getElementById(id).style.display='none');
+  ['nb-schedule','nb-standings','nb-players','nb-mtp'].forEach(id=>document.getElementById(id).style.display='none');
   document.getElementById('season-sel').value='';
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
 }
@@ -685,7 +715,7 @@ async function loadSeason(year){
     curSeason=year;
     runningRecords=null;pidxBuilt=false;pidx={};
     document.getElementById('season-sel').value=year;
-    ['nb-schedule','nb-standings','nb-players'].forEach(id=>document.getElementById(id).style.display='');
+    ['nb-schedule','nb-standings','nb-players','nb-mtp'].forEach(id=>document.getElementById(id).style.display='');
     buildMnav();
     showView('calendar');
   }catch(e){
@@ -756,7 +786,7 @@ function showView(name,skipRender){
   document.getElementById('vhome').classList.remove('active');
   document.querySelectorAll('#mc .view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
-  const ids={calendar:'vcalendar',box:'vbox',standings:'vst',team:'vteam',players:'vpl',pp:'vpp',career:'vcs'};
+  const ids={calendar:'vcalendar',box:'vbox',standings:'vst',team:'vteam',players:'vpl',pp:'vpp',career:'vcs',mtp:'vmtp'};
   document.getElementById(ids[name]||'vcalendar').classList.add('active');
   const labels={calendar:'Schedule',standings:'Standings',players:'Players'};
   document.querySelectorAll('.nb').forEach(b=>{if(b.textContent===labels[name])b.classList.add('active');});
@@ -767,6 +797,7 @@ function showView(name,skipRender){
     renderST(selectedDate||D.dates[D.dates.length-1]);
   }
     if(name==='players'){buildIdx();filterPlayers(document.getElementById('psrch').value||'');}
+    if(name==='mtp'){renderMTP();}
   }
 }
 
@@ -781,12 +812,13 @@ function openBox(gid,from){
 
 function goBackFromPP(){
   if(prevPPView==='box'){
-    // Go back to box score
     document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
     document.getElementById('vhome').classList.remove('active');
     document.getElementById('vbox').classList.add('active');
   } else if(prevPPView==='career'){
     showView('career',true);
+  } else if(prevPPView==='mtp'){
+    showView('mtp',true);
   } else {
     showView('players',true);
   }
@@ -808,12 +840,14 @@ function goBack(){
   else showView('calendar');
 }
 
-function openPP(name,team){
+function openPP(name,team,fromView){
   buildIdx();
   const player=pidx[name]||(team?pidx[name+'|'+team]:null);
   if(!player)return;
-  prevView='players'; prevPPView='players'; currentPPName=name;
-  document.getElementById('pp-back-btn').textContent='\u2190 Players';
+  const src=fromView||'players';
+  prevView=src; prevPPView=src; currentPPName=name;
+  const labels={players:'\u2190 Players',mtp:'\u2190 Traded',career:'\u2190 Career',box:'\u2190 Box Score'};
+  document.getElementById('pp-back-btn').textContent=labels[src]||'\u2190 Back';
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById('vpp').classList.add('active');
   renderPP(player);
@@ -1324,6 +1358,24 @@ function renderPP(player){
         :`<span><b>AB</b>${ab}</span><span><b>H</b>${h}</span><span><b>AVG</b>${avg}</span><span><b>BB</b>${bb}</span><span><b>K</b>${k}</span><span><b>HR</b>${hr}</span><span><b>RBI</b>${rbi}</span>`
       }
     </div>
+    ${teams.length>1?`<div class="splits-bar">${teams.map(t=>{
+      const tg=player.games.filter(g=>(g.role==='S'||g.appeared)&&g.team===t);
+      const tc2=tc(t),tn2=D.teams[t]?D.teams[t].name:t;
+      if(isPitcher){
+        const tip=tg.reduce((s,g)=>s+(g.ipouts||0),0);
+        const ter=tg.reduce((s,g)=>s+(g.per||0),0);
+        const tw=tg.filter(g=>g.dec==='W').length,tl=tg.filter(g=>g.dec==='L').length;
+        const tera=tip>0?(ter/(tip/27)).toFixed(2):'—';
+        return '<span class="split-pill" style="border-left:3px solid '+tc2+'"><span class="split-team" style="color:'+tc2+'">'+tn2+'</span><span class="split-stats">'+tg.length+'G · '+tw+'-'+tl+' · '+tera+' ERA</span></span>';
+      } else {
+        const tab=tg.reduce((s,g)=>s+(g.ab||0),0);
+        const th=tg.reduce((s,g)=>s+(g.h||0),0);
+        const thr=tg.reduce((s,g)=>s+(g.hr||0),0);
+        const trbi=tg.reduce((s,g)=>s+(g.rbi||0),0);
+        const tavg=tab>0?('.'+Math.round(th/tab*1000).toString().padStart(3,'0')):'—';
+        return '<span class="split-pill" style="border-left:3px solid '+tc2+'"><span class="split-team" style="color:'+tc2+'">'+tn2+'</span><span class="split-stats">'+tg.length+'G · '+tavg+' · '+thr+'HR · '+trbi+'RBI</span></span>';
+      }
+    }).join('')}</div>`:''}
     <div class="glt-wrap"><table class="glt">
       <tr>${isPitcher
         ?'<th>Date</th><th>Team</th><th>Opp</th><th>Role</th><th>Result</th><th>IP</th><th>H</th><th>ER</th><th>BB</th><th>K</th><th>Dec</th>'
@@ -1902,6 +1954,128 @@ async function renderCompare(){
       ${rows}
     </table>
   </div>`;
+}
+
+// ── Multi-Team Players ───────────────────────────────────────────────────────
+let mtpFilter_active='bat';
+
+function mtpFilter(mode){
+  mtpFilter_active=mode;
+  ['bat','pit','all'].forEach(m=>{
+    const btn=document.getElementById('mtp-btn-'+m);
+    if(btn){btn.style.borderColor=m===mode?'var(--accent)':'var(--border)';btn.style.color=m===mode?'var(--accent)':'var(--muted)';}
+  });
+  document.querySelectorAll('.mtp-card').forEach(card=>{
+    const isPit=card.dataset.type==='pit';
+    card.style.display=(mode==='all'||(mode==='bat'&&!isPit)||(mode==='pit'&&isPit))?'':'none';
+  });
+}
+
+function renderMTP(){
+  if(!D)return;
+  const PITCHERS=D.pitchers?new Set(D.pitchers):null;
+  // Collect per-player per-team stats
+  const pts={};
+  function getS(name,code){
+    if(!pts[name])pts[name]={};
+    if(!pts[name][code])pts[name][code]={g:0,ab:0,h:0,hr:0,rbi:0,bb:0,k:0,ip:0,er:0,w:0,l:0,sv:0,pbb:0,pk:0,ph:0,gs:0};
+    return pts[name][code];
+  }
+  for(const box of Object.values(D.box_scores)){
+    for(const [side,ck] of [['vb','v'],['hb','h']]){
+      const code=box[ck],tb=box[side];
+      for(const p of tb.l||[]){const s=getS(p.n,code);s.g++;s.ab+=p.ab||0;s.h+=p.h||0;s.hr+=p.hr||0;s.rbi+=p.rbi||0;s.bb+=p.bb||0;s.k+=p.k||0;}
+      for(const p of tb.b||[]){if(!p.a)continue;const s=getS(p.n,code);s.g++;s.ab+=p.ab||0;s.h+=p.h||0;s.hr+=p.hr||0;s.rbi+=p.rbi||0;s.bb+=p.bb||0;s.k+=p.k||0;}
+      for(const p of tb.p||[]){
+        const s=getS(p.n,code);
+        const ou=p.ip?(+p.ip.split('.')[0]*3+(+p.ip.split('.')[1]||0)):0;
+        s.g++;s.ip+=ou;s.er+=p.er||0;s.pbb+=p.bb||0;s.pk+=p.k||0;s.ph+=p.h||0;
+        if(p.gs)s.gs++;if(p.dec==='W')s.w++;if(p.dec==='L')s.l++;if(p.dec==='S')s.sv++;
+      }
+      for(const p of tb.bp||[]){
+        if(!p.a)continue;const s=getS(p.n,code);
+        const ou=p.ip?(+p.ip.split('.')[0]*3+(+p.ip.split('.')[1]||0)):0;
+        s.g++;s.ip+=ou;s.er+=p.er||0;s.pbb+=p.bb||0;s.pk+=p.k||0;s.ph+=p.h||0;
+        if(p.dec==='W')s.w++;if(p.dec==='L')s.l++;if(p.dec==='S')s.sv++;
+      }
+    }
+  }
+
+  const multi=Object.entries(pts).filter(([,t])=>Object.keys(t).length>1);
+  multi.sort((a,b)=>{const al=a[0].split(' ').pop(),bl=b[0].split(' ').pop();return al.localeCompare(bl);});
+
+  const batCount=multi.filter(([n])=>!PITCHERS||!PITCHERS.has(n)).length;
+  const pitCount=multi.filter(([n])=>PITCHERS&&PITCHERS.has(n)).length;
+  document.getElementById('mtp-sub').textContent=curSeason+' · '+multi.length+' players on multiple teams · '+batCount+' batters · '+pitCount+' pitchers';
+
+  const fmtAvg=(h,ab)=>ab>0?('.'+Math.round(h/ab*1000).toString().padStart(3,'0')):'.---';
+  const fmtIp=ou=>Math.floor(ou/3)+'.'+(ou%3);
+  const fmtEra=(er,ip)=>ip>0?(er/(ip/27)).toFixed(2):'----';
+
+  document.getElementById('mtp-grid').innerHTML=multi.map(([name,teamMap])=>{
+    const isPit=PITCHERS&&PITCHERS.has(name);
+    const teamList=Object.entries(teamMap).sort((a,b)=>b[1].g-a[1].g);
+    const color=tc(teamList[0][0]);
+    // Totals
+    const tot={g:0,ab:0,h:0,hr:0,rbi:0,bb:0,k:0,ip:0,er:0,w:0,l:0,sv:0,pbb:0,pk:0,ph:0,gs:0};
+    teamList.forEach(([,s])=>{for(const k of Object.keys(tot))tot[k]+=s[k]||0;});
+
+    const dotStyle=(code)=>`display:inline-block;width:7px;height:7px;border-radius:50%;background:${tc(code)};margin-right:5px;vertical-align:middle`;
+
+    let rows='';
+    if(isPit){
+      teamList.forEach(([code,s])=>{
+        const tn=D.teams[code]?D.teams[code].name:code;
+        rows+=`<tr>
+          <td><span style="${dotStyle(code)}"></span>${tn}</td>
+          <td class="hi">${s.g}</td><td>${s.gs}</td>
+          <td class="hi">${s.w}-${s.l}</td><td>${s.sv||0}</td>
+          <td class="hi">${fmtIp(s.ip)}</td><td>${s.ph}</td>
+          <td>${s.er}</td><td>${s.pbb}</td><td class="hi">${s.pk}</td>
+          <td class="hi">${fmtEra(s.er,s.ip)}</td>
+        </tr>`;
+      });
+      rows+=`<tr class="mtp-tot">
+        <td>Total</td><td>${tot.g}</td><td>${tot.gs}</td>
+        <td>${tot.w}-${tot.l}</td><td>${tot.sv}</td>
+        <td>${fmtIp(tot.ip)}</td><td>${tot.ph}</td>
+        <td>${tot.er}</td><td>${tot.pbb}</td><td>${tot.pk}</td>
+        <td>${fmtEra(tot.er,tot.ip)}</td>
+      </tr>`;
+      return `<div class="mtp-card" data-type="pit" style="display:${mtpFilter_active==='pit'||mtpFilter_active==='all'?'':'none'}">
+        <div class="mtp-name" style="background:${color};cursor:pointer" onclick="openPP('${esc(name)}','','mtp')">${name}</div>
+        <table class="mtp-tbl">
+          <tr><th>Team</th><th>G</th><th>GS</th><th>W-L</th><th>SV</th><th>IP</th><th>H</th><th>ER</th><th>BB</th><th>K</th><th>ERA</th></tr>
+          ${rows}
+        </table>
+      </div>`;
+    } else {
+      teamList.forEach(([code,s])=>{
+        const tn=D.teams[code]?D.teams[code].name:code;
+        rows+=`<tr>
+          <td><span style="${dotStyle(code)}"></span>${tn}</td>
+          <td class="hi">${s.g}</td><td>${s.ab}</td><td>${s.h}</td>
+          <td class="hi">${fmtAvg(s.h,s.ab)}</td>
+          <td class="hi">${s.hr}</td><td class="hi">${s.rbi}</td>
+          <td>${s.bb}</td><td>${s.k}</td>
+        </tr>`;
+      });
+      rows+=`<tr class="mtp-tot">
+        <td>Total</td><td>${tot.g}</td><td>${tot.ab}</td><td>${tot.h}</td>
+        <td>${fmtAvg(tot.h,tot.ab)}</td>
+        <td>${tot.hr}</td><td>${tot.rbi}</td><td>${tot.bb}</td><td>${tot.k}</td>
+      </tr>`;
+      return `<div class="mtp-card" data-type="bat">
+        <div class="mtp-name" style="background:${color};cursor:pointer" onclick="openPP('${esc(name)}','','mtp')">${name}</div>
+        <table class="mtp-tbl">
+          <tr><th>Team</th><th>G</th><th>AB</th><th>H</th><th>AVG</th><th>HR</th><th>RBI</th><th>BB</th><th>K</th></tr>
+          ${rows}
+        </table>
+      </div>`;
+    }
+  }).join('');
+  // Apply current filter
+  mtpFilter(mtpFilter_active);
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
