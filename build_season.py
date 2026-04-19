@@ -54,7 +54,7 @@ def get_alias(code, year):
         return 'MIA'
     # LAA in OD = expansion Angels 1961-64 (TEAM also LAA, no alias needed)
     #           = modern Angels 2005+ (TEAM uses ANA)
-    if code == 'LAA' and y >= 2005:
+    if code == 'LAA' and y >= 1997:
         return 'ANA'
     return TEAM_ALIAS.get(code, code)
 
@@ -113,6 +113,15 @@ def build_season(year, data_dir, opening_day_file, transactions_file):
                 league = 'AL' if league_raw in ('A','AL') else ('NL' if league_raw in ('N','NL') else None)
                 if league:
                     teams[code] = {'league': league, 'city': city, 'name': name, 'full': f"{city} {name}"}
+    # ── team name overrides for historical accuracy ──
+    NAME_OVERRIDES = {
+        ('HOU', 1962): ('Houston', 'Colt .45s'),
+        ('HOU', 1963): ('Houston', 'Colt .45s'),
+        ('HOU', 1964): ('Houston', 'Colt .45s'),
+    }
+    for (code_ov, yr_ov), (city_ov, name_ov) in NAME_OVERRIDES.items():
+        if code_ov in teams and int(year) == yr_ov:
+            teams[code_ov].update({'city': city_ov, 'name': name_ov, 'full': f"{city_ov} {name_ov}"})
     ML_TEAMS = set(teams.keys())
     print(f"  {len(ML_TEAMS)} teams")
 
@@ -179,6 +188,13 @@ def build_season(year, data_dir, opening_day_file, transactions_file):
             if tgt in snap:
                 for s in srcs:
                     if s not in snap: snap[s] = snap[tgt]
+        # Year-aware reverse aliases
+        if int(year) <= 1967 and 'KC1' in snap and 'KCA' not in snap:
+            snap['KCA'] = snap['KC1']
+        if int(year) >= 2012 and 'MIA' in snap and 'FLO' not in snap:
+            snap['FLO'] = snap['MIA']
+        if int(year) >= 1997 and 'ANA' in snap and 'LAA' not in snap:
+            snap['LAA'] = snap['ANA']
         roster_by_date[gdate.strftime('%Y%m%d')] = snap
 
     teamstats = {}
@@ -231,7 +247,7 @@ def build_season(year, data_dir, opening_day_file, transactions_file):
             r = starters[lp]; pid = r['id']
             pos = get_pos(gid, pid); name = roster.get(pid, {}).get('name', pid)
             lineup_names.add(name); is_p = (pos == 'P')
-            entry = {'lp': lp, 'n': name, 'pos': pos, 'p': is_p,
+            entry = {'lp': lp, 'n': name, 'id': pid, 'pos': pos, 'p': is_p,
                      'ab': safe_int(r['b_ab']), 'h': safe_int(r['b_h']),
                      'bb': safe_int(r['b_w']), 'k': safe_int(r['b_k']),
                      'hr': safe_int(r['b_hr']), 'rbi': safe_int(r['b_rbi'])}
@@ -242,7 +258,7 @@ def build_season(year, data_dir, opening_day_file, transactions_file):
             pitcher_names_all.add(name)
             outs = safe_int(r['p_ipouts']); ip = f"{outs//3}.{outs%3}"
             dec = 'W' if r['wp']==pid else ('L' if r['lp']==pid else ('S' if r['save']==pid else ''))
-            pitchers.append({'n': name, 'ip': ip, 'gs': r['p_gs']=='1',
+            pitchers.append({'n': name, 'id': pid, 'ip': ip, 'gs': r['p_gs']=='1',
                              'h': safe_int(r['p_h']), 'r': safe_int(r['p_r']),
                              'er': safe_int(r['p_er']), 'bb': safe_int(r['p_w']),
                              'k': safe_int(r['p_k']), 'dec': dec})

@@ -73,12 +73,12 @@ def get_alias(code, year):
         return 'MIA'
     # LAA in OD = expansion Angels 1961-64 (TEAM also LAA, no alias needed)
     #           = modern Angels 2005+ (TEAM uses ANA)
-    if code == 'LAA' and y >= 2005:
+    if code == 'LAA' and y >= 1997:
         return 'ANA'
     return TEAM_ALIAS.get(code, code)
 
 
-FIRST_YEAR      = 1940
+FIRST_YEAR  = 1915
 LAST_YEAR       = 2025
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -176,6 +176,28 @@ def build_season(year):
                 if league:
                     teams[code] = {'league': league, 'city': city,
                                    'name': name, 'full': f"{city} {name}"}
+    # ── team name overrides for historical accuracy ──
+    NAME_OVERRIDES = {
+        ('HOU', 1962): ('Houston', 'Colt .45s'),
+        ('HOU', 1963): ('Houston', 'Colt .45s'),
+        ('HOU', 1964): ('Houston', 'Colt .45s'),
+        ('WS2', 1961): ('Washington', 'Senators'),
+        ('WS2', 1962): ('Washington', 'Senators'),
+        ('WS2', 1963): ('Washington', 'Senators'),
+        ('WS2', 1964): ('Washington', 'Senators'),
+        ('WS2', 1965): ('Washington', 'Senators'),
+        ('WS2', 1966): ('Washington', 'Senators'),
+        ('WS2', 1967): ('Washington', 'Senators'),
+        ('WS2', 1968): ('Washington', 'Senators'),
+        ('WS2', 1969): ('Washington', 'Senators'),
+        ('WS2', 1970): ('Washington', 'Senators'),
+        ('WS2', 1971): ('Washington', 'Senators'),
+    }
+    for (code_ov, yr_ov), (city_ov, name_ov) in NAME_OVERRIDES.items():
+        if code_ov in teams and int(y) == yr_ov:
+            teams[code_ov]['city'] = city_ov
+            teams[code_ov]['name'] = name_ov
+            teams[code_ov]['full'] = f"{city_ov} {name_ov}"
     ML_TEAMS = set(teams.keys())
     if not ML_TEAMS:
         print(f"  SKIP {y}: no teams found in TEAM{y}")
@@ -252,6 +274,13 @@ def build_season(year):
                 for s in srcs:
                     if s not in snap:
                         snap[s] = snap[tgt]
+        # Year-aware reverse aliases
+        if int(y) <= 1967 and 'KC1' in snap and 'KCA' not in snap:
+            snap['KCA'] = snap['KC1']
+        if int(y) >= 2012 and 'MIA' in snap and 'FLO' not in snap:
+            snap['FLO'] = snap['MIA']
+        if int(y) >= 1997 and 'ANA' in snap and 'LAA' not in snap:
+            snap['LAA'] = snap['ANA']
         roster_by_date[gdate.strftime('%Y%m%d')] = snap
 
     # ── load game data ──
@@ -318,7 +347,7 @@ def build_season(year):
             nm  = roster.get(pid, {}).get('name', pid)
             lineup_names.add(nm)
             is_p = (pos == 'P')
-            entry = {'lp': lp, 'n': nm, 'pos': pos, 'p': is_p,
+            entry = {'lp': lp, 'n': nm, 'id': r['id'], 'pos': pos, 'p': is_p,
                      'ab': safe_int(r['b_ab']), 'h': safe_int(r['b_h']),
                      'bb': safe_int(r['b_w']),  'k': safe_int(r['b_k']),
                      'hr': safe_int(r['b_hr']), 'rbi': safe_int(r['b_rbi'])}
@@ -334,7 +363,7 @@ def build_season(year):
             dec  = ('W' if r['wp'] == pid else
                     'L' if r['lp'] == pid else
                     'S' if r['save'] == pid else '')
-            pitchers.append({'n': nm, 'ip': ip, 'gs': r['p_gs'] == '1',
+            pitchers.append({'n': nm, 'id': r['id'], 'ip': ip, 'gs': r['p_gs'] == '1',
                              'h': safe_int(r['p_h']),  'r': safe_int(r['p_r']),
                              'er': safe_int(r['p_er']), 'bb': safe_int(r['p_w']),
                              'k':  safe_int(r['p_k']),  'dec': dec})

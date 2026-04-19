@@ -449,24 +449,23 @@ body{font-family:'Archivo Narrow',sans-serif;background:var(--bg);color:var(--te
 // ── Team colors ──────────────────────────────────────────────────────────────
 const COLORS={
   ANA:[[1961,"#003DA5","#C8102E"],[1997,"#0C2340","#C4CED4"],[2002,"#C8102E","#0C2340"]],
-  LAA:[[2005,"#C8102E","#003263"]],
   ARI:[[1998,"#5F259F","#009CA6"],[2007,"#C8102E","#010101"]],
-  ATH:[[1940,"#0C2340","#C8102E"],[1963,"#006341","#FFC72C"]],
+  ATH:[[1915,"#0C2340","#C8102E"],[1963,"#006341","#FFC72C"]],
   ATL:[[1940,"#0C2340","#FFC72C"],[1941,"#C8102E","#0C2340"]],
-  BAL:[[1940,"#8F654D","#E35205"],[1954,"#E35205","#010101"]],
-  BOS:[[1940,"#C8102E","#0C2340"]],
-  BRO:[[1940,"#003DA5","#C8102E"]],
-  BSN:[[1940,"#0C2340","#FFC72C"],[1941,"#C8102E","#0C2340"]],
+  BAL:[[1915,"#8F654D","#010101"],[1934,"#8F654D","#E35205"],[1954,"#E35205","#010101"]],
+  BOS:[[1915,"#C8102E","#0C2340"]],
+  BRO:[[1915,"#003DA5","#C8102E"],[1937,"#006A4E","#003DA5"],[1938,"#003DA5","#C8102E"]],
+  BSN:[[1915,"#0C2340","#C8102E"],[1940,"#0C2340","#FFC72C"],[1941,"#C8102E","#0C2340"]],
   CAL:[[1961,"#003DA5","#C8102E"],[1997,"#0C2340","#C4CED4"],[2002,"#C8102E","#0C2340"]],
-  CHA:[[1940,"#0C2340","#C8102E"],[1949,"#010101","#C8102E"],[1964,"#003DA5","#C8102E"],[1991,"#010101","#C4CED4"]],
-  CHN:[[1940,"#003DA5","#C8102E"]],
-  CIN:[[1940,"#C8102E","#0C2340"],[1961,"#C8102E","#010101"]],
-  CLE:[[1940,"#0C2340","#C8102E"]],
+  CHA:[[1915,"#0C2340","#C8102E"],[1949,"#010101","#C8102E"],[1964,"#003DA5","#C8102E"],[1991,"#010101","#C4CED4"]],
+  CHN:[[1915,"#003DA5","#C8102E"]],
+  CIN:[[1915,"#C8102E","#0C2340"],[1961,"#C8102E","#010101"]],
+  CLE:[[1915,"#0C2340","#C8102E"]],
   COL:[[1993,"#5F259F","#010101"]],
-  DET:[[1940,"#0C2340","#E35205"]],
-  FLO:[[1993,"#FF6600","#0C2C56"]],
+  DET:[[1915,"#0C2340","#E35205"]],
+  FLO:[[1993,"#009CA6","#010101"],[2012,"#E35205","#009CA6"],[2019,"#010101","#C8102E"]],
   HOU:[[1962,"#0C2340","#E35205"],[1975,"#E35205","#FFC72C"],[1994,"#0C2340","#FFC72C"],[2000,"#A6192E","#D9C89D"],[2013,"#0C2340","#E35205"]],
-  KC1:[[1955,"#003DA5","#FFC72C"],[1963,"#006341","#EFB21E"],[1969,"#004687","#C09A5B"]],
+  KC1:[[1969,"#003DA5","#FFC72C"]],
   KCA:[[1969,"#003DA5","#FFC72C"]],
   LAN:[[1940,"#003DA5","#C8102E"]],
   MIA:[[1993,"#009CA6","#010101"],[2012,"#E35205","#009CA6"],[2019,"#010101","#C8102E"]],
@@ -474,28 +473,34 @@ const COLORS={
   MIN:[[1940,"#C8102E","#0C2340"]],
   MLN:[[1940,"#0C2340","#FFC72C"],[1941,"#C8102E","#0C2340"]],
   MON:[[1969,"#C8102E","#003DA5"],[2005,"#C8102E","#0C2340"]],
-  NY1:[[1940,"#C8102E","#0C2340"],[1947,"#010101","#E35205"]],
-  NYA:[[1940,"#0C2340","#FFFFFF"]],
+  NY1:[[1915,"#FF6720","#010101"],[1940,"#C8102E","#0C2340"],[1947,"#010101","#E35205"]],
+  NYA:[[1915,"#0C2340","#FFFFFF"]],
   NYN:[[1962,"#003DA5","#E35205"]],
-  OAK:[[1940,"#0C2340","#C8102E"],[1963,"#006341","#FFC72C"]],
-  PHA:[[1940,"#0C2340","#C8102E"],[1963,"#006341","#FFC72C"]],
-  PHI:[[1940,"#7C2539","#0C2340"],[1944,"#7C2539","#6CAEDF"],[1950,"#C8102E","#0C2340"],[1970,"#7C2539","#6CAEDF"],[1992,"#C8102E","#0C2340"]],
-  PIT:[[1940,"#C8102E","#0C2340"],[1947,"#010101","#FFC72C"]],
+  OAK:[[1915,"#0C2340","#C8102E"],[1963,"#006341","#FFC72C"]],
+  PHA:[[1915,"#0C2340","#C8102E"],[1963,"#006341","#FFC72C"]],
+  PHI:[[1915,"#7C2539","#0C2340"],[1944,"#7C2539","#6CAEDF"],[1950,"#C8102E","#0C2340"],[1970,"#7C2539","#6CAEDF"],[1992,"#C8102E","#0C2340"]],
+  PIT:[[1915,"#C8102E","#003DA5"],[1940,"#C8102E","#0C2340"],[1947,"#010101","#FFC72C"]],
   SDN:[[1969,"#8F654D","#FFC72C"],[1985,"#0C2340","#E35205"],[2020,"#8F654D","#FFC72C"]],
-  SE1:[[1969,"#0B5C3A","#CEAD5F"]],
+  SE1:[[1977,"#003DA5","#FFC72C"],[1993,"#0C2340","#009CA6"]],
   SEA:[[1977,"#003DA5","#FFC72C"],[1993,"#0C2340","#009CA6"]],
-  SEP:[[1969,"#0B5C3A","#CEAD5F"]],
+  SEP:[[1977,"#003DA5","#FFC72C"],[1993,"#0C2340","#009CA6"]],
   SFN:[[1940,"#C8102E","#0C2340"],[1947,"#010101","#E35205"]],
-  SLA:[[1940,"#C8102E","#0C2340"]],
-  SLN:[[1940,"#C8102E","#0C2340"]],
-  TBA:[[1998,"#092C5C","#8FBCE6"]],
+  SLA:[[1902,"#0C2340","#C8590A"]],
+  SLN:[[1915,"#C8102E","#0C2340"]],
+  TBA:[[1998,"#0C2340","#009CA6"],[2008,"#0C2340","#6CAEDF"]],
   TEX:[[1961,"#003DA5","#C8102E"]],
   TOR:[[1977,"#003DA5","#6CAEDF"],[1997,"#0C2340","#010101"],[2012,"#003DA5","#6CAEDF"]],
   WAS:[[1969,"#C8102E","#003DA5"],[2005,"#C8102E","#0C2340"]],
-  WSN:[[2005,"#C8102E","#0C2340"]],
-  WS1:[[1940,"#C8102E","#0C2340"]],
+  WS1:[[1915,"#C8102E","#0C2340"]],
   WS2:[[1961,"#003DA5","#C8102E"]],
+  WSA:[[1961,"#003DA5","#C8102E"]],
+  SE1:[[1969,"#0B5C3A","#CEAD5F"]],
+  SEP:[[1969,"#0B5C3A","#CEAD5F"]],
   WSA:[[1961,"#BA0C2F","#11225B"]],
+  TBA:[[1998,"#092C5C","#8FBCE6"]],
+  LAA:[[2005,"#C8102E","#003263"]],
+  WSN:[[2005,"#C8102E","#0C2340"]],
+  FLO:[[1993,"#FF6600","#0C2C56"]],
 };
 const AB={
   BOS:'BOS',BRO:'BKN',BSN:'BSN',CHA:'CWS',CHN:'CHC',CIN:'CIN',
@@ -510,6 +515,31 @@ const AB={
 };
 
 const SEASONS_AVAILABLE = [
+  {year:'1915',file:'1915.json',champs:{AL:'Boston Red Sox',NL:'Philadelphia Phillies'}},
+  {year:'1916',file:'1916.json',champs:{AL:'Boston Red Sox',NL:'Brooklyn Robins'}},
+  {year:'1917',file:'1917.json',champs:{AL:'Chicago White Sox',NL:'New York Giants'}},
+  {year:'1918',file:'1918.json',champs:{AL:'Boston Red Sox',NL:'Chicago Cubs'}},
+  {year:'1919',file:'1919.json',champs:{AL:'Chicago White Sox',NL:'Cincinnati Reds'}},
+  {year:'1920',file:'1920.json',champs:{AL:'Cleveland Indians',NL:'Brooklyn Robins'}},
+  {year:'1921',file:'1921.json',champs:{AL:'New York Yankees',NL:'New York Giants'}},
+  {year:'1922',file:'1922.json',champs:{AL:'New York Yankees',NL:'New York Giants'}},
+  {year:'1923',file:'1923.json',champs:{AL:'New York Yankees',NL:'New York Giants'}},
+  {year:'1924',file:'1924.json',champs:{AL:'Washington Senators',NL:'New York Giants'}},
+  {year:'1925',file:'1925.json',champs:{AL:'Washington Senators',NL:'Pittsburgh Pirates'}},
+  {year:'1926',file:'1926.json',champs:{AL:'New York Yankees',NL:'St. Louis Cardinals'}},
+  {year:'1927',file:'1927.json',champs:{AL:'New York Yankees',NL:'Pittsburgh Pirates'}},
+  {year:'1928',file:'1928.json',champs:{AL:'New York Yankees',NL:'St. Louis Cardinals'}},
+  {year:'1929',file:'1929.json',champs:{AL:'Philadelphia Athletics',NL:'Chicago Cubs'}},
+  {year:'1930',file:'1930.json',champs:{AL:'Philadelphia Athletics',NL:'St. Louis Cardinals'}},
+  {year:'1931',file:'1931.json',champs:{AL:'Philadelphia Athletics',NL:'St. Louis Cardinals'}},
+  {year:'1932',file:'1932.json',champs:{AL:'New York Yankees',NL:'Chicago Cubs'}},
+  {year:'1933',file:'1933.json',champs:{AL:'Washington Senators',NL:'New York Giants'}},
+  {year:'1934',file:'1934.json',champs:{AL:'Detroit Tigers',NL:'St. Louis Cardinals'}},
+  {year:'1935',file:'1935.json',champs:{AL:'Detroit Tigers',NL:'Chicago Cubs'}},
+  {year:'1936',file:'1936.json',champs:{AL:'New York Yankees',NL:'New York Giants'}},
+  {year:'1937',file:'1937.json',champs:{AL:'New York Yankees',NL:'New York Giants'}},
+  {year:'1938',file:'1938.json',champs:{AL:'New York Yankees',NL:'Chicago Cubs'}},
+  {year:'1939',file:'1939.json',champs:{AL:'New York Yankees',NL:'Cincinnati Reds'}},
   {year:'1940',file:'1940.json',champs:{AL:'Detroit Tigers',NL:'Cincinnati Reds'}},
   {year:'1941',file:'1941.json',champs:{AL:'New York Yankees',NL:'Brooklyn Dodgers'}},
   {year:'1942',file:'1942.json',champs:{AL:'St. Louis Cardinals',NL:'St. Louis Cardinals'}},
@@ -842,7 +872,8 @@ function goBack(){
 
 function openPP(name,team,fromView){
   buildIdx();
-  const player=pidx[name]||(team?pidx[name+'|'+team]:null);
+  // Try team-specific key first for disambiguation, then plain name
+  const player=(team?pidx[name+'|'+team]:null)||pidx[name]||(team?pidx[name+'|'+team]:null);
   if(!player)return;
   const src=fromView||'players';
   prevView=src; prevPPView=src; currentPPName=name;
@@ -855,7 +886,7 @@ function openPP(name,team,fromView){
 
 function openPPfromBox(name,team){
   buildIdx();
-  const player=pidx[name]||(team?pidx[name+'|'+team]:null);
+  const player=(team?pidx[name+'|'+team]:null)||pidx[name];
   if(!player)return;
   prevPPView='box'; currentPPName=name;
   document.getElementById('pp-back-btn').textContent='\u2190 Box Score';
@@ -1222,6 +1253,51 @@ function buildIdx(){
       });
     });
   });
+  // ── Split same-name different-player conflicts ──────────────────────────────
+  // A traded player's team-A games all end before team-B games start (sequential)
+  // Same-name different players have games that interleave between teams
+  Object.keys(pidx).forEach(key=>{
+    const pl=pidx[key];
+    if(pl.teams.length<2)return;
+    // Sort games by date
+    const sorted=[...pl.games].sort((a,b)=>a.date.localeCompare(b.date));
+    // For each pair of teams, check if their games interleave
+    for(let ti=0;ti<pl.teams.length-1;ti++){
+      for(let tj=ti+1;tj<pl.teams.length;tj++){
+        const tA=pl.teams[ti], tB=pl.teams[tj];
+        const gA=sorted.filter(g=>g.team===tA).map(g=>g.date);
+        const gB=sorted.filter(g=>g.team===tB).map(g=>g.date);
+        if(!gA.length||!gB.length)continue;
+        const lastA=gA[gA.length-1], firstB=gB[0];
+        const firstA=gA[0], lastB=gB[gB.length-1];
+        // If teams' date ranges overlap AND games are interspersed = different players
+        const overlaps=!(lastA<firstB||lastB<firstA);
+        if(overlaps){
+          // Check if truly interleaved (not just overlapping ranges due to doubleheaders)
+          // Count how many times team switches back and forth
+          let switches=0,lastTeam=null;
+          for(const g of sorted){
+            if(g.team===tA||g.team===tB){
+              if(lastTeam&&lastTeam!==g.team)switches++;
+              lastTeam=g.team;
+            }
+          }
+          if(switches>=2){
+            // Split: create separate entries per team
+            const plA={name:pl.name,teams:[tA],isPitcher:pl.isPitcher,
+                       games:pl.games.filter(g=>g.team===tA)};
+            const plB={name:pl.name,teams:[tB],isPitcher:pl.isPitcher,
+                       games:pl.games.filter(g=>g.team===tB)};
+            pidx[pl.name+'|'+tA]=plA;
+            pidx[pl.name+'|'+tB]=plB;
+            delete pidx[key];
+            return; // stop checking this player
+          }
+        }
+      }
+    }
+  });
+
   // Finalize isPitcher: use D.pitchers list if available, else infer from game data
   Object.values(pidx).forEach(pl=>{
     if(PITCHERS){
@@ -1399,20 +1475,14 @@ async function loadCsIndex(){
     // Build searchable map: name_lower -> [entries]
     // Supports both old format {name:[seasons]} and new [{n,b,s}]
     csIndex={};
-    if(Array.isArray(raw)){
-      raw.forEach(e=>{
-        const nl=e.n.toLowerCase();
-        if(!csIndex[nl])csIndex[nl]=[];
-        csIndex[nl].push(e);
-      });
-    } else {
-      // Legacy format: convert
-      Object.entries(raw).forEach(([name,seasons])=>{
-        const nl=name.toLowerCase();
-        if(!csIndex[nl])csIndex[nl]=[];
-        csIndex[nl].push({n:name,b:'',s:seasons});
-      });
-    }
+    const arr=Array.isArray(raw)?raw:Object.entries(raw).map(([n,s])=>({n,b:'',s,pid:''}));
+    arr.forEach(e=>{
+      const nl=e.n.toLowerCase();
+      if(!csIndex[nl])csIndex[nl]=[];
+      const seasons=Array.isArray(e.s)?e.s:Object.keys(e.s).sort();
+      const teamsPerSeason=Array.isArray(e.s)?null:e.s;
+      csIndex[nl].push({n:e.n,b:e.b||'',pid:e.pid||'',s:seasons,t:teamsPerSeason});
+    });
     return true;
   }catch(e){
     document.getElementById('cs-results').innerHTML=
@@ -1483,7 +1553,8 @@ async function csLoadAll(name,sid,birth){
   const isPitcher_hint=false; // will be determined per season
   statsDiv.innerHTML='<div class="cs-loading">Loading seasons...</div>';
   // Load all seasons in parallel
-  const results=await Promise.all(seasons.map(yr=>csLoadSeasonData(name,yr)));
+  const teamsMap=entry&&entry.t?entry.t:null;
+  const results=await Promise.all(seasons.map(yr=>csLoadSeasonData(name,yr,birth,teamsMap?teamsMap[yr]:null,entry&&entry.pid?entry.pid:null)));
   // Determine if pitcher from any season
   const isPitcher=results.some(r=>r&&r.isPitcher);
   const headers=isPitcher
@@ -1542,7 +1613,7 @@ async function csLoadAll(name,sid,birth){
   statsDiv.innerHTML=`<table class="cs-tbl"><tr>${headers}</tr>${rows}</table>`;
 }
 
-async function csLoadSeasonData(name,year){
+async function csLoadSeasonData(name,year,birthYear,allowedTeams,pid){
   try{
     let d=_csCache[year];
     if(!d){
@@ -1552,55 +1623,110 @@ async function csLoadSeasonData(name,year){
       _csCache[year]=d;
     }
     const isPitcher=d.pitchers&&d.pitchers.includes(name);
-    let w=0,l=0,sv=0,ipouts=0,per=0,pbb=0,pk=0,ph=0;
-    let ab=0,h=0,bb=0,k=0,hr=0,rbi=0,g=0,gs=0;
-    const teams=new Set();
-    for(const box of Object.values(d.box_scores)){
-      let appeared=false;
-      for(const side of ['vb','hb']){
-        const code=box[side==='vb'?'v':'h'];
-        const tb=box[side];
-        for(const p of tb.l){
-          if(p.n===name){teams.add(code);ab+=p.ab||0;h+=p.h||0;bb+=p.bb||0;k+=p.k||0;hr+=p.hr||0;rbi+=p.rbi||0;gs++;appeared=true;}
-        }
-        for(const p of tb.b){
-          if(p.n===name&&p.a){teams.add(code);ab+=p.ab||0;h+=p.h||0;bb+=p.bb||0;k+=p.k||0;hr+=p.hr||0;rbi+=p.rbi||0;appeared=true;}
-        }
-        for(const p of tb.p){
-          if(p.n===name){
-            teams.add(code);
-            const ou=p.ip?(+p.ip.split('.')[0]*3+(+p.ip.split('.')[1]||0)):0;
-            ipouts+=ou;per+=p.er||0;pbb+=p.bb||0;pk+=p.k||0;ph+=p.h||0;
-            if(p.gs)gs++;
-            if(p.dec==='W')w++;else if(p.dec==='L')l++;else if(p.dec==='S')sv++;
-            appeared=true;
-          }
-        }
-        for(const p of tb.bp){
-          if(p.n===name&&p.a){
-            teams.add(code);
-            const ou=p.ip?(+p.ip.split('.')[0]*3+(+p.ip.split('.')[1]||0)):0;
-            ipouts+=ou;per+=p.er||0;pbb+=p.bb||0;pk+=p.k||0;ph+=p.h||0;
-            if(p.dec==='W')w++;else if(p.dec==='L')l++;else if(p.dec==='S')sv++;
-            appeared=true;
+    // Collect per-game stats with team and date for interleaving detection
+    const gameLog=[];
+    // Match by pid if available (unambiguous), else fall back to name
+    for(const [gid,box] of Object.entries(d.box_scores)){
+      for(const [side,ck] of [['vb','v'],['hb','h']]){
+        const code=box[ck],tb=box[side];
+        const match=p=>pid&&p.id?(p.id===pid):(p.n===name);
+        let found=false,stats={ab:0,h:0,hr:0,rbi:0,bb:0,k:0,ip:0,er:0,pbb:0,pk:0,ph:0,gs:false,w:false,l:false,sv:false};
+        let foundInLineup=false;
+        for(const p of tb.l||[]){if(match(p)){found=true;foundInLineup=true;stats.ab+=p.ab||0;stats.h+=p.h||0;stats.hr+=p.hr||0;stats.rbi+=p.rbi||0;stats.bb+=p.bb||0;stats.k+=p.k||0;stats.gs=true;break;}}
+        if(!foundInLineup){for(const p of tb.b||[]){if(match(p)&&p.a){found=true;stats.ab+=p.ab||0;stats.h+=p.h||0;stats.hr+=p.hr||0;stats.rbi+=p.rbi||0;stats.bb+=p.bb||0;stats.k+=p.k||0;break;}}}
+        const seenP=new Set();
+        for(const p of tb.p||[]){if(match(p)){found=true;seenP.add(p.id||p.n);const ou=p.ip?(+p.ip.split('.')[0]*3+(+p.ip.split('.')[1]||0)):0;stats.ip+=ou;stats.er+=p.er||0;stats.pbb+=p.bb||0;stats.pk+=p.k||0;stats.ph+=p.h||0;if(p.gs)stats.gs=true;if(p.dec==='W')stats.w=true;if(p.dec==='L')stats.l=true;if(p.dec==='S')stats.sv=true;break;}}
+        for(const p of tb.bp||[]){const key=p.id||p.n;if(match(p)&&p.a&&!seenP.has(key)){found=true;const ou=p.ip?(+p.ip.split('.')[0]*3+(+p.ip.split('.')[1]||0)):0;stats.ip+=ou;stats.er+=p.er||0;stats.pbb+=p.bb||0;stats.pk+=p.k||0;stats.ph+=p.h||0;if(p.dec==='W')stats.w=true;if(p.dec==='L')stats.l=true;if(p.dec==='S')stats.sv=true;break;}}
+        if(found) gameLog.push({date:box.d,team:code,stats});
+      }
+    }
+    if(!gameLog.length)return null;
+    // Filter to allowed teams if we have that data from player_index
+    let filteredLog=gameLog;
+    if(allowedTeams&&allowedTeams.length>0){
+      const allowed=new Set(allowedTeams);
+      const filtered=gameLog.filter(g=>allowed.has(g.team));
+      if(filtered.length>0)filteredLog=filtered;
+    } else {
+    // Fallback: detect interleaving for disambiguation
+    const teamSet=new Set(gameLog.map(g=>g.team));
+    if(teamSet.size>1&&birthYear){
+      // Check for interleaving
+      const sorted=[...gameLog].sort((a,b)=>a.date.localeCompare(b.date));
+      const teamList=[...teamSet];
+      let interleaved=false;
+      for(let ti=0;ti<teamList.length-1&&!interleaved;ti++){
+        for(let tj=ti+1;tj<teamList.length&&!interleaved;tj++){
+          const tA=teamList[ti],tB=teamList[tj];
+          const dA=sorted.filter(g=>g.team===tA).map(g=>g.date);
+          const dB=sorted.filter(g=>g.team===tB).map(g=>g.date);
+          if(!dA.length||!dB.length)continue;
+          const lastA=dA[dA.length-1],firstB=dB[0],firstA=dA[0],lastB=dB[dB.length-1];
+          if(!(lastA<firstB||lastB<firstA)){
+            let sw=0,lt=null;
+            for(const g of sorted){
+              if(g.team===tA||g.team===tB){if(lt&&lt!==g.team)sw++;lt=g.team;}
+            }
+            if(sw>=2)interleaved=true;
           }
         }
       }
-      if(appeared)g++;
+      if(interleaved){
+        // Use birth year from d.births to find which player this is
+        const bd=d.births&&d.births[name];
+        if(bd&&bd.length>=4){
+          const playerBirthYr=bd.slice(0,4);
+          if(playerBirthYr!==String(birthYear)){
+            // d.births is unreliable for same-name players (stores only one)
+            // Split by team: each interleaved team group belongs to a different player
+            // Assign the larger group (more games) to this birth year player
+            // This works for most cases; the smaller group is the other player
+            const teamGameCounts={};
+            for(const gl of filteredLog){
+              teamGameCounts[gl.team]=(teamGameCounts[gl.team]||0)+1;
+            }
+            // Find team pairs and pick the correct one for this birth year
+            // Use the birth year order: earlier birth = more established player
+            // who typically has more games on their primary team
+            const sortedByCount=Object.entries(teamGameCounts).sort((a,b)=>b[1]-a[1]);
+            // If birth year is earlier (older player), take team with most games
+            // If birth year is later (newer player), take team with fewer games  
+            const bdYr=parseInt(playerBirthYr);
+            const birthYrInt=parseInt(birthYear);
+            let keepTeam;
+            if(bdYr<birthYrInt){
+              // d.births has the YOUNGER player stored; current request is OLDER player
+              // Older player usually has more games (established player)
+              keepTeam=sortedByCount[0][0];
+            } else {
+              // d.births has OLDER player; current request is YOUNGER player  
+              keepTeam=sortedByCount[sortedByCount.length-1][0];
+            }
+            filteredLog=filteredLog.filter(g=>g.team===keepTeam);
+          }
+        }
+      }
+    }
+    } // end interleave detection
+    // Sum stats from filtered game log
+    let g=filteredLog.length,gs=0,w=0,l=0,sv=0,ipouts=0,per=0,pbb=0,pk=0,ph=0;
+    let ab=0,h=0,bb=0,k=0,hr=0,rbi=0;
+    const teams=new Set();
+    for(const gl of filteredLog){
+      teams.add(gl.team);
+      const s=gl.stats;
+      ab+=s.ab;h+=s.h;hr+=s.hr;rbi+=s.rbi;bb+=s.bb;k+=s.k;
+      ipouts+=s.ip;per+=s.er;pbb+=s.pbb;pk+=s.pk;ph+=s.ph;
+      if(s.gs)gs++;if(s.w)w++;if(s.l)l++;if(s.sv)sv++;
     }
     const teamArr=[...teams];
     const teamCode=teamArr[0]||null;
-    // Use year-aware color
-    const savedSeason=typeof curSeason!=='undefined'?curSeason:null;
-    // Temporarily set curSeason for tc() call
-    const origSeason=typeof window!=='undefined'?window._tmpSeason:null;
     const teamColor=teamCode?(()=>{const e=COLORS[teamCode];if(!e)return'#888';const yr=+year;let p=e[0][1];for(const [y,c] of e){if(yr>=y)p=c;}return p;})():'#888';
     const teamName=teamArr.map(t=>d.teams[t]?d.teams[t].name:t).join('/');
     const birth=d.births&&d.births[name]?d.births[name]:null;
     return {year,isPitcher,teams:teamArr,teamCode,teamColor,teamName,g,gs,w,l,sv,ipouts,per,pbb,pk,ph,ab,h,bb,k,hr,rbi,birth};
   }catch(e){return null;}
 }
-
 async function csLoadSeason(name,year){
   const statsDiv=document.getElementById('csstats-'+name.replace(/\s/g,'_').replace(/'/g,''));
   if(!statsDiv)return;
@@ -1690,11 +1816,27 @@ async function csOpenPlayer(name,sid,birth){
   if(!seasons.length)return;
   const yr=Object.keys(_csCache).filter(y=>seasons.includes(y)).pop()||seasons[seasons.length-1];
   await loadSeason(yr);
+  buildIdx();
   prevPPView='career';
   currentPPName=name;
   const btn=document.getElementById('pp-back-btn');
   if(btn)btn.textContent='\u2190 Career';
-  openPP(name);
+  // After split, player may be stored as name|team - find the right one
+  // Use birth year to pick the correct player when same name exists
+  let targetKey=name;
+  if(!pidx[name]){
+    // Look for name|team keys - find one whose teams match the entry seasons
+    const entry2=birth?(csIndex&&csIndex[name.toLowerCase()]||[]).find(e=>e.b===birth):null;
+    const candidateKeys=Object.keys(pidx).filter(k=>k.startsWith(name+'|'));
+    if(candidateKeys.length===1){
+      targetKey=candidateKeys[0];
+    } else if(candidateKeys.length>1&&entry2){
+      // Pick the one whose team's seasons overlap with this player's career
+      targetKey=candidateKeys[0]; // best effort
+    }
+  }
+  openPP(targetKey.includes('|')?targetKey.split('|')[0]:targetKey,
+         targetKey.includes('|')?targetKey.split('|')[1]:null,'career');
 }
 
 function csToggle(name,sid,birth){
