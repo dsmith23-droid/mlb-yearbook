@@ -36,6 +36,15 @@ TXN_DIR         = os.path.join(BASE_DIR, "transactions")
 OUT_DIR         = "data"                         # output JSON folder (relative to this script)
 BIO_FILE    = os.path.join(BASE_DIR, "biofile0.csv")  # Retrosheet biofile
 
+# Load bio handedness once at startup
+_BIO_HAND = {}
+if os.path.exists(BIO_FILE):
+    with open(BIO_FILE, encoding='utf-8', errors='replace') as _bf:
+        for _row in csv.DictReader(_bf):
+            _pid = _row['id'].strip()
+            _BIO_HAND[_pid] = {'bt': _row.get('bats','').strip(),
+                               'th': _row.get('throws','').strip()}
+
 # Team code aliases: OD rosters/transactions sometimes differ from TEAM files
 # Static aliases: OD/transaction code -> TEAM file code (year-independent)
 TEAM_ALIAS = {
@@ -307,6 +316,18 @@ def build_season(year):
         if row['stattype'] == 'value':
             pitching_by_game[row['gid']].append(row)
 
+    # Build per-game starter handedness lookup: gid -> {team: hand}
+    gid_starter_hand = {}
+    for gid_p, rows_p in pitching_by_game.items():
+        for pr in rows_p:
+            if pr.get('p_gs') == '1':
+                team_p = pr.get('team','')
+                hand_p = _BIO_HAND.get(pr.get('id',''), {}).get('th', '')
+                if team_p and hand_p:
+                    if gid_p not in gid_starter_hand:
+                        gid_starter_hand[gid_p] = {}
+                    gid_starter_hand[gid_p][team_p] = hand_p
+
     fielding_pos = {}
     for row in load_csv('fielding'):
         if row.get('d_seq') == '1' and row.get('d_pos',''):
@@ -347,10 +368,12 @@ def build_season(year):
             nm  = roster.get(pid, {}).get('name', pid)
             lineup_names.add(nm)
             is_p = (pos == 'P')
-            entry = {'lp': lp, 'n': nm, 'id': r['id'], 'pos': pos, 'p': is_p,
+            entry = {'lp': lp, 'n': nm, 'id': r['id'], 'bt': _BIO_HAND.get(r['id'], {}).get('bt', ''), 'ph': gid_starter_hand.get(r['gid'], {}).get(r.get('opp',''), ''), 'pos': pos, 'p': is_p,
                      'ab': safe_int(r['b_ab']), 'h': safe_int(r['b_h']),
                      'bb': safe_int(r['b_w']),  'k': safe_int(r['b_k']),
-                     'hr': safe_int(r['b_hr']), 'rbi': safe_int(r['b_rbi'])}
+                     'hr': safe_int(r['b_hr']), 'rbi': safe_int(r['b_rbi']),
+                     'sb': safe_int(r['b_sb']), 'cs': safe_int(r['b_cs']),
+                     'bt': _BIO_HAND.get(r['id'], {}).get('bt', '')}
             lineup.append(entry)
 
         pitcher_names, pitchers = set(), []
@@ -363,7 +386,7 @@ def build_season(year):
             dec  = ('W' if r['wp'] == pid else
                     'L' if r['lp'] == pid else
                     'S' if r['save'] == pid else '')
-            pitchers.append({'n': nm, 'id': r['id'], 'ip': ip, 'gs': r['p_gs'] == '1',
+            pitchers.append({'n': nm, 'id': r['id'], 'th': _BIO_HAND.get(r['id'], {}).get('th', ''), 'ip': ip, 'gs': r['p_gs'] == '1',
                              'h': safe_int(r['p_h']),  'r': safe_int(r['p_r']),
                              'er': safe_int(r['p_er']), 'bb': safe_int(r['p_w']),
                              'k':  safe_int(r['p_k']),  'dec': dec})
@@ -390,7 +413,7 @@ def build_season(year):
             entry = {'n': nm, 'a': ap}
             if ap and nm in sub_bat:
                 r = sub_bat[nm]
-                entry.update({'ab': safe_int(r['b_ab']), 'h': safe_int(r['b_h']),
+                entry.update({'ph': gid_starter_hand.get(r['gid'], {}).get(r.get('opp',''), ''), 'ab': safe_int(r['b_ab']), 'h': safe_int(r['b_h']),
                               'bb': safe_int(r['b_w']),  'k': safe_int(r['b_k']),
                               'hr': safe_int(r['b_hr']), 'rbi': safe_int(r['b_rbi'])})
             bench.append(entry)

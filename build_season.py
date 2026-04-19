@@ -11,6 +11,19 @@ from datetime import datetime
 
 POS_NAMES = {1:'P',2:'C',3:'1B',4:'2B',5:'3B',6:'SS',7:'LF',8:'CF',9:'RF',10:'DH',11:'PH',12:'PR'}
 
+
+# Load bio handedness
+_BIO_HAND = {}
+_bio_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'biofile0.csv')
+if not os.path.exists(_bio_file):
+    _bio_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'biofile0.csv')
+if os.path.exists(_bio_file):
+    with open(_bio_file, encoding='utf-8', errors='replace') as _bf:
+        for _row in csv.DictReader(_bf):
+            _pid = _row['id'].strip()
+            _BIO_HAND[_pid] = {'bt': _row.get('bats','').strip(),
+                               'th': _row.get('throws','').strip()}
+
 def safe_int(v, default=0):
     try: return int(v) if v and str(v).strip() else default
     except: return default
@@ -215,6 +228,16 @@ def build_season(year, data_dir, opening_day_file, transactions_file):
             if row['stattype'] == 'value':
                 pitching_by_game[row['gid']].append(row)
 
+    # Build per-game starter handedness: gid -> {team: hand}
+    gid_starter_hand = {}
+    for gid_p, rows_p in pitching_by_game.items():
+        for pr in rows_p:
+            if pr.get('p_gs') == '1':
+                hand_p = _BIO_HAND.get(pr.get('id',''), {}).get('th', '')
+                team_p = pr.get('team','')
+                if team_p and hand_p:
+                    gid_starter_hand.setdefault(gid_p, {})[team_p] = hand_p
+
     fielding_pos = {}
     with open(os.path.join(data_dir, f'{year}fielding.csv')) as f:
         for row in csv.DictReader(f):
@@ -247,18 +270,17 @@ def build_season(year, data_dir, opening_day_file, transactions_file):
             r = starters[lp]; pid = r['id']
             pos = get_pos(gid, pid); name = roster.get(pid, {}).get('name', pid)
             lineup_names.add(name); is_p = (pos == 'P')
-            entry = {'lp': lp, 'n': name, 'id': pid, 'pos': pos, 'p': is_p,
-                     'ab': safe_int(r['b_ab']), 'h': safe_int(r['b_h']),
-                     'bb': safe_int(r['b_w']), 'k': safe_int(r['b_k']),
-                     'hr': safe_int(r['b_hr']), 'rbi': safe_int(r['b_rbi'])}
-            lineup.append(entry)
+            lineup_names.add(name); is_p = (pos == 'P')
+            entry = {'lp': lp, 'n': name, 'id': pid, 'bt': _BIO_HAND.get(pid,{}).get('bt',''), 'ph': gid_starter_hand.get(r['gid'],{}).get(r.get('opp',''),''), 'pos': pos, 'p': is_p,
+                     'hr': safe_int(r['b_hr']), 'rbi': safe_int(r['b_rbi']),
+                     'sb': safe_int(r['b_sb']), 'cs': safe_int(r['b_cs'])}
         pitcher_names_all = set(); pitchers = []
         for r in pitch_rows:
             pid = r['id']; name = roster.get(pid, {}).get('name', pid)
             pitcher_names_all.add(name)
             outs = safe_int(r['p_ipouts']); ip = f"{outs//3}.{outs%3}"
             dec = 'W' if r['wp']==pid else ('L' if r['lp']==pid else ('S' if r['save']==pid else ''))
-            pitchers.append({'n': name, 'id': pid, 'ip': ip, 'gs': r['p_gs']=='1',
+            pitchers.append({'n': name, 'id': pid, 'th': _BIO_HAND.get(pid,{}).get('th',''), 'ip': ip, 'gs': r['p_gs']=='1',
                              'h': safe_int(r['p_h']), 'r': safe_int(r['p_r']),
                              'er': safe_int(r['p_er']), 'bb': safe_int(r['p_w']),
                              'k': safe_int(r['p_k']), 'dec': dec})
@@ -282,7 +304,7 @@ def build_season(year, data_dir, opening_day_file, transactions_file):
             entry = {'n': name, 'a': appeared}
             if appeared and name in sub_bat_by_name:
                 r = sub_bat_by_name[name]
-                entry.update({'ab': safe_int(r['b_ab']), 'h': safe_int(r['b_h']),
+                entry.update({'ph': gid_starter_hand.get(r['gid'], {}).get(r.get('opp',''), ''), 'ab': safe_int(r['b_ab']), 'h': safe_int(r['b_h']),
                               'bb': safe_int(r['b_w']), 'k': safe_int(r['b_k']),
                               'hr': safe_int(r['b_hr']), 'rbi': safe_int(r['b_rbi'])})
             bench.append(entry)
