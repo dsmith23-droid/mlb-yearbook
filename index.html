@@ -321,9 +321,21 @@ body{font-family:'Archivo Narrow',sans-serif;background:var(--bg);color:var(--te
         <div class="page-title" id="cal-title"></div>
         <div class="page-sub" id="cal-sub"></div>
       </div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <select id="rg-year-sel" class="season-sel" style="color:var(--text)" title="Random game from year"></select>
-        <button class="bbk" onclick="randomGame()" title="Jump to a random game" style="white-space:nowrap">&#9861; Random game</button>
+      <div style="display:flex;gap:8px;align-items:center;position:relative">
+        <button class="bbk" id="rg-pool-btn" onclick="toggleRgPool()" title="Choose seasons for random game" style="white-space:nowrap">&#9881; Seasons</button>
+        <button class="bbk" onclick="randomGame()" title="Jump to a random game" style="white-space:nowrap">&#9861; Random</button>
+        <div id="rg-pool-panel" style="display:none;position:absolute;right:0;top:calc(100% + 6px);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);padding:12px;z-index:200;min-width:320px;box-shadow:0 4px 16px rgba(0,0,0,.15)">
+          <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:.85rem;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
+            <span>Random Game Season Pool</span>
+            <button class="bbk" onclick="rgSelectAll()" style="font-size:.7rem;padding:2px 8px">All</button>
+          </div>
+          <div style="font-size:.72rem;color:var(--muted);margin-bottom:8px">Check seasons to include in the random game pool</div>
+          <div id="rg-checkboxes" style="display:grid;grid-template-columns:repeat(6,1fr);gap:3px;max-height:260px;overflow-y:auto;font-family:'Roboto Mono',monospace;font-size:.72rem"></div>
+          <div style="margin-top:10px;display:flex;gap:8px">
+            <button class="bbk" onclick="rgClearAll()" style="font-size:.75rem">Clear all</button>
+            <button class="bbk" onclick="toggleRgPool()" style="font-size:.75rem;margin-left:auto;border-color:var(--accent);color:var(--accent)">Done</button>
+          </div>
+        </div>
       </div>
     </div>
     <div class="cal-dow-row" id="cal-dow-row"></div>
@@ -1622,7 +1634,7 @@ async function csLoadSeasonData(name,year,birthYear,allowedTeams,pid){
       d=await r.json();
       _csCache[year]=d;
     }
-    const isPitcher=d.pitchers&&d.pitchers.includes(name);
+    // isPitcher determined after gameLog is built (from actual IP, not name lookup)
     // Collect per-game stats with team and date for interleaving detection
     const gameLog=[];
     // Match by pid if available (unambiguous), else fall back to name
@@ -1708,6 +1720,8 @@ async function csLoadSeasonData(name,year,birthYear,allowedTeams,pid){
       }
     }
     } // end interleave detection
+    // Determine isPitcher from actual pitching appearances in game log
+    const isPitcher=filteredLog.some(gl=>gl.stats.ip>0);
     // Sum stats from filtered game log
     let g=filteredLog.length,gs=0,w=0,l=0,sv=0,ipouts=0,per=0,pbb=0,pk=0,ph=0;
     let ab=0,h=0,bb=0,k=0,hr=0,rbi=0;
@@ -1751,7 +1765,7 @@ async function csLoadSeason(name,year){
       _csCache[year]=d;
     }
     // Build player stats from this season
-    const isPitcher=d.pitchers&&d.pitchers.includes(name);
+    // isPitcher determined after gameLog is built (from actual IP, not name lookup)
     let w=0,l=0,sv=0,ipouts=0,per=0,pbb=0,pk=0;
     let ab=0,h=0,bb=0,k=0,hr=0,rbi=0;
     const teams=new Set();
@@ -1874,15 +1888,52 @@ function toggleDark(){
 })();
 
 // ── Random Game ───────────────────────────────────────────────────────────────
+function getRgPool(){
+  try{
+    const raw=localStorage.getItem('rgPool');
+    if(raw===null)return SEASONS_AVAILABLE.map(s=>s.year); // never set = all
+    const s=JSON.parse(raw);
+    return s; // empty array = none selected (after Clear all)
+  }catch(e){return SEASONS_AVAILABLE.map(s=>s.year);}
+}
+function rgToggle(cb){
+  let pool=getRgPool();
+  if(cb.checked){if(!pool.includes(cb.value))pool.push(cb.value);}
+  else{pool=pool.filter(y=>y!==cb.value);}
+  localStorage.setItem('rgPool',JSON.stringify(pool));
+  // Update styling of this label only (don't re-render - that flips checkbox)
+  const lbl=cb.closest('label');
+  if(lbl){
+    const on=cb.checked;
+    lbl.style.background=on?'var(--accent-dim,#1a3a1a)':'transparent';
+    const sp=lbl.querySelector('span');
+    if(sp)sp.style.color=on?'var(--accent)':'var(--muted)';
+  }
+  // Update button label
+  const btn=document.getElementById('rg-pool-btn');
+  if(btn){const all=SEASONS_AVAILABLE.length;btn.textContent=pool.length===all?'⚙ All seasons':`⚙ ${pool.length} seasons`;}
+}
+function rgSelectAll(){
+  localStorage.setItem('rgPool',JSON.stringify(SEASONS_AVAILABLE.map(s=>s.year)));
+  buildRgYearSel();
+}
+function rgClearAll(){
+  localStorage.setItem('rgPool','[]');
+  buildRgYearSel();
+}
+function toggleRgPool(){
+  const panel=document.getElementById('rg-pool-panel');
+  if(!panel)return;
+  const open=panel.style.display==='none';
+  panel.style.display=open?'':'none';
+  if(open)buildRgYearSel();
+}
 function randomGame(){
-  const sel=document.getElementById('rg-year-sel');
-  const targetYear=sel&&sel.value?sel.value:null;
+  const pool=getRgPool();
+  if(!pool.length){alert('No seasons selected — click ⚙ Seasons to add some.');return;}
+  const targetYear=pool[Math.floor(Math.random()*pool.length)];
   // If a season is loaded and matches, use it; otherwise load the target year
-  if(!D||(targetYear&&curSeason!==targetYear)){
-    if(!targetYear){
-      alert('Select a season first, or pick a year from the dropdown.');
-      return;
-    }
+  if(!D||curSeason!==targetYear){
     loadSeason(targetYear).then(()=>_pickRandomGame());
   } else {
     _pickRandomGame();
@@ -1900,14 +1951,19 @@ function _pickRandomGame(){
   setTimeout(()=>{selectDate(date);openBox(g.gid);},50);
 }
 function buildRgYearSel(){
-  const sel=document.getElementById('rg-year-sel');
-  if(!sel)return;
-  sel.innerHTML='<option value="">Any loaded season</option>';
-  SEASONS_AVAILABLE.forEach(s=>{
-    const opt=document.createElement('option');
-    opt.value=s.year;opt.textContent=s.year;sel.appendChild(opt);
-  });
-  if(curSeason)sel.value=curSeason;
+  const box=document.getElementById('rg-checkboxes');
+  if(!box)return;
+  const pool=new Set(getRgPool());
+  const all=SEASONS_AVAILABLE.length;
+  box.innerHTML=SEASONS_AVAILABLE.map(s=>{
+    const on=pool.has(s.year);
+    return `<label style="display:flex;align-items:center;gap:3px;cursor:pointer;padding:2px 4px;border-radius:4px;background:${on?'var(--accent-dim,#1a3a1a)':'transparent'}">
+      <input type="checkbox" value="${s.year}" ${on?'checked':''} onchange="rgToggle(this)" style="width:11px;height:11px">
+      <span style="color:${on?'var(--accent)':'var(--muted)'}">${s.year}</span>
+    </label>`;
+  }).join('');
+  const btn=document.getElementById('rg-pool-btn');
+  if(btn)btn.textContent=pool.size===all?'⚙ All seasons':`⚙ ${pool.size} seasons`;
 }
 
 // ── Head-to-Head Records ──────────────────────────────────────────────────────
