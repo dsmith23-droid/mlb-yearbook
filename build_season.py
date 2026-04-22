@@ -22,7 +22,8 @@ if os.path.exists(_bio_file):
         for _row in csv.DictReader(_bf):
             _pid = _row['id'].strip()
             _BIO_HAND[_pid] = {'bt': _row.get('bats','').strip(),
-                               'th': _row.get('throws','').strip()}
+                               'th': _row.get('throws','').strip(),
+                               'born': _row.get('birthdate','').strip()}
 
 def safe_int(v, default=0):
     try: return int(v) if v and str(v).strip() else default
@@ -238,6 +239,40 @@ def build_season(year, data_dir, opening_day_file, transactions_file):
                 if team_p and hand_p:
                     gid_starter_hand.setdefault(gid_p, {})[team_p] = hand_p
 
+    # ── substitution chains from plays.csv ──
+    gid_subs = {}
+    plays_path = os.path.join(data_dir, f'{year}plays.csv')
+    if os.path.exists(plays_path):
+        plays_by_gm = defaultdict(list)
+        with open(plays_path, encoding='utf-8', errors='replace') as f:
+            for row in csv.DictReader(f):
+                if row.get('gametype') == 'regular':
+                    plays_by_gm[row['gid']].append(row)
+        for gid_p, prows in plays_by_gm.items():
+            subs_v, subs_h = {}, {}
+            for side, subs_d in [('0', subs_v), ('1', subs_h)]:
+                plays = [r for r in prows if r.get('top_bot') == side]
+                prev = {}
+                for r in plays:
+                    inning = safe_int(r.get('inning', 0))
+                    for slot in range(1, 10):
+                        pid = r.get(f'l{slot}', '')
+                        if not pid: continue
+                        if slot not in prev:
+                            subs_d[slot] = [(pid, 0)]
+                            prev[slot] = pid
+                        elif pid != prev[slot]:
+                            subs_d[slot].append((pid, inning))
+                            prev[slot] = pid
+            v_out = {str(s): [{'id':p,'n':roster.get(p,{}).get('name',p),'i':i}
+                               for p,i in chain[1:]]
+                     for s, chain in subs_v.items() if len(chain) > 1}
+            h_out = {str(s): [{'id':p,'n':roster.get(p,{}).get('name',p),'i':i}
+                               for p,i in chain[1:]]
+                     for s, chain in subs_h.items() if len(chain) > 1}
+            if v_out or h_out:
+                gid_subs[gid_p] = {'v': v_out, 'h': h_out}
+
     fielding_pos = {}
     with open(os.path.join(data_dir, f'{year}fielding.csv')) as f:
         for row in csv.DictReader(f):
@@ -271,7 +306,7 @@ def build_season(year, data_dir, opening_day_file, transactions_file):
             pos = get_pos(gid, pid); name = roster.get(pid, {}).get('name', pid)
             lineup_names.add(name); is_p = (pos == 'P')
             lineup_names.add(name); is_p = (pos == 'P')
-            entry = {'lp': lp, 'n': name, 'id': pid, 'bt': _BIO_HAND.get(pid,{}).get('bt',''), 'ph': gid_starter_hand.get(r['gid'],{}).get(r.get('opp',''),''), 'pos': pos, 'p': is_p,
+            entry = {'lp': lp, 'n': name, 'id': pid, 'bt': _BIO_HAND.get(pid,{}).get('bt',''), 'born': _BIO_HAND.get(pid,{}).get('born',''), 'ph': gid_starter_hand.get(r['gid'],{}).get(r.get('opp',''),''), 'pos': pos, 'p': is_p,
                      'hr': safe_int(r['b_hr']), 'rbi': safe_int(r['b_rbi']),
                      'sb': safe_int(r['b_sb']), 'cs': safe_int(r['b_cs'])}
         pitcher_names_all = set(); pitchers = []
@@ -279,8 +314,8 @@ def build_season(year, data_dir, opening_day_file, transactions_file):
             pid = r['id']; name = roster.get(pid, {}).get('name', pid)
             pitcher_names_all.add(name)
             outs = safe_int(r['p_ipouts']); ip = f"{outs//3}.{outs%3}"
-            dec = 'W' if r['wp']==pid else ('L' if r['lp']==pid else ('S' if r['save']==pid else ''))
-            pitchers.append({'n': name, 'id': pid, 'th': _BIO_HAND.get(pid,{}).get('th',''), 'ip': ip, 'gs': r['p_gs']=='1',
+            dec = 'W' if r['wp']=='1' else ('L' if r['lp']=='1' else ('S' if r['save']=='1' else ''))
+            pitchers.append({'n': name, 'id': pid, 'th': _BIO_HAND.get(pid,{}).get('th',''), 'born': _BIO_HAND.get(pid,{}).get('born',''), 'ip': ip, 'gs': r['p_gs']=='1',
                              'h': safe_int(r['p_h']), 'r': safe_int(r['p_r']),
                              'er': safe_int(r['p_er']), 'bb': safe_int(r['p_w']),
                              'k': safe_int(r['p_k']), 'dec': dec})
@@ -301,7 +336,8 @@ def build_season(year, data_dir, opening_day_file, transactions_file):
             if name in lineup_names: continue
             if ros_pos.get(name, '?') == 'P': continue
             appeared = name in appeared_batters
-            entry = {'n': name, 'a': appeared}
+            pid_bs = sub_bat_by_name[name]['id'] if appeared and name in sub_bat_by_name else ''
+            entry = {'n': name, 'id': pid_bs, 'born': _BIO_HAND.get(pid_bs,{}).get('born',''), 'a': appeared}
             if appeared and name in sub_bat_by_name:
                 r = sub_bat_by_name[name]
                 entry.update({'ph': gid_starter_hand.get(r['gid'], {}).get(r.get('opp',''), ''), 'ab': safe_int(r['b_ab']), 'h': safe_int(r['b_h']),
@@ -313,7 +349,8 @@ def build_season(year, data_dir, opening_day_file, transactions_file):
             if name in lineup_names: continue
             if ros_pos.get(name, '?') != 'P': continue
             appeared = name in appeared_relievers
-            entry = {'n': name, 'a': appeared}
+            pid_bs = sub_bat_by_name[name]['id'] if appeared and name in sub_bat_by_name else ''
+            entry = {'n': name, 'id': pid_bs, 'born': _BIO_HAND.get(pid_bs,{}).get('born',''), 'a': appeared}
             if appeared:
                 p_entry = next((p for p in pitchers if p['n']==name and not p['gs']), None)
                 if p_entry:
@@ -350,8 +387,13 @@ def build_season(year, data_dir, opening_day_file, transactions_file):
         games_by_date[date_str].append({'gid':gid,'v':vis,'h':home,'vr':vis_r,'hr':home_r,
             'vsp':vis_sp,'hsp':home_sp,'w':wteam,'att':g['attendance'],
             'n':g['number'] if g['number'] in ('1','2') else ''})
-        box_scores[gid] = {'gid':gid,'v':vis,'h':home,'d':date_str,
+        _bx = {'gid':gid,'v':vis,'h':home,'d':date_str,
             'vb':build_team_box(gid,vis,date_str),'hb':build_team_box(gid,home,date_str),'att':g['attendance']}
+        if gid in gid_subs:
+            s = gid_subs[gid]
+            if s.get('v'): _bx['vb']['subs'] = s['v']
+            if s.get('h'): _bx['hb']['subs'] = s['h']
+        box_scores[gid] = _bx
 
     # Collect all player names for births lookup
     _all = set()
