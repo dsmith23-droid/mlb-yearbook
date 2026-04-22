@@ -85,7 +85,7 @@ body{font-family:'Archivo Narrow',sans-serif;background:var(--bg);color:var(--te
 .cal-daynum{font-family:'Roboto Mono',monospace;font-size:.75rem;color:var(--dim);line-height:1;margin-bottom:8px;font-weight:400}
 .cal-cell.has-games .cal-daynum{color:var(--text);font-weight:600}
 .cal-pips{display:flex;flex-wrap:wrap;gap:3px;margin-top:auto}
-.cal-pip{width:7px;height:7px;border-radius:50%;flex-shrink:0;transition:transform .1s}
+.cal-gcnt{font-size:.7rem;color:var(--muted);margin-top:2px;font-family:'Roboto Mono',monospace}
 .cal-cell:hover .cal-pip{transform:scale(1.15)}
 
 /* ── DAY PANEL ── */
@@ -436,6 +436,10 @@ body{font-family:'Archivo Narrow',sans-serif;background:var(--bg);color:var(--te
     <div style="display:flex;gap:8px;margin-bottom:14px">
       <button class="bbk" id="roster-tab-sched" onclick="showTeamTab('sched')" style="border-color:var(--accent);color:var(--accent)">Schedule</button>
       <button class="bbk" id="roster-tab-roster" onclick="showTeamTab('roster')">Roster</button>
+      <div id="roster-date-wrap" style="display:none;align-items:center;gap:6px;margin-left:8px">
+        <span style="font-size:.75rem;color:var(--muted);font-family:'Roboto Mono',monospace">Through</span>
+        <select id="roster-date-sel" class="season-sel" style="color:var(--text);font-size:.78rem" onchange="buildRoster(_rosterTeam)"></select>
+      </div>
     </div>
     <div id="team-sched-panel">
     <div class="sched-grid" id="sched-grid"></div>
@@ -1004,12 +1008,8 @@ function renderCalendar(mk){
     if(games.length){
       el.className='cal-cell has-games'+(selectedDate===ds?' selected':'');
       const cap=ds; el.onclick=()=>selectDate(cap);
-      // One pip per game, colored by home team
-      const pips=games.map(g=>{
-        const col=tc(g.h);
-        return `<div class="cal-pip" style="background:${col}" title="${tf(g.v)} @ ${tf(g.h)}"></div>`;
-      }).join('');
-      el.innerHTML=`<div class="cal-daynum">${day}</div><div class="cal-pips">${pips}</div>`;
+      const gLabel=games.length===1?'1 game':`${games.length} games`;
+      el.innerHTML=`<div class="cal-daynum">${day}</div><div class="cal-gcnt">${gLabel}</div>`;
     } else {
       el.className='cal-cell no-games';
       el.innerHTML=`<div class="cal-daynum">${day}</div>`;
@@ -2475,12 +2475,14 @@ function showTeamTab(tab){
     schedPanel.style.display='';
     rosterPanel.style.display='none';
     h2h.style.display='';
+    const _rdw=document.getElementById('roster-date-wrap');if(_rdw)_rdw.style.display='none';
     schedBtn.style.borderColor='var(--accent)';schedBtn.style.color='var(--accent)';
     rosterBtn.style.borderColor='';rosterBtn.style.color='';
   } else {
     schedPanel.style.display='none';
     rosterPanel.style.display='';
     h2h.style.display='none';
+    const _rdw2=document.getElementById('roster-date-wrap');if(_rdw2)_rdw2.style.display='flex';
     rosterBtn.style.borderColor='var(--accent)';rosterBtn.style.color='var(--accent)';
     schedBtn.style.borderColor='';schedBtn.style.color='';
     if(_rosterTeam)buildRoster(_rosterTeam);
@@ -2495,9 +2497,23 @@ async function buildRoster(teamCode){
   await loadCsIndex();
   const color=tc(teamCode);
 
-  // Aggregate stats from all box scores for this team
+  // Populate date selector with all dates this team played
+  const teamDates=Object.values(D.box_scores)
+    .filter(b=>b.v===teamCode||b.h===teamCode)
+    .map(b=>b.d).filter(Boolean).sort();
+  const dateSel=document.getElementById('roster-date-sel');
+  if(dateSel){
+    const prevVal=dateSel.value;
+    dateSel.innerHTML=`<option value="">Full season</option>`
+      +teamDates.map(d=>`<option value="${d}">${fd(d)}</option>`).join('');
+    if(prevVal&&teamDates.includes(prevVal))dateSel.value=prevVal;
+  }
+  const cutoffDate=dateSel&&dateSel.value?dateSel.value:'';
+
+  // Aggregate stats from all box scores for this team (up to cutoff date)
   const batters={}, pitchers={};
   Object.values(D.box_scores).forEach(box=>{
+    if(cutoffDate&&box.d>cutoffDate)return;
     ['vb','hb'].forEach(side=>{
       const tb=box[side];
       const code=side==='vb'?box.v:box.h;
