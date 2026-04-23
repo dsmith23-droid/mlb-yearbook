@@ -223,6 +223,44 @@ body{font-family:'Archivo Narrow',sans-serif;background:var(--bg);color:var(--te
 .rW{color:var(--green);font-weight:700}.rL{color:var(--red);font-weight:700}
 .brow td{color:var(--dim)!important;font-style:italic}
 .ng{padding:40px;text-align:center;color:var(--dim);font-family:'Roboto Mono',monospace;font-size:.78rem}
+/* ── Postseason ─────────────────────────────────────────────────────────── */
+.ps-wrap{max-width:1100px;margin:0 auto;padding:16px}
+.ps-hero{display:flex;align-items:center;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.ps-title{font-family:'Archivo',sans-serif;font-size:1.4rem;font-weight:800;letter-spacing:-.02em;margin:0}
+.ps-bracket{display:grid;gap:12px;margin-bottom:24px}
+.ps-round{display:flex;flex-direction:column;gap:8px}
+.ps-round-label{font-family:'Archivo',sans-serif;font-weight:700;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);padding:4px 0;border-bottom:1px solid var(--border);margin-bottom:4px}
+.ps-series{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);padding:10px 14px;cursor:pointer;transition:border-color .15s}
+.ps-series:hover{border-color:var(--accent)}
+.ps-series.winner-highlight{border-left:3px solid var(--accent)}
+.ps-team{display:flex;align-items:center;justify-content:space-between;padding:3px 0;font-size:.82rem}
+.ps-team.won{font-weight:700}
+.ps-team.lost{opacity:.55}
+.ps-team-name{display:flex;align-items:center;gap:8px}
+.ps-team-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.ps-wins{font-variant-numeric:tabular-nums;min-width:12px;text-align:right}
+.ps-lg-badge{font-family:'Archivo',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.06em;padding:2px 5px;border-radius:3px;background:var(--surface2);color:var(--muted)}
+.ps-champion{background:linear-gradient(135deg,var(--surface2) 0%,var(--surface) 100%);border:1px solid var(--accent);border-radius:var(--radius2);padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:16px}
+.ps-champ-label{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.ps-champ-name{font-family:'Archivo',sans-serif;font-size:1.3rem;font-weight:800}
+.ps-games-list{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden;margin-bottom:16px}
+.ps-games-hdr{padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-family:'Archivo',sans-serif;font-weight:700;font-size:.8rem;display:flex;align-items:center;gap:10px}
+.ps-game-row{display:flex;align-items:center;padding:8px 14px;border-bottom:1px solid var(--border);cursor:pointer;font-size:.82rem;gap:12px}
+.ps-game-row:last-child{border-bottom:none}
+.ps-game-row:hover{background:var(--surface2)}
+.ps-game-num{font-weight:700;color:var(--dim);min-width:20px}
+.ps-game-date{color:var(--muted);min-width:80px}
+.ps-game-score{font-variant-numeric:tabular-nums;flex:1}
+.ps-game-winner{color:var(--accent);font-weight:700}
+.ps-back-btn{font-size:.75rem;padding:4px 10px;margin-bottom:12px}
+.ps-bracket-grid{display:grid;gap:16px}
+.ps-bracket-grid.era-ws{grid-template-columns:1fr}
+.ps-bracket-grid.era-lcs{grid-template-columns:1fr 1fr}
+.ps-bracket-grid.era-ds{grid-template-columns:1fr 1fr 1fr 1fr}
+.ps-bracket-grid.era-full{display:flex;gap:12px;align-items:flex-start}
+.ps-bracket-col{display:flex;flex-direction:column;gap:8px;flex:1}
+.ps-connector{display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--dim);padding:8px 0;align-self:center}
+
 .cs-wrap{max-width:960px;margin:0 auto}
 .cs-hero{padding:20px 0 16px}
 .cs-result{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);margin-bottom:10px;overflow:hidden}
@@ -347,6 +385,7 @@ body{font-family:'Archivo Narrow',sans-serif;background:var(--bg);color:var(--te
       <button class="nb" id="nb-players" onclick="showView('players')" style="display:none">Players</button>
       <button class="nb" id="nb-mtp" onclick="showView('mtp')" style="display:none">Traded</button>
       <button class="nb" id="nb-career" onclick="showView('career')">Career</button>
+      <button class="nb" id="nb-ps" onclick="showView('postseason')">Postseason</button>
       <button class="nb" id="dm-toggle" onclick="toggleDark()" title="Toggle dark mode" style="font-size:.9rem;padding:6px 10px">&#9790;</button>
     </nav>
   </div>
@@ -476,6 +515,17 @@ body{font-family:'Archivo Narrow',sans-serif;background:var(--bg);color:var(--te
     <div id="mtp-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px;margin-top:16px"></div>
   </div>
 
+  <div id="vps" class="view">
+    <div class="ps-wrap">
+      <div class="ps-hero">
+        <h2 class="ps-title">Postseason</h2>
+        <select id="ps-year-sel" class="season-sel" onchange="loadPostseason(this.value)">
+          <option value="">— Select Year —</option>
+        </select>
+      </div>
+      <div id="ps-content"></div>
+    </div>
+  </div>
   <div id="vcs" class="view">
     <div class="cs-wrap">
       <div class="cs-hero">
@@ -708,7 +758,7 @@ let runningRecords=null; // computed once per season load
 const MO=['','January','February','March','April','May','June','July','August','September','October','November','December'];
 const MS=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-function dp(pos){return pos==="?"?"DH":pos;}
+function dp(pos){if(!pos)return "";return pos==="?"?"DH":pos;}
 function fd(d){return MO[+d.slice(4,6)]+' '+parseInt(d.slice(6,8))+', '+d.slice(0,4)}
 function fds(d){return MS[+d.slice(4,6)]+' '+parseInt(d.slice(6,8))}
 function tc(code){
@@ -804,7 +854,7 @@ function goHome(){
 }
 
 // ── Season loading ────────────────────────────────────────────────────────────
-async function loadSeason(year){
+async function loadSeason(year,silent=false){
   if(!year){goHome();return;}
   const loading=document.getElementById('loading');
   loading.classList.add('show');
@@ -819,7 +869,7 @@ async function loadSeason(year){
     document.getElementById('season-sel').value=year;
     ['nb-schedule','nb-standings','nb-players','nb-mtp'].forEach(id=>document.getElementById(id).style.display='');
     buildMnav();
-    showView('calendar');
+    if(!silent)showView('calendar');
   }catch(e){
     const isFile=location.protocol==='file:';
     alert(isFile?`Cannot load data files when opened directly.\n\nDouble-click "Start Yearbook.bat" to run a local server.`:`Could not load ${year}.json\n\n${e.message}`);
@@ -888,7 +938,7 @@ function showView(name,skipRender){
   document.getElementById('vhome').classList.remove('active');
   document.querySelectorAll('#mc .view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
-  const ids={calendar:'vcalendar',box:'vbox',standings:'vst',team:'vteam',players:'vpl',pp:'vpp',career:'vcs',mtp:'vmtp'};
+  const ids={calendar:'vcalendar',box:'vbox',standings:'vst',team:'vteam',players:'vpl',pp:'vpp',career:'vcs',mtp:'vmtp',postseason:'vps'};
   document.getElementById(ids[name]||'vcalendar').classList.add('active');
   const labels={calendar:'Schedule',standings:'Standings',players:'Players'};
   document.querySelectorAll('.nb').forEach(b=>{if(b.textContent===labels[name])b.classList.add('active');});
@@ -1107,7 +1157,7 @@ function buildTP(code,tb,color,rec,date){
     const pbadge=isPit?`<span class="pb pitcher">P</span>`:`<span class="pb">${dp(p.pos)}</span>`;
     const btBadge=p.bt?`<span class="pb" style="background:var(--surface2);color:var(--muted);font-size:.6rem">${p.bt==='B'?'S':p.bt}</span>`:'';
     const ab=p.ab??'—',h=p.h??'—';
-    const stats=`<td class="st${p.h?' val':''}">${h}-${ab}</td><td class="st${p.bb?' val':''}">${p.bb||''}</td><td class="st${p.k?' val':''}">${p.k||''}</td><td class="st${p.hr?' val':''}">${p.hr||''}</td><td class="st${p.rbi?' val':''}">${p.rbi||''}</td><td class="st${p.sb?' val':''}">${p.sb||''}</td>`;
+    const stats=`<td class="st${p.h?' val':''}">${h}-${ab}</td><td class="st${p.d?' val':''}">${p.d||''}</td><td class="st${p.t?' val':''}">${p.t||''}</td><td class="st${p.bb?' val':''}">${p.bb||''}</td><td class="st${p.k?' val':''}">${p.k||''}</td><td class="st${p.hr?' val':''}">${p.hr||''}</td><td class="st${p.rbi?' val':''}">${p.rbi||''}</td><td class="st${p.sb?' val':''}">${p.sb||''}</td>`;
     return `<tr>
       <td>${i+1}</td>
       <td>${plink(p.n,code)}${pbadge}${btBadge}</td>
@@ -1119,7 +1169,7 @@ function buildTP(code,tb,color,rec,date){
   const benchRows=(tb.b||[]).filter(p=>p.a&&(p.ab||p.bb)).map(p=>{
     const btBadge2=p.bt?`<span class="pb" style="background:var(--surface2);color:var(--muted);font-size:.6rem">${p.bt==='B'?'S':p.bt}</span>`:'';
     const ab=p.ab??'—',h=p.h??'—';
-    const stats=`<td class="st${p.h?' val':''}">${h}-${ab}</td><td class="st${p.bb?' val':''}">${p.bb||''}</td><td class="st${p.k?' val':''}">${p.k||''}</td><td class="st${p.hr?' val':''}">${p.hr||''}</td><td class="st${p.rbi?' val':''}">${p.rbi||''}</td><td class="st">${p.sb||''}</td>`;
+    const stats=`<td class="st${p.h?' val':''}">${h}-${ab}</td><td class="st${p.d?' val':''}">${p.d||''}</td><td class="st${p.t?' val':''}">${p.t||''}</td><td class="st${p.bb?' val':''}">${p.bb||''}</td><td class="st${p.k?' val':''}">${p.k||''}</td><td class="st${p.hr?' val':''}">${p.hr||''}</td><td class="st${p.rbi?' val':''}">${p.rbi||''}</td><td class="st">${p.sb||''}</td>`;
     return `<tr style="opacity:.8;background:var(--surface2)">
       <td style="color:var(--dim);font-size:.7rem">PH</td>
       <td>${plink(p.n,code)}<span class="pb" style="background:var(--surface2);color:var(--dim);font-size:.6rem">PH</span>${btBadge2}</td>
@@ -1161,13 +1211,13 @@ function buildTP(code,tb,color,rec,date){
     <div class="tph" style="background:${color}" onclick="openTeamSchedule('${code}','box')">
       <div class="tph-left">
         <div class="tph-name">${tf(code)}</div>
-        <div class="tph-rec">${rec.w}-${rec.l} · ${activeCount} active · Click for schedule</div>
+        <div class="tph-rec">${rec&&(rec.w!==undefined&&rec.w!=='')?(rec.w+'-'+rec.l+' · '+activeCount+' active · Click for schedule'):activeCount+' active'}</div>
       </div>
       <div class="tph-score" >${tb.r}</div>
     </div>
     <div class="sec-label" style="border-left-color:${color}">Lineup</div>
     <table class="lt" style="background:${sec}18">
-      <tr style="background:${sec}30"><th>#</th><th>Player</th><th>H-AB</th><th>BB</th><th>K</th><th>HR</th><th>RBI</th><th>SB</th></tr>
+      <tr style="background:${sec}30"><th>#</th><th>Player</th><th>H-AB</th><th>2B</th><th>3B</th><th>BB</th><th>K</th><th>HR</th><th>RBI</th><th>SB</th></tr>
       ${lrows}${benchRows}
     </table>
     <div class="sec-label" style="border-left-color:${color}">Bench</div><div class="rl" style="background:${sec}10">${rlBench(tb.b||[])}</div>
@@ -1318,7 +1368,7 @@ function buildIdx(){
       tb.l.forEach(p=>{
         const pl=go(p.n,p.p);
         pl.games.push({date:box.d,gid,team:code,opp,side,role:'S',pos:dp(p.pos),
-          h:p.h,ab:p.ab,bb:p.bb||0,k:p.k||0,hr:p.hr||0,rbi:p.rbi||0,sb:p.sb||0,cs:p.cs||0,bt:p.bt||'',ph:p.ph||'',tr:tr2,or:or2});
+          h:p.h,ab:p.ab,bb:p.bb||0,k:p.k||0,hr:p.hr||0,rbi:p.rbi||0,d:p.d||0,t:p.t||0,sb:p.sb||0,cs:p.cs||0,bt:p.bt||'',ph:p.ph||'',tr:tr2,or:or2});
       });
       tb.b.forEach(p=>{const pl=go(p.n,false);if(!pl.games.find(g=>g.gid===gid)){
         if(p.a)pl.games.push({date:box.d,gid,team:code,opp,side,role:'B',appeared:true,sb:p.sb||0,cs:p.cs||0,bt:p.bt||'',ph:p.ph||'',ab:p.ab,h:p.h,bb:p.bb,k:p.k,hr:p.hr,rbi:p.rbi,tr:tr2,or:or2});
@@ -1443,6 +1493,7 @@ function filterPlayers(q){
 }
 
 function renderPP(player){
+  _ppPlayer=player;
   const teams=player.teams||[];
   const color=tc(teams[0]);
   const isPitcher=player.isPitcher;
@@ -1470,6 +1521,7 @@ function renderPP(player){
   const ab=starts.reduce((s,g)=>s+(g.ab||0),0),h=starts.reduce((s,g)=>s+(g.h||0),0);
   const bb=starts.reduce((s,g)=>s+(g.bb||0),0),k=starts.reduce((s,g)=>s+(g.k||0),0);
   const hr=starts.reduce((s,g)=>s+(g.hr||0),0),rbi=starts.reduce((s,g)=>s+(g.rbi||0),0);
+  const d=starts.reduce((s,g)=>s+(g.d||0),0),t2=starts.reduce((s,g)=>s+(g.t||0),0);
   const sb=starts.reduce((s,g)=>s+(g.sb||0),0),cs=starts.reduce((s,g)=>s+(g.cs||0),0);
   const avg=ab>0?('.'+Math.round(h/ab*1000).toString().padStart(3,'0')):'—';
   const allP=player.games.filter(g=>(g.role==='S'||g.role==='BP')&&g.appeared);
@@ -1508,11 +1560,11 @@ function renderPP(player){
     const bcol=res==='W'?'color:#166534;font-weight:700':res==='L'?'color:#991b1b;font-weight:700':'color:var(--muted)';
     if(g.role==='B')return `<tr onclick="openBox('${g.gid}','pp')">
       <td>${fds(g.date)}</td><td>${tdot}${tname}</td><td>${odotB}${opp}</td><td>PH/PR</td><td style="${bcol}">${score}</td>
-      <td>${g.ab}</td><td>${g.h}</td><td>${g.bb}</td><td>${g.k}</td><td>${g.hr||''}</td><td>${g.rbi||''}</td><td>${g.sb||''}</td><td>${g.cs||''}</td>
+      <td>${g.ab}</td><td>${g.h}</td><td>${g.d||''}</td><td>${g.t||''}</td><td>${g.bb}</td><td>${g.k}</td><td>${g.hr||''}</td><td>${g.rbi||''}</td><td>${g.sb||''}</td><td>${g.cs||''}</td>
     </tr>`;
     return `<tr onclick="openBox('${g.gid}','pp')">
       <td>${fds(g.date)}</td><td>${tdot}${tname}</td><td>${odotB}${opp}${g.ph?`<span style='font-size:.6rem;color:var(--muted);margin-left:3px'>${g.ph}P</span>`:''}</td><td>${dp(g.pos)||'\u2014'}</td><td style="${bcol}">${score}</td>
-      <td>${g.ab}</td><td>${g.h}</td><td>${g.bb}</td><td>${g.k}</td><td>${g.hr||''}</td><td>${g.rbi||''}</td><td>${g.sb||''}</td><td>${g.cs||''}</td>
+      <td>${g.ab}</td><td>${g.h}</td><td>${g.d||''}</td><td>${g.t||''}</td><td>${g.bb}</td><td>${g.k}</td><td>${g.hr||''}</td><td>${g.rbi||''}</td><td>${g.sb||''}</td><td>${g.cs||''}</td>
     </tr>`;
   });
   // Split rows into starts and bench/relief
@@ -1535,7 +1587,7 @@ function renderPP(player){
       ${isPitcher&&player.games.filter(g=>g.role==='BP'&&g.appeared).length>0?`<span><b>RP</b>${player.games.filter(g=>g.role==='BP'&&g.appeared).length}</span>`:''}
       ${isPitcher
         ?`<span><b>W</b>${totW}</span><span><b>L</b>${totL}</span><span><b>SV</b>${totSv}</span><span><b>IP</b>${ipDisp}</span><span><b>ERA</b>${era}</span><span><b>H</b>${totPh}</span><span><b>BB</b>${totPbb}</span><span><b>K</b>${totPk}</span>`
-        :`<span><b>AB</b>${ab}</span><span><b>H</b>${h}</span><span><b>AVG</b>${avg}</span><span><b>BB</b>${bb}</span><span><b>K</b>${k}</span><span><b>HR</b>${hr}</span><span><b>RBI</b>${rbi}</span><span><b>SB</b>${sb}</span><span><b>CS</b>${cs}</span>`
+        :`<span><b>AB</b>${ab}</span><span><b>H</b>${h}</span><span><b>AVG</b>${avg}</span><span><b>2B</b>${d}</span><span><b>3B</b>${t2}</span><span><b>HR</b>${hr}</span><span><b>RBI</b>${rbi}</span><span><b>BB</b>${bb}</span><span><b>K</b>${k}</span><span><b>SB</b>${sb}</span><span><b>CS</b>${cs}</span>`
       }
     </div>
 
@@ -1587,7 +1639,7 @@ function renderPP(player){
     })()}
     ${(()=>{
       const pitHdr='<th>Date</th><th>Team</th><th>Opp</th><th>Role</th><th>Result</th><th>IP</th><th>H</th><th>ER</th><th>BB</th><th>K</th><th>Dec</th>';
-      const batHdr='<th>Date</th><th>Team</th><th>Opp</th><th>Pos</th><th>Result</th><th>AB</th><th>H</th><th>BB</th><th>K</th><th>HR</th><th>RBI</th><th>SB</th><th>CS</th>';
+      const batHdr='<th>Date</th><th>Team</th><th>Opp</th><th>Pos</th><th>Result</th><th>AB</th><th>H</th><th>2B</th><th>3B</th><th>BB</th><th>K</th><th>HR</th><th>RBI</th><th>SB</th><th>CS</th>';
       const hdr=isPitcher?pitHdr:batHdr;
       function mkTbl(rws,label){
         if(!rws.length)return '';
@@ -1599,7 +1651,20 @@ function renderPP(player){
           +mkTbl(_bRows,isPitcher?'Relief':'Bench');
       }
       return '<div class="glt-wrap"><table class="glt"><tr>'+hdr+'</tr>'+rowsJoined+'</table></div>';
-    })()}`;
+    })()}
+    <div style="margin-top:16px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2)">
+      <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:.78rem;letter-spacing:.04em;color:var(--dim);text-transform:uppercase;margin-bottom:8px">Milestone Finder</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <select id="ms-stat-season" class="season-sel" style="color:var(--text);font-size:.78rem">
+          ${isPitcher
+            ?'<option value="k_pit">Strikeouts (P)</option><option value="w">Wins</option><option value="sv">Saves</option>'
+            :'<option value="h">Hits</option><option value="hr">Home Runs</option><option value="rbi">RBI</option><option value="k_bat">Strikeouts (B)</option><option value="sb">Stolen Bases</option>'}
+        </select>
+        <input id="ms-num-season" type="number" min="1" placeholder="e.g. 100" style="width:90px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:.78rem">
+        <button class="bbk" onclick="findMilestone('season')" style="font-size:.78rem">Find game</button>
+      </div>
+      <div id="ms-result-season"></div>
+    </div>`;
 }
 
 // ── Career Search ────────────────────────────────────────────────────────────
@@ -1700,7 +1765,7 @@ async function csLoadAll(name,sid,birth){
   const isPitcher=results.some(r=>r&&r.isPitcher);
   const headers=isPitcher
     ?'<th>Year</th><th>Age</th><th>Team</th><th>G</th><th>GS</th><th>W</th><th>L</th><th>SV</th><th>IP</th><th>ERA</th><th>H</th><th>BB</th><th>K</th>'
-    :'<th>Year</th><th>Age</th><th>Team</th><th>G</th><th>GS</th><th>AB</th><th>H</th><th>AVG</th><th>HR</th><th>RBI</th><th>BB</th><th>K</th>';
+    :'<th>Year</th><th>Age</th><th>Team</th><th>G</th><th>GS</th><th>AB</th><th>H</th><th>AVG</th><th>2B</th><th>3B</th><th>HR</th><th>RBI</th><th>BB</th><th>K</th>';
   const rows=results.filter(Boolean).map(r=>{
     const yr=r.year;
     const col=r.teamCode?`color:${r.teamColor}`:'';
@@ -1744,6 +1809,8 @@ async function csLoadAll(name,sid,birth){
         <td class="${r.ab?'cs-val':''}">${r.ab||0}</td>
         <td class="${r.h?'cs-val':''}">${r.h||0}</td>
         <td class="${r.ab?'cs-val':''}">${r.ab>0?avg:'—'}</td>
+        <td class="${r.d?'cs-val':''}">${r.d||0}</td>
+        <td class="${r.t?'cs-val':''}">${r.t||0}</td>
         <td class="${r.hr?'cs-val':''}">${r.hr||0}</td>
         <td class="${r.rbi?'cs-val':''}">${r.rbi||0}</td>
         <td class="${r.bb?'cs-val':''}">${r.bb||0}</td>
@@ -1751,8 +1818,47 @@ async function csLoadAll(name,sid,birth){
       </tr>`;
     }
   }).join('');
-  statsDiv.innerHTML=`<table class="cs-tbl"><tr>${headers}</tr>${rows}</table>`;
+  statsDiv.innerHTML=`<table class="cs-tbl"><tr>${headers}</tr>${rows}
+  <tr style="border-top:2px solid var(--border);font-weight:700;background:var(--surface2)">
+    <td colspan="2" style="font-style:italic">Career</td><td></td><td style="color:var(--accent)">${results.filter(Boolean).reduce((s,r)=>s+(r.g||0),0)}</td>
+    <td>${results.filter(Boolean).reduce((s,r)=>s+(r.gs||0),0)}</td>
+    ${isPitcher?`
+      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.w||0),0)}</td>
+      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.l||0),0)}</td>
+      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.sv||0),0)}</td>
+      <td>${(()=>{const o=results.filter(Boolean).reduce((s,r)=>s+(r.ipouts||0),0);return Math.floor(o/3)+'.'+o%3;})()}</td>
+      <td>${(()=>{const o=results.filter(Boolean).reduce((s,r)=>s+(r.ipouts||0),0),e=results.filter(Boolean).reduce((s,r)=>s+(r.per||0),0);return o>0?(e/(o/27)).toFixed(2):'—';})()}</td>
+      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.ph||0),0)}</td>
+      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.pbb||0),0)}</td>
+      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.pk||0),0)}</td>`
+    :`
+      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.ab||0),0)}</td>
+      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.h||0),0)}</td>
+      <td>${(()=>{const ab=results.filter(Boolean).reduce((s,r)=>s+(r.ab||0),0),h=results.filter(Boolean).reduce((s,r)=>s+(r.h||0),0);return ab>0?('.'+Math.round(h/ab*1000).toString().padStart(3,'0')):'—';})()}</td>
+      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.d||0),0)}</td>
+      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.t||0),0)}</td>
+      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.hr||0),0)}</td>
+      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.rbi||0),0)}</td>
+      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.bb||0),0)}</td>
+      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.k||0),0)}</td>`}
+  </tr>
+</table>
+<div style="margin-top:12px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2)">
+  <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:.04em;color:var(--dim);text-transform:uppercase;margin-bottom:8px">Career Milestone Finder</div>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <select id="ms-stat-career-${sid}" class="season-sel" style="color:var(--text);font-size:.78rem">
+      ${isPitcher
+        ?'<option value="k_pit">Strikeouts (P)</option><option value="w">Wins</option><option value="sv">Saves</option>'
+        :'<option value="h">Hits</option><option value="hr">Home Runs</option><option value="rbi">RBI</option><option value="k_bat">Strikeouts (B)</option><option value="sb">Stolen Bases</option>'}
+    </select>
+    <input id="ms-num-career-${sid}" type="number" min="1" placeholder="e.g. 500" style="width:90px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:.78rem">
+    <button class="bbk" onclick="findCareerMilestone('${sid}','${esc(name)}','${birth||''}')" style="font-size:.78rem">Find game</button>
+  </div>
+  <div id="ms-result-career-${sid}"></div>
+</div>`;
 }
+
+
 
 async function csLoadSeasonData(name,year,birthYear,allowedTeams,pid){
   try{
@@ -1771,10 +1877,10 @@ async function csLoadSeasonData(name,year,birthYear,allowedTeams,pid){
       for(const [side,ck] of [['vb','v'],['hb','h']]){
         const code=box[ck],tb=box[side];
         const match=p=>pid&&p.id?(p.id===pid):(p.n===name);
-        let found=false,stats={ab:0,h:0,hr:0,rbi:0,bb:0,k:0,ip:0,er:0,pbb:0,pk:0,ph:0,gs:false,w:false,l:false,sv:false};
+        let found=false,stats={ab:0,h:0,d:0,t:0,hr:0,rbi:0,bb:0,k:0,ip:0,er:0,pbb:0,pk:0,ph:0,gs:false,w:false,l:false,sv:false};
         let foundInLineup=false;
-        for(const p of tb.l||[]){if(match(p)){found=true;foundInLineup=true;stats.ab+=p.ab||0;stats.h+=p.h||0;stats.hr+=p.hr||0;stats.rbi+=p.rbi||0;stats.bb+=p.bb||0;stats.k+=p.k||0;stats.gs=true;break;}}
-        if(!foundInLineup){for(const p of tb.b||[]){if(match(p)&&p.a){found=true;stats.ab+=p.ab||0;stats.h+=p.h||0;stats.hr+=p.hr||0;stats.rbi+=p.rbi||0;stats.bb+=p.bb||0;stats.k+=p.k||0;break;}}}
+        for(const p of tb.l||[]){if(match(p)){found=true;foundInLineup=true;stats.ab+=p.ab||0;stats.h+=p.h||0;stats.d+=p.d||0;stats.t+=p.t||0;stats.hr+=p.hr||0;stats.rbi+=p.rbi||0;stats.bb+=p.bb||0;stats.k+=p.k||0;stats.gs=true;break;}}
+        if(!foundInLineup){for(const p of tb.b||[]){if(match(p)&&p.a){found=true;stats.ab+=p.ab||0;stats.h+=p.h||0;stats.d+=p.d||0;stats.t+=p.t||0;stats.hr+=p.hr||0;stats.rbi+=p.rbi||0;stats.bb+=p.bb||0;stats.k+=p.k||0;break;}}}
         const seenP=new Set();
         for(const p of tb.p||[]){if(match(p)){found=true;seenP.add(p.id||p.n);const ou=p.ip?(+p.ip.split('.')[0]*3+(+p.ip.split('.')[1]||0)):0;stats.ip+=ou;stats.er+=p.er||0;stats.pbb+=p.bb||0;stats.pk+=p.k||0;stats.ph+=p.h||0;if(p.gs)stats.gs=true;if(p.dec==='W')stats.w=true;if(p.dec==='L')stats.l=true;if(p.dec==='S')stats.sv=true;break;}}
         for(const p of tb.bp||[]){const key=p.id||p.n;if(match(p)&&p.a&&!seenP.has(key)){found=true;const ou=p.ip?(+p.ip.split('.')[0]*3+(+p.ip.split('.')[1]||0)):0;stats.ip+=ou;stats.er+=p.er||0;stats.pbb+=p.bb||0;stats.pk+=p.k||0;stats.ph+=p.h||0;if(p.dec==='W')stats.w=true;if(p.dec==='L')stats.l=true;if(p.dec==='S')stats.sv=true;break;}}
@@ -1853,12 +1959,12 @@ async function csLoadSeasonData(name,year,birthYear,allowedTeams,pid){
     const isPitcher=filteredLog.some(gl=>gl.stats.ip>0);
     // Sum stats from filtered game log
     let g=filteredLog.length,gs=0,w=0,l=0,sv=0,ipouts=0,per=0,pbb=0,pk=0,ph=0;
-    let ab=0,h=0,bb=0,k=0,hr=0,rbi=0;
+    let ab=0,h=0,dbl=0,tpl=0,bb=0,k=0,hr=0,rbi=0;
     const teams=new Set();
     for(const gl of filteredLog){
       teams.add(gl.team);
       const s=gl.stats;
-      ab+=s.ab;h+=s.h;hr+=s.hr;rbi+=s.rbi;bb+=s.bb;k+=s.k;
+      ab+=s.ab;h+=s.h;dbl+=(s.d||0);tpl+=(s.t||0);hr+=s.hr;rbi+=s.rbi;bb+=s.bb;k+=s.k;
       ipouts+=s.ip;per+=s.er;pbb+=s.pbb;pk+=s.pk;ph+=s.ph;
       if(s.gs)gs++;if(s.w)w++;if(s.l)l++;if(s.sv)sv++;
     }
@@ -1867,7 +1973,7 @@ async function csLoadSeasonData(name,year,birthYear,allowedTeams,pid){
     const teamColor=teamCode?(()=>{const e=COLORS[teamCode];if(!e)return'#888';const yr=+year;let p=e[0][1];for(const [y,c] of e){if(yr>=y)p=c;}return p;})():'#888';
     const teamName=teamArr.map(t=>d.teams[t]?d.teams[t].name:t).join('/');
     const birth=d.births&&d.births[name]?d.births[name]:null;
-    return {year,isPitcher,teams:teamArr,teamCode,teamColor,teamName,g,gs,w,l,sv,ipouts,per,pbb,pk,ph,ab,h,bb,k,hr,rbi,birth};
+    return {year,isPitcher,teams:teamArr,teamCode,teamColor,teamName,g,gs,w,l,sv,ipouts,per,pbb,pk,ph,ab,h,d:dbl,t:tpl,bb,k,hr,rbi,birth};
   }catch(e){return null;}
 }
 async function csLoadSeason(name,year){
@@ -2521,17 +2627,17 @@ async function buildRoster(teamCode){
       // Batters - lineup
       (tb.l||[]).forEach(p=>{
         if(!p.n)return;
-        if(!batters[p.n])batters[p.n]={n:p.n,id:p.id||'',born:p.born||'',g:0,gs:0,ab:0,h:0,bb:0,k:0,hr:0,rbi:0,sb:0,cs:0};
+        if(!batters[p.n])batters[p.n]={n:p.n,id:p.id||'',born:p.born||'',g:0,gs:0,ab:0,h:0,d:0,t:0,bb:0,k:0,hr:0,rbi:0,sb:0,cs:0};
         const b=batters[p.n]; b.g++; b.gs++;
-        b.ab+=p.ab||0; b.h+=p.h||0; b.bb+=p.bb||0; b.k+=p.k||0;
+        b.ab+=p.ab||0; b.h+=p.h||0; b.d+=p.d||0; b.t+=p.t||0; b.bb+=p.bb||0; b.k+=p.k||0;
         b.hr+=p.hr||0; b.rbi+=p.rbi||0; b.sb+=p.sb||0; b.cs+=p.cs||0;
       });
       // Batters - bench appearances
       (tb.b||[]).forEach(p=>{
         if(!p.n||!p.a)return;
-        if(!batters[p.n])batters[p.n]={n:p.n,id:p.id||'',born:p.born||'',g:0,gs:0,ab:0,h:0,bb:0,k:0,hr:0,rbi:0,sb:0,cs:0};
+        if(!batters[p.n])batters[p.n]={n:p.n,id:p.id||'',born:p.born||'',g:0,gs:0,ab:0,h:0,d:0,t:0,bb:0,k:0,hr:0,rbi:0,sb:0,cs:0};
         const b=batters[p.n]; b.g++;
-        b.ab+=p.ab||0; b.h+=p.h||0; b.bb+=p.bb||0; b.k+=p.k||0;
+        b.ab+=p.ab||0; b.h+=p.h||0; b.d+=p.d||0; b.t+=p.t||0; b.bb+=p.bb||0; b.k+=p.k||0;
         b.hr+=p.hr||0; b.rbi+=p.rbi||0; b.sb+=p.sb||0; b.cs+=p.cs||0;
       });
       // Pitchers
@@ -2578,6 +2684,8 @@ async function buildRoster(teamCode){
       <td class="st${b.ab?' val':''}">${b.ab}</td>
       <td class="st${b.h?' val':''}">${b.h}</td>
       <td class="st${b.ab?' val':''}">${avg}</td>
+      <td class="st${b.d?' val':''}">${b.d}</td>
+      <td class="st${b.t?' val':''}">${b.t}</td>
       <td class="st${b.hr?' val':''}">${b.hr}</td>
       <td class="st${b.rbi?' val':''}">${b.rbi}</td>
       <td class="st${b.bb?' val':''}">${b.bb}</td>
@@ -2618,6 +2726,9 @@ function rosterSortKey(row,col){
   const v=row[col];
   if(col==='n')return row.n.toLowerCase();
   if(col==='avg')return row.ab>0?row.h/row.ab:0;
+  if(col==='d'||col==='t')return row[col]||0;
+  if(col==='d')return row.d||0;
+  if(col==='t')return row.t||0;
   if(col==='era')return row.ipouts>0?row.er/(row.ipouts/27):99;
   if(col==='age'){
     const bd=row.born||(D.births&&D.births[row.n])||'';
@@ -2634,9 +2745,9 @@ function renderRosterTables(panel){
   const color=panel._color, teamCode=panel._team;
   const bs=panel._batSort, ps=panel._pitSort;
 
-  const batCols=['n','age','g','gs','ab','h','avg','hr','rbi','bb','k','sb'];
+  const batCols=['n','age','g','gs','ab','h','avg','d','t','hr','rbi','bb','k','sb'];
   const pitCols=['n','age','g','gs','w','l','sv','ip','era','h','bb','k'];
-  const batHdrs=['Player','Age','G','GS','AB','H','AVG','HR','RBI','BB','K','SB'];
+  const batHdrs=['Player','Age','G','GS','AB','H','AVG','2B','3B','HR','RBI','BB','K','SB'];
   const pitHdrs=['Player','Age','G','GS','W','L','SV','IP','ERA','H','BB','K'];
 
   function mkTh(cols,hdrs,sortState,type){
@@ -2677,6 +2788,8 @@ function renderRosterTables(panel){
       <td class="st${b.ab?' val':''}">${b.ab}</td>
       <td class="st${b.h?' val':''}">${b.h}</td>
       <td class="st${b.ab?' val':''}">${avg}</td>
+      <td class="st${b.d?' val':''}">${b.d}</td>
+      <td class="st${b.t?' val':''}">${b.t}</td>
       <td class="st${b.hr?' val':''}">${b.hr}</td>
       <td class="st${b.rbi?' val':''}">${b.rbi}</td>
       <td class="st${b.bb?' val':''}">${b.bb}</td>
@@ -2730,9 +2843,432 @@ function ipToOuts(ip){
   return (+parts[0])*3+(+parts[1]||0);
 }
 
+// ── Milestone Finder ─────────────────────────────────────────────────────────
+function findMilestone(scope){
+  // scope: 'season' or 'career'
+  const statSel=document.getElementById('ms-stat-'+scope);
+  const numInp=document.getElementById('ms-num-'+scope);
+  const resEl=document.getElementById('ms-result-'+scope);
+  if(!statSel||!numInp||!resEl)return;
+  const stat=statSel.value;
+  const target=parseInt(numInp.value);
+  if(!target||target<1){resEl.innerHTML='<span style="color:var(--muted)">Enter a number.</span>';return;}
+  resEl.innerHTML='<span style="color:var(--muted)">Searching...</span>';
+
+  // Build chronological game list
+  let games=[];
+  if(scope==='season'){
+    // Current player profile games
+    if(!_ppPlayer)return;
+    games=[..._ppPlayer.games].filter(g=>g.appeared||g.role==='S').sort((a,b)=>a.date.localeCompare(b.date));
+  } else {
+    // Career - needs all seasons loaded - use _csAllGames if available
+    if(!_csAllGames||!_csAllGames.length){resEl.innerHTML='<span style="color:var(--muted)">Load career data first.</span>';return;}
+    games=_csAllGames;
+  }
+
+  // Stat accessor
+  const getVal=g=>{
+    if(stat==='h')return g.h||0;
+    if(stat==='hr')return g.hr||0;
+    if(stat==='rbi')return g.rbi||0;
+    if(stat==='sb')return g.sb||0;
+    if(stat==='k_bat')return g.k||0;
+    if(stat==='k_pit')return g.pk||g.k||0;
+    if(stat==='w')return g.dec==='W'?1:0;
+    if(stat==='sv')return g.dec==='S'?1:0;
+    return 0;
+  };
+  const statLabel={'h':'Hit','hr':'HR','rbi':'RBI','sb':'SB','k_bat':'K (batter)','k_pit':'K (pitcher)','w':'Win','sv':'Save'};
+
+  let running=0;
+  for(const g of games){
+    running+=getVal(g);
+    if(running>=target){
+      // Found the milestone game
+      const prev=running-getVal(g);
+      const inGame=target-prev;
+      const dateStr=g.date?fd(g.date):'';
+      const oppStr=g.opp?` vs ${tf(g.opp)}`:'';
+      const yr=g.date?g.date.slice(0,4):'';
+      const seasonStr=scope==='career'&&yr?` (${yr})`:'';
+      resEl.innerHTML=`<div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius2);padding:10px 14px;margin-top:6px">
+        <div style="font-weight:700;font-size:.9rem">${target}th ${statLabel[stat]||stat}${seasonStr}</div>
+        <div style="color:var(--muted);font-size:.8rem;margin-top:2px">${dateStr}${oppStr}</div>
+        <div style="font-size:.78rem;margin-top:4px">Running total reached <b>${running}</b> (was ${prev}, added ${getVal(g)} this game)</div>
+        <button class="bbk" onclick="loadSeason('${yr||curSeason}',true).then(()=>{showView('box',true);openBox('${g.gid}');})" style="margin-top:8px;font-size:.75rem">View box score →</button>
+      </div>`;
+      return;
+    }
+  }
+  resEl.innerHTML=`<span style="color:var(--muted)">Never reached ${target} — career total: ${running}.</span>`;
+}
+
+let _ppPlayer=null; // set when player profile opens
+let _csAllGames=null; // set when career search loads all seasons
+
+// ── Career Milestone (cross-season) ──────────────────────────────────────────
+async function findCareerMilestone(sid,name,birth){
+  const statSel=document.getElementById('ms-stat-career-'+sid);
+  const numInp=document.getElementById('ms-num-career-'+sid);
+  const resEl=document.getElementById('ms-result-career-'+sid);
+  if(!statSel||!numInp||!resEl)return;
+  const stat=statSel.value;
+  const target=parseInt(numInp.value);
+  if(!target||target<1){resEl.innerHTML='<span style="color:var(--muted)">Enter a number.</span>';return;}
+  resEl.innerHTML='<span style="color:var(--muted)">Loading seasons...</span>';
+
+  // Get season list for this player from csIndex
+  await loadCsIndex();
+  const bl=name.toLowerCase();
+  const entries=(csIndex[bl]||[]);
+  const entry=birth?entries.find(e=>e.b===birth)||entries[0]:entries[0];
+  if(!entry||!entry.s){resEl.innerHTML='<span style="color:var(--muted)">No career data found.</span>';return;}
+  const seasons=(Array.isArray(entry.s)?entry.s:Object.keys(entry.s)).sort();
+
+  const statLabel={'h':'Hit','hr':'HR','rbi':'RBI','sb':'SB','k_bat':'K (batter)','k_pit':'K (pitcher)','w':'Win','sv':'Save'};
+  const getVal=(g)=>{
+    if(stat==='h')return g.h||0;
+    if(stat==='hr')return g.hr||0;
+    if(stat==='rbi')return g.rbi||0;
+    if(stat==='sb')return g.sb||0;
+    if(stat==='k_bat')return g.k||0;
+    if(stat==='k_pit')return g.pk||g.k||0;
+    if(stat==='w')return g.dec==='W'?1:0;
+    if(stat==='sv')return g.dec==='S'?1:0;
+    return 0;
+  };
+
+  let running=0;
+  const availYears=new Set(SEASONS_AVAILABLE.map(s=>s.year));
+  for(const yr of seasons.filter(y=>availYears.has(y))){
+    resEl.innerHTML=`<span style="color:var(--muted)">Scanning ${yr}... (${running} so far)</span>`;
+    await loadSeason(yr,true); // load silently - sets global D
+    if(!D)continue;
+    // Find this player's games in this season
+    const allowedTeams=(entry.t&&entry.t[yr])||null;
+    const pid=entry.pid||null;
+    const games=[];
+    for(const date of D.dates){
+      for(const box of Object.values(D.box_scores).filter(b=>b.d===date)){
+        ['vb','hb'].forEach(side=>{
+          const code=side==='vb'?box.v:box.h;
+          if(allowedTeams&&!allowedTeams.includes(code))return;
+          const tb=box[side];
+          // Check lineup
+          (tb.l||[]).forEach(p=>{
+            if(pid?p.id===pid:p.n===name)
+              games.push({date:box.d,gid:box.gid,opp:side==='vb'?box.h:box.v,yr,...p,role:'S'});
+          });
+          // Check bullpen
+          (tb.p||[]).forEach(p=>{
+            if(pid?p.id===pid:p.n===name)
+              games.push({date:box.d,gid:box.gid,opp:side==='vb'?box.h:box.v,yr,...p,role:'P'});
+          });
+          // Check bench
+          (tb.b||[]).forEach(p=>{
+            if((pid?p.id===pid:p.n===name)&&p.a)
+              games.push({date:box.d,gid:box.gid,opp:side==='vb'?box.h:box.v,yr,...p,role:'B'});
+          });
+        });
+      }
+    }
+    games.sort((a,b)=>a.date.localeCompare(b.date));
+    for(const g of games){
+      running+=getVal(g);
+      if(running>=target){
+        const prev=running-getVal(g);
+        resEl.innerHTML=`<div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius2);padding:10px 14px;margin-top:6px">
+          <div style="font-weight:700;font-size:.9rem">${target}th career ${statLabel[stat]||stat}</div>
+          <div style="color:var(--muted);font-size:.8rem;margin-top:2px">${fd(g.date)} vs ${tf(g.opp)} · ${yr}</div>
+          <div style="font-size:.78rem;margin-top:4px">Running total: <b>${running}</b> (was ${prev}, added ${getVal(g)} this game)</div>
+          <button class="bbk" onclick="loadSeason('${yr}',true).then(()=>{showView('box',true);openBox('${g.gid}');})" style="margin-top:8px;font-size:.75rem">View box score →</button>
+        </div>`;
+        return;
+      }
+    }
+  }
+  resEl.innerHTML=`<span style="color:var(--muted)">Never reached ${target} — career total: ${running}.</span>`;
+}
+
+// ── Postseason ───────────────────────────────────────────────────────────────
+let _psData = null;
+let _psYear = null;
+const PS_DATA_PATH = 'data/postseason/';
+
+// Build year selector from available postseason JSONs
+// We probe by trying to load a manifest or just show years with data
+const PS_YEARS = []; // populated by buildPsYearSel()
+
+function buildPsYearSel() {
+  // Generate years from 1903 to 2025 - user may not have all
+  const sel = document.getElementById('ps-year-sel');
+  if (!sel) return;
+  const years = [];
+  for (let y = 2025; y >= 1903; y--) {
+    if (y !== 1904 && y !== 1994) years.push(y); // no WS those years
+  }
+  sel.innerHTML = '<option value="">— Select Year —</option>' +
+    years.map(y => `<option value="${y}">${y}</option>`).join('');
+}
+
+async function loadPostseason(year) {
+  if (!year) return;
+  const el = document.getElementById('ps-content');
+  el.innerHTML = '<div class="cs-loading">Loading ' + year + ' postseason...</div>';
+  try {
+    const resp = await fetch(`${PS_DATA_PATH}${year}.json`);
+    if (!resp.ok) throw new Error(`No postseason data for ${year}`);
+    _psData = await resp.json();
+    _psYear = year;
+    renderPsBracket();
+  } catch(e) {
+    el.innerHTML = `<div style="padding:20px;color:var(--muted)">No postseason data found for ${year}. Make sure you've run build_postseason.py and uploaded the data files.</div>`;
+  }
+}
+
+function renderPsBracket() {
+  if (!_psData) return;
+  const el = document.getElementById('ps-content');
+  const d = _psData;
+  const champ = d.champion ? tf(d.champion) : '';
+  const champColor = d.champion ? tc(d.champion) : 'var(--accent)';
+
+  // Group series by round
+  const byRound = {};
+  for (const s of d.series) {
+    if (!byRound[s.round]) byRound[s.round] = [];
+    byRound[s.round].push(s);
+  }
+
+  const rounds = ['wildcard','divisionseries','lcs','worldseries','championship'];
+  const presentRounds = rounds.filter(r => byRound[r]);
+
+  // Determine era layout
+  const hasWC = !!byRound['wildcard'];
+  const hasDS = !!byRound['divisionseries'];
+  const hasLCS = !!byRound['lcs'] || !!byRound['championship'];
+  const hasWS = !!byRound['worldseries'];
+
+  let bracketHtml = '';
+
+  // Champion banner
+  if (champ) {
+    bracketHtml += `<div class="ps-champion">
+      <div>
+        <div class="ps-champ-label">🏆 ${d.year} World Series Champion</div>
+        <div class="ps-champ-name" style="color:${champColor}">${champ}</div>
+      </div>
+    </div>`;
+  }
+
+  // Build bracket columns
+  // For full modern bracket: WC → DS → LCS → WS
+  // Layout: AL side on top, NL side on bottom within each round column
+
+  const makeSeriesCard = (s, idx) => {
+    if (!s) return '<div class="ps-series" style="opacity:.3;min-height:72px"></div>';
+    const wColor = tc(s.winner);
+    const lColor = s.loser ? tc(s.loser) : 'var(--muted)';
+    const wWins = s.wins[s.winner] || 0;
+    const lWins = s.wins[s.loser] || 0;
+    const sId = `ps-series-${s.round}-${s.winner}-${s.loser}`;
+    return `<div class="ps-series winner-highlight" id="${sId}" onclick="showPsSeries('${s.round}','${s.winner}','${s.loser}')">
+      <div style="font-size:.65rem;color:var(--dim);margin-bottom:4px;font-family:'Archivo',sans-serif;letter-spacing:.04em;text-transform:uppercase">${s.label}${s.lg && s.lg !== '?' ? ' · <span style="color:var(--muted)">' + s.lg + '</span>' : ''}</div>
+      <div class="ps-team won">
+        <div class="ps-team-name">
+          <div class="ps-team-dot" style="background:${wColor}"></div>
+          <span style="color:${wColor}">${tf(s.winner)}</span>
+        </div>
+        <div class="ps-wins">${wWins}</div>
+      </div>
+      <div class="ps-team lost">
+        <div class="ps-team-name">
+          <div class="ps-team-dot" style="background:${lColor}"></div>
+          <span>${s.loser ? tf(s.loser) : '—'}</span>
+        </div>
+        <div class="ps-wins">${lWins}</div>
+      </div>
+    </div>`;
+  };
+
+  if (hasWS && !hasLCS && !hasDS) {
+    // Pre-1969: just World Series
+    bracketHtml += `<div style="max-width:320px">${(byRound['worldseries']||[]).map(makeSeriesCard).join('')}</div>`;
+  } else if (hasWS && hasLCS && !hasDS) {
+    // 1969-1994: LCS + WS, 2 league cols
+    const alLCS = (byRound['lcs']||byRound['championship']||[]).find(s => s.lg==='AL');
+    const nlLCS = (byRound['lcs']||byRound['championship']||[]).find(s => s.lg==='NL');
+    const ws = (byRound['worldseries']||[])[0];
+    bracketHtml += `<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;max-width:700px">
+      <div>${alLCS ? makeSeriesCard(alLCS) : ''}</div>
+      <div class="ps-connector">→</div>
+      <div>${nlLCS ? makeSeriesCard(nlLCS) : ''}</div>
+      <div></div><div style="display:flex;justify-content:center">${ws ? makeSeriesCard(ws) : ''}</div><div></div>
+    </div>`;
+  } else {
+    // Modern: WC + DS + LCS + WS
+    const alWC = (byRound['wildcard']||[]).filter(s => s.lg==='AL');
+    const nlWC = (byRound['wildcard']||[]).filter(s => s.lg==='NL');
+    const alDS = (byRound['divisionseries']||[]).filter(s => s.lg==='AL');
+    const nlDS = (byRound['divisionseries']||[]).filter(s => s.lg==='NL');
+    const alLCS = [...(byRound['lcs']||[]),...(byRound['championship']||[])].filter(s=>s.lg==='AL');
+    const nlLCS = [...(byRound['lcs']||[]),...(byRound['championship']||[])].filter(s=>s.lg==='NL');
+    const ws = (byRound['worldseries']||[])[0];
+
+    const colStyle = 'display:flex;flex-direction:column;gap:8px;flex:1;min-width:160px';
+
+    // Build columns
+    let cols = '';
+    if (hasWC) {
+      cols += `<div style="${colStyle}">
+        <div class="ps-round-label">Wild Card</div>
+        ${alWC.map(makeSeriesCard).join('')}
+        ${nlWC.map(makeSeriesCard).join('')}
+      </div>
+      <div class="ps-connector" style="font-size:.9rem;color:var(--border)">▶</div>`;
+    }
+    if (hasDS) {
+      cols += `<div style="${colStyle}">
+        <div class="ps-round-label">Division Series</div>
+        ${alDS.map(makeSeriesCard).join('')}
+        ${nlDS.map(makeSeriesCard).join('')}
+      </div>
+      <div class="ps-connector" style="font-size:.9rem;color:var(--border)">▶</div>`;
+    }
+    if (hasLCS) {
+      cols += `<div style="${colStyle}">
+        <div class="ps-round-label">League Championship</div>
+        ${alLCS.map(makeSeriesCard).join('')}
+        ${nlLCS.map(makeSeriesCard).join('')}
+      </div>
+      <div class="ps-connector" style="font-size:.9rem;color:var(--border)">▶</div>`;
+    }
+    if (hasWS) {
+      cols += `<div style="${colStyle}">
+        <div class="ps-round-label">World Series</div>
+        ${ws ? makeSeriesCard(ws) : ''}
+      </div>`;
+    }
+    bracketHtml += `<div style="display:flex;gap:8px;align-items:flex-start;overflow-x:auto;padding-bottom:8px">${cols}</div>`;
+  }
+
+  // All series list below bracket (for quick access)
+  bracketHtml += `<div style="margin-top:20px">
+    <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin-bottom:10px">All Series</div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      ${d.series.map(s => `<div class="ps-series" onclick="showPsSeries('${s.round}','${s.winner}','${s.loser}')" style="cursor:pointer">
+        <span style="font-size:.7rem;color:var(--dim);text-transform:uppercase;letter-spacing:.04em">${s.label}</span>
+        <span style="margin-left:8px;font-weight:700;color:${tc(s.winner)}">${tf(s.winner)}</span>
+        <span style="color:var(--muted)"> def. </span>
+        <span>${tf(s.loser)}</span>
+        <span style="color:var(--muted);margin-left:6px">${s.wins[s.winner]}-${s.wins[s.loser]}</span>
+      </div>`).join('')}
+    </div>
+  </div>`;
+
+  el.innerHTML = bracketHtml;
+}
+
+function showPsSeries(round, winner, loser) {
+  if (!_psData) return;
+  const s = _psData.series.find(s => s.round===round && s.winner===winner && s.loser===loser);
+  if (!s) return;
+  const el = document.getElementById('ps-content');
+  const wColor = tc(winner);
+
+  let html = `<button class="bbk ps-back-btn" onclick="renderPsBracket()">← Back to bracket</button>
+  <div class="ps-games-list">
+    <div class="ps-games-hdr">
+      <span style="color:${wColor};font-weight:800">${tf(winner)}</span>
+      <span style="color:var(--muted)">def.</span>
+      <span>${tf(loser)}</span>
+      <span style="color:var(--muted);margin-left:4px">${s.wins[winner]}-${s.wins[loser]}</span>
+      <span style="margin-left:auto;font-weight:400;color:var(--dim)">${s.label} · ${_psYear}</span>
+    </div>`;
+
+  s.games.forEach((g, i) => {
+    const vColor = tc(g.v);
+    const hColor = tc(g.h);
+    const vWon = g.vr > g.hr;
+    const hWon = g.hr > g.vr;
+    const dateStr = g.d ? `${g.d.slice(4,6)}/${g.d.slice(6,8)}` : '';
+    html += `<div class="ps-game-row" onclick="openPsBox('${g.gid}')">
+      <span class="ps-game-num">G${i+1}</span>
+      <span class="ps-game-date">${dateStr}</span>
+      <span class="ps-game-score">
+        <span style="color:${vColor};${vWon?'font-weight:700':''}">${tf(g.v)}</span>
+        <span style="color:var(--muted);margin:0 4px">${g.vr}</span>
+        <span style="color:var(--muted)">@</span>
+        <span style="color:${hColor};${hWon?'font-weight:700':''};margin:0 4px">${tf(g.h)}</span>
+        <span style="color:var(--muted)">${g.hr}</span>
+      </span>
+      <span class="ps-game-winner" style="color:${tc(g.w)}">${tf(g.w)} ▶</span>
+    </div>`;
+  });
+  html += `</div>`;
+  el.innerHTML = html;
+}
+
+async function openPsBox(gid) {
+  if (!_psData) return;
+  const box = _psData.box_scores[gid];
+  if (!box) return;
+  const series = _psData.series.find(s => s.games.some(g => g.gid === gid));
+  const sw = series?.winner||'', sl = series?.loser||'', rnd = series?.round||'';
+  const dateStr = box.d ? fd(box.d) : '';
+  const gt = series ? series.label + ' · ' + _psYear : _psYear;
+
+  // Inject into the existing vbox DOM so it looks exactly like regular season
+  document.getElementById('btitle').textContent = tf(box.v) + ' at ' + tf(box.h);
+  document.getElementById('bsub').textContent = dateStr + ' · ' + gt;
+
+  const vb = box.vb, hb = box.hb;
+  const vc = tc(box.v), hc = tc(box.h);
+  const vWon = (vb.r||0) > (hb.r||0), hWon = (hb.r||0) > (vb.r||0);
+  const maxI = Math.max(vb.i.length, hb.i.length, 9);
+  const inH = Array.from({length:maxI},(_,i)=>`<th>${i+1}</th>`).join('');
+  const inC = (inn, isHome) => Array.from({length:maxI},(_,i)=>{
+    const v = inn[i];
+    if(v===undefined) return `<td style="color:var(--dim)">-</td>`;
+    if(v===''){
+      if(isHome && hWon && i>=8) return `<td style="color:var(--dim);font-style:italic">x</td>`;
+      return `<td style="color:var(--dim)">-</td>`;
+    }
+    return `<td>${v}</td>`;
+  }).join('');
+
+  document.getElementById('lst').innerHTML = `
+    <tr><th>Team</th>${inH}<th class="lsrhe">R</th><th class="lsrhe">H</th><th class="lsrhe">E</th></tr>
+    <tr>
+      <td style="border-left:3px solid ${vc};background:${vc}08">${tf(box.v)}</td>
+      ${inC(vb.i,false)}<td class="lsrhe" style="font-weight:700">${vb.r}</td><td class="lsrhe">${vb.h}</td><td class="lsrhe">${vb.e}</td>
+    </tr>
+    <tr>
+      <td style="border-left:3px solid ${hc};background:${hc}08">${tf(box.h)}</td>
+      ${inC(hb.i,true)}<td class="lsrhe" style="font-weight:700">${hb.r}</td><td class="lsrhe">${hb.h}</td><td class="lsrhe">${hb.e}</td>
+    </tr>`;
+
+  // Use buildTP but pass dummy rec since postseason has no W-L record
+  document.getElementById('bteams').innerHTML = buildTP(box.v,vb,vc,null,box.d) + buildTP(box.h,hb,hc,null,box.d);
+
+  // Add back button at top of box
+  const backHtml = `<button class="bbk" style="margin:8px 16px 0;font-size:.75rem" onclick="showPsSeries('${rnd}','${sw}','${sl}');showView('postseason',true)">← Back to series</button>`;
+  document.getElementById('box-back-ps')?.remove();
+  const boxEl = document.getElementById('vbox');
+  const firstChild = boxEl.firstElementChild;
+  const btn = document.createElement('div');
+  btn.id = 'box-back-ps';
+  btn.innerHTML = backHtml;
+  boxEl.insertBefore(btn, firstChild);
+
+  showView('box', true);
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 buildHome();
 buildRgYearSel();
+buildPsYearSel();
 </script>
 </body>
 </html>

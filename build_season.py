@@ -169,7 +169,7 @@ def build_season(year, data_dir, opening_day_file, transactions_file):
     with open(os.path.join(data_dir, f'{year}gameinfo.csv')) as f:
         dates_seen = set()
         for row in csv.DictReader(f):
-            if row['gametype'] == 'regular' and row['visteam'] in ML_TEAMS and row['hometeam'] in ML_TEAMS:
+            if row['gametype'] in ('regular','playoff') and row['visteam'] in ML_TEAMS and row['hometeam'] in ML_TEAMS:
                 d = row['date']
                 if d not in dates_seen:
                     dates_seen.add(d)
@@ -246,7 +246,7 @@ def build_season(year, data_dir, opening_day_file, transactions_file):
         plays_by_gm = defaultdict(list)
         with open(plays_path, encoding='utf-8', errors='replace') as f:
             for row in csv.DictReader(f):
-                if row.get('gametype') == 'regular':
+                if row.get('gametype') in ('regular','playoff'):
                     plays_by_gm[row['gid']].append(row)
         for gid_p, prows in plays_by_gm.items():
             subs_v, subs_h = {}, {}
@@ -283,7 +283,7 @@ def build_season(year, data_dir, opening_day_file, transactions_file):
     games_raw = []
     with open(os.path.join(data_dir, f'{year}gameinfo.csv')) as f:
         for row in csv.DictReader(f):
-            if row['gametype'] == 'regular' and row['visteam'] in ML_TEAMS and row['hometeam'] in ML_TEAMS:
+            if row['gametype'] in ('regular','playoff') and row['visteam'] in ML_TEAMS and row['hometeam'] in ML_TEAMS:
                 games_raw.append(row)
 
     def get_pos(gid, pid): return fielding_pos.get((gid, pid), '?')
@@ -308,6 +308,7 @@ def build_season(year, data_dir, opening_day_file, transactions_file):
             lineup_names.add(name); is_p = (pos == 'P')
             entry = {'lp': lp, 'n': name, 'id': pid, 'bt': _BIO_HAND.get(pid,{}).get('bt',''), 'born': _BIO_HAND.get(pid,{}).get('born',''), 'ph': gid_starter_hand.get(r['gid'],{}).get(r.get('opp',''),''), 'pos': pos, 'p': is_p,
                      'hr': safe_int(r['b_hr']), 'rbi': safe_int(r['b_rbi']),
+                     'd': safe_int(r['b_d']),   't': safe_int(r['b_t']),
                      'sb': safe_int(r['b_sb']), 'cs': safe_int(r['b_cs'])}
         pitcher_names_all = set(); pitchers = []
         for r in pitch_rows:
@@ -342,7 +343,8 @@ def build_season(year, data_dir, opening_day_file, transactions_file):
                 r = sub_bat_by_name[name]
                 entry.update({'ph': gid_starter_hand.get(r['gid'], {}).get(r.get('opp',''), ''), 'ab': safe_int(r['b_ab']), 'h': safe_int(r['b_h']),
                               'bb': safe_int(r['b_w']), 'k': safe_int(r['b_k']),
-                              'hr': safe_int(r['b_hr']), 'rbi': safe_int(r['b_rbi'])})
+                              'hr': safe_int(r['b_hr']), 'rbi': safe_int(r['b_rbi']),
+                              'd': safe_int(r['b_d']),   't': safe_int(r['b_t'])})
             bench.append(entry)
         bullpen = []
         for name in sorted(active_roster):

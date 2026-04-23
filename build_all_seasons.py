@@ -249,7 +249,7 @@ def build_season(year):
     with open(gameinfo_path, encoding='utf-8', errors='replace') as f:
         dates_seen = set()
         for row in csv.DictReader(f):
-            if (row['gametype'] == 'regular'
+            if (row['gametype'] in ('regular','playoff')
                     and row['visteam'] in ML_TEAMS
                     and row['hometeam'] in ML_TEAMS):
                 d = row['date']
@@ -342,7 +342,7 @@ def build_season(year):
         plays_by_game = defaultdict(list)
         with open(plays_path, encoding='utf-8', errors='replace') as f:
             for row in csv.DictReader(f):
-                if row.get('gametype') == 'regular':
+                if row.get('gametype') in ('regular','playoff'):
                     plays_by_game[row['gid']].append(row)
         for gid_p, prows in plays_by_game.items():
             subs_v, subs_h = {}, {}
@@ -372,7 +372,7 @@ def build_season(year):
     games_raw = []
     with open(gameinfo_path, encoding='utf-8', errors='replace') as f:
         for row in csv.DictReader(f):
-            if (row['gametype'] == 'regular'
+            if (row['gametype'] in ('regular','playoff')
                     and row['visteam'] in ML_TEAMS
                     and row['hometeam'] in ML_TEAMS):
                 games_raw.append(row)
@@ -407,6 +407,7 @@ def build_season(year):
                      'ab': safe_int(r['b_ab']), 'h': safe_int(r['b_h']),
                      'bb': safe_int(r['b_w']),  'k': safe_int(r['b_k']),
                      'hr': safe_int(r['b_hr']), 'rbi': safe_int(r['b_rbi']),
+                     'd': safe_int(r['b_d']),   't': safe_int(r['b_t']),
                      'sb': safe_int(r['b_sb']), 'cs': safe_int(r['b_cs']),
                      'bt': _BIO_HAND.get(r['id'], {}).get('bt', '')}
             lineup.append(entry)
@@ -451,7 +452,8 @@ def build_season(year):
                 r = sub_bat[nm]
                 entry.update({'ph': gid_starter_hand.get(r['gid'], {}).get(r.get('opp',''), ''), 'ab': safe_int(r['b_ab']), 'h': safe_int(r['b_h']),
                               'bb': safe_int(r['b_w']),  'k': safe_int(r['b_k']),
-                              'hr': safe_int(r['b_hr']), 'rbi': safe_int(r['b_rbi'])})
+                              'hr': safe_int(r['b_hr']), 'rbi': safe_int(r['b_rbi']),
+                              'd': safe_int(r['b_d']),   't': safe_int(r['b_t'])})
             bench.append(entry)
 
         bullpen = []
@@ -563,6 +565,16 @@ def build_season(year):
     return True
 
 
+# ── Module-level worker (must be at top level for Windows multiprocessing) ────
+def _build_one(y):
+    try:
+        r = build_season(y)
+        return (y, 'ok' if r else 'skip', None)
+    except Exception as e:
+        import traceback as _tb
+        return (y, 'fail', _tb.format_exc())
+
+
 # ── Main ─────────────────────────────────────────────────────────────────────
 if __name__ == '__main__':
     os.makedirs(OUT_DIR, exist_ok=True)
@@ -575,15 +587,35 @@ if __name__ == '__main__':
 
     print(f"Building {len(years)} season(s) into {os.path.abspath(OUT_DIR)}/\n")
     ok, skipped, failed = 0, 0, 0
-    for year in years:
-        try:
-            result = build_season(year)
-            if result: ok += 1
-            else:       skipped += 1
-        except Exception as e:
-            print(f"  FAIL {year}: {e}")
-            traceback.print_exc()
+
+    import multiprocessing as _mp
+    import subprocess as _sp
+    import sys as _sys
+    workers = min(_mp.cpu_count(), len(years), 8)
+
+    if workers > 1 and len(years) > 1:
+        print(f"  Using {workers} parallel workers\n")
+        # Launch build_season.py as separate processes — avoids Windows pickling issues
+        _script = __file__  # this file handles single-year args too
+        from concurrent.futures import ThreadPoolExecutor as _TPE
+        def _run_year(y):
+            r = _sp.run([_sys.executable, _script, str(y)],
+                        capture_output=True, text=True)
+            ok = r.returncode == 0 and 'OK' in r.stdout
+            skip = r.returncode == 0 and 'OK' not in r.stdout
+            out = (r.stdout + r.stderr).strip()
+            return (y, 'ok' if ok else ('skip' if skip else 'fail'), out if not ok else None)
+        with _TPE(max_workers=workers) as ex:
+            results = list(ex.map(_run_year, years))
+    else:
+        results = [_build_one(y) for y in years]
+
+    for y, status, msg in sorted(results, key=lambda r: r[0]):
+        if status == 'ok':     ok += 1
+        elif status == 'skip': skipped += 1
+        else:
             failed += 1
+            print(f"  FAIL {y}:\n{msg}")
 
     print(f"\nDone: {ok} built, {skipped} skipped, {failed} failed")
     if ok:
