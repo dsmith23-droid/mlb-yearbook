@@ -518,8 +518,10 @@ body{font-family:'Archivo Narrow',sans-serif;background:var(--bg);color:var(--te
         <button class="bbk" id="mtp-btn-bat" onclick="mtpFilter('bat')" style="border-color:var(--accent);color:var(--accent)">Batters</button>
         <button class="bbk" id="mtp-btn-pit" onclick="mtpFilter('pit')">Pitchers</button>
         <button class="bbk" id="mtp-btn-all" onclick="mtpFilter('all')">All</button>
+        <button class="bbk" id="mtp-btn-team" onclick="mtpFilter('team')">By Team</button>
       </div>
     </div>
+    <div id="mtp-team-view" style="display:none;margin-top:16px"></div>
     <div id="mtp-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px;margin-top:16px"></div>
   </div>
 
@@ -2460,14 +2462,129 @@ let mtpFilter_active='bat';
 
 function mtpFilter(mode){
   mtpFilter_active=mode;
-  ['bat','pit','all'].forEach(m=>{
+  ['bat','pit','all','team'].forEach(m=>{
     const btn=document.getElementById('mtp-btn-'+m);
     if(btn){btn.style.borderColor=m===mode?'var(--accent)':'var(--border)';btn.style.color=m===mode?'var(--accent)':'var(--muted)';}
   });
-  document.querySelectorAll('.mtp-card').forEach(card=>{
-    const isPit=card.dataset.type==='pit';
-    card.style.display=(mode==='all'||(mode==='bat'&&!isPit)||(mode==='pit'&&isPit))?'':'none';
-  });
+  const teamView=document.getElementById('mtp-team-view');
+  const gridView=document.getElementById('mtp-grid');
+  if(mode==='team'){
+    teamView.style.display='';
+    gridView.style.display='none';
+    renderMTPByTeam();
+  } else {
+    teamView.style.display='none';
+    gridView.style.display='grid';
+    document.querySelectorAll('.mtp-card').forEach(card=>{
+      const isPit=card.dataset.type==='pit';
+      card.style.display=(mode==='all'||(mode==='bat'&&!isPit)||(mode==='pit'&&isPit))?'':'none';
+    });
+  }
+}
+
+function renderMTPByTeam(){
+  if(!D)return;
+  const el=document.getElementById('mtp-team-view');
+  const PITCHERS=D.pitchers?new Set(D.pitchers):null;
+
+  // Build same pts structure as renderMTP
+  const pts={};
+  function getS(name,code){
+    if(!pts[name])pts[name]={};
+    if(!pts[name][code])pts[name][code]={g:0,ab:0,h:0,hr:0,rbi:0,bb:0,k:0,ip:0,er:0,w:0,l:0,sv:0,pbb:0,pk:0,ph:0,gs:0};
+    return pts[name][code];
+  }
+  for(const box of Object.values(D.box_scores)){
+    for(const [side,ck] of [['vb','v'],['hb','h']]){
+      const code=box[ck],tb=box[side];
+      for(const p of tb.l||[]){const s=getS(p.n,code);s.g++;s.ab+=p.ab||0;s.h+=p.h||0;s.hr+=p.hr||0;s.rbi+=p.rbi||0;s.bb+=p.bb||0;s.k+=p.k||0;}
+      for(const p of tb.b||[]){if(!p.a)continue;const s=getS(p.n,code);s.g++;s.ab+=p.ab||0;s.h+=p.h||0;s.hr+=p.hr||0;s.rbi+=p.rbi||0;s.bb+=p.bb||0;s.k+=p.k||0;}
+      const seenPit=new Set();
+      for(const p of tb.p||[]){const s=getS(p.n,code);const ou=p.ip?(+p.ip.split('.')[0]*3+(+p.ip.split('.')[1]||0)):0;s.g++;s.ip+=ou;s.er+=p.er||0;s.pbb+=p.bb||0;s.pk+=p.k||0;s.ph+=p.h||0;if(p.gs)s.gs++;if(p.dec==='W')s.w++;if(p.dec==='L')s.l++;if(p.dec==='S')s.sv++;seenPit.add(p.n);}
+      for(const p of tb.bp||[]){if(!p.a||seenPit.has(p.n))continue;const s=getS(p.n,code);const ou=p.ip?(+p.ip.split('.')[0]*3+(+p.ip.split('.')[1]||0)):0;s.g++;s.ip+=ou;s.er+=p.er||0;s.pbb+=p.bb||0;s.pk+=p.k||0;s.ph+=p.h||0;if(p.dec==='W')s.w++;if(p.dec==='L')s.l++;if(p.dec==='S')s.sv++;}
+    }
+  }
+
+  // Filter to multi-team players only
+  const multi=Object.entries(pts).filter(([,t])=>Object.keys(t).length>1);
+
+  // Group by team — for each team, list all players who played for them AND other teams
+  const byTeam={};
+  for(const [name,teamMap] of multi){
+    for(const code of Object.keys(teamMap)){
+      if(!byTeam[code])byTeam[code]=[];
+      byTeam[code].push({name,teamMap});
+    }
+  }
+
+  const fmtAvg=(h,ab)=>ab>0?('.'+Math.round(h/ab*1000).toString().padStart(3,'0')):'.---';
+  const fmtIp=ou=>Math.floor(ou/3)+'.'+(ou%3);
+  const fmtEra=(er,ip)=>ip>0?(er/(ip/27)).toFixed(2):'----';
+
+  // Sort teams by full name
+  const sortedTeams=Object.keys(byTeam).sort((a,b)=>tf(a).localeCompare(tf(b)));
+
+  let html='';
+  for(const code of sortedTeams){
+    const players=byTeam[code].sort((a,b)=>a.name.split(' ').pop().localeCompare(b.name.split(' ').pop()));
+    const color=tc(code);
+    const teamName=tf(code);
+    const batters=players.filter(({name})=>!PITCHERS||!PITCHERS.has(name));
+    const pitchers=players.filter(({name})=>PITCHERS&&PITCHERS.has(name));
+
+    html+=`<div style="margin-bottom:20px">
+      <div style="background:${color};color:#fff;padding:8px 14px;border-radius:var(--radius2) var(--radius2) 0 0;font-family:'Archivo',sans-serif;font-weight:800;font-size:.9rem;display:flex;align-items:center;gap:10px">
+        ${teamName}
+        <span style="font-weight:400;font-size:.75rem;opacity:.8">${players.length} multi-team player${players.length!==1?'s':''} </span>
+      </div>
+      <div style="border:1px solid ${color}40;border-top:none;border-radius:0 0 var(--radius2) var(--radius2);overflow:hidden">`;
+
+    if(batters.length){
+      html+=`<table class="mtp-tbl" style="width:100%">
+        <tr style="background:var(--surface2)"><th colspan="10" style="text-align:left;padding:6px 12px;color:var(--dim);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase">Batters</th></tr>
+        <tr><th>Player</th><th>Teams</th><th>G</th><th>AB</th><th>H</th><th>AVG</th><th>HR</th><th>RBI</th><th>BB</th><th>K</th></tr>`;
+      for(const {name,teamMap} of batters){
+        const teams=Object.keys(teamMap);
+        const tot={g:0,ab:0,h:0,hr:0,rbi:0,bb:0,k:0};
+        for(const s of Object.values(teamMap)){tot.g+=s.g;tot.ab+=s.ab;tot.h+=s.h;tot.hr+=s.hr;tot.rbi+=s.rbi;tot.bb+=s.bb;tot.k+=s.k;}
+        const teamDots=teams.map(t=>`<span title="${tf(t)}" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${tc(t)};margin-right:2px"></span>`).join('');
+        html+=`<tr>
+          <td style="cursor:pointer;color:var(--accent)" onclick="openPP('${esc(name)}','','mtp')">${name}</td>
+          <td>${teamDots}</td>
+          <td class="hi">${tot.g}</td><td>${tot.ab}</td><td>${tot.h}</td>
+          <td class="hi">${fmtAvg(tot.h,tot.ab)}</td>
+          <td class="hi">${tot.hr}</td><td class="hi">${tot.rbi}</td>
+          <td>${tot.bb}</td><td>${tot.k}</td>
+        </tr>`;
+      }
+      html+=`</table>`;
+    }
+
+    if(pitchers.length){
+      html+=`<table class="mtp-tbl" style="width:100%">
+        <tr style="background:var(--surface2)"><th colspan="11" style="text-align:left;padding:6px 12px;color:var(--dim);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase">Pitchers</th></tr>
+        <tr><th>Player</th><th>Teams</th><th>G</th><th>GS</th><th>W-L</th><th>SV</th><th>IP</th><th>H</th><th>ER</th><th>K</th><th>ERA</th></tr>`;
+      for(const {name,teamMap} of pitchers){
+        const teams=Object.keys(teamMap);
+        const tot={g:0,gs:0,w:0,l:0,sv:0,ip:0,ph:0,er:0,pk:0};
+        for(const s of Object.values(teamMap)){tot.g+=s.g;tot.gs+=s.gs;tot.w+=s.w;tot.l+=s.l;tot.sv+=s.sv;tot.ip+=s.ip;tot.ph+=s.ph;tot.er+=s.er;tot.pk+=s.pk;}
+        const teamDots=teams.map(t=>`<span title="${tf(t)}" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${tc(t)};margin-right:2px"></span>`).join('');
+        html+=`<tr>
+          <td style="cursor:pointer;color:var(--accent)" onclick="openPP('${esc(name)}','','mtp')">${name}</td>
+          <td>${teamDots}</td>
+          <td class="hi">${tot.g}</td><td>${tot.gs}</td>
+          <td class="hi">${tot.w}-${tot.l}</td><td>${tot.sv}</td>
+          <td class="hi">${fmtIp(tot.ip)}</td><td>${tot.ph}</td><td>${tot.er}</td>
+          <td class="hi">${tot.pk}</td><td class="hi">${fmtEra(tot.er,tot.ip)}</td>
+        </tr>`;
+      }
+      html+=`</table>`;
+    }
+
+    html+=`</div></div>`;
+  }
+
+  el.innerHTML=html||'<div style="color:var(--muted);padding:16px">No multi-team players found.</div>';
 }
 
 function renderMTP(){
