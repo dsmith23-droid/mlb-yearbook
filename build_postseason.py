@@ -69,7 +69,7 @@ def build_year(year, gameinfo_rows, batting_rows, pitching_rows, teamstats_rows,
     
     # Filter to this year
     games  = [r for r in gameinfo_rows  if yr in r['gid'][:7]]
-    bats   = [r for r in batting_rows   if yr in r['gid'][:7] and r.get('stattype')=='value' and r.get('b_lp')]
+    bats   = [r for r in batting_rows   if yr in r['gid'][:7] and r.get('stattype')=='value']
     pitches= [r for r in pitching_rows  if yr in r['gid'][:7] and r.get('stattype')=='value']
     ts     = {(r['gid'],r['team']): r for r in teamstats_rows if yr in r['gid'][:7] and r.get('stattype')=='value'}
     plays  = [r for r in plays_rows     if yr in r['gid'][:7]]
@@ -97,11 +97,22 @@ def build_year(year, gameinfo_rows, batting_rows, pitching_rows, teamstats_rows,
         # Extract starting lineup positions from first play per game
         if gid not in gid_pos and r.get('l1'):
             gid_pos[gid] = {}
+            # Batting team positions (l1-l9 / lf1-lf9)
             for slot in range(1, 10):
                 pid = r.get(f'l{slot}','')
                 fld = r.get(f'lf{slot}','')
                 if pid and fld:
                     gid_pos[gid][pid] = POS.get(int(fld), fld) if fld.isdigit() else fld
+            # Fielding team positions (f2-f9 = C,1B,2B,3B,SS,LF,CF,RF)
+            fpos = {2:'C',3:'1B',4:'2B',5:'3B',6:'SS',7:'LF',8:'CF',9:'RF'}
+            for fnum, fname in fpos.items():
+                pid = r.get(f'f{fnum}','')
+                if pid and pid not in gid_pos[gid]:
+                    gid_pos[gid][pid] = fname
+            # Pitcher from pitteam
+            pitcher = r.get('pitcher','')
+            if pitcher and pitcher not in gid_pos[gid]:
+                gid_pos[gid][pitcher] = 'P'
 
     # Build series: group games by round and matchup
     series_map = defaultdict(lambda: defaultdict(list))  # round -> frozenset(teams) -> [gids]
@@ -127,10 +138,10 @@ def build_year(year, gameinfo_rows, batting_rows, pitching_rows, teamstats_rows,
             lineup, bench, bullpen = [], [], []
             seen_lp = set()
             for r in b_rows:
-                lp = si(r.get('b_lp',0))
+                lp = si(r.get('b_lp',0)) or si(r.get('b_seq',0))
                 pid = r.get('id','')
                 nm = _BIO.get(pid, {}).get('name', pid)
-                bio = _BIO.get(nm, {})
+                bio = _BIO.get(pid, {})
                 entry = {
                     'lp': lp, 'n': nm, 'id': pid,
                     'bt': bio.get('bt',''), 'born': bio.get('born',''),
@@ -143,11 +154,17 @@ def build_year(year, gameinfo_rows, batting_rows, pitching_rows, teamstats_rows,
                     'bb': si(r['b_w']), 'k': si(r['b_k']),
                     'sb': si(r['b_sb']), 'cs': si(r['b_cs']),
                 }
+                if not lp:
+                    # No lineup position - skip (incomplete data)
+                    continue
                 if lp not in seen_lp:
                     seen_lp.add(lp)
                     lineup.append(entry)
                 else:
                     entry['a'] = True
+                    # Set pos for pinch hitters/runners
+                    if r.get('ph') == 'Y': entry['pos'] = 'PH'
+                    elif r.get('pr') == 'Y': entry['pos'] = 'PR'
                     bench.append(entry)
 
             for r in p_rows:
@@ -186,7 +203,7 @@ def build_year(year, gameinfo_rows, batting_rows, pitching_rows, teamstats_rows,
             teams = list(pair)
             wins = defaultdict(int)
             game_entries = []
-            for gid in sorted(gids):
+            for gid in sorted(gids, key=lambda g: box_scores.get(g,{}).get('d','')):
                 box = box_scores.get(gid,{})
                 vr = box.get('vb',{}).get('r',0)
                 hr = box.get('hb',{}).get('r',0)
@@ -270,6 +287,18 @@ def main():
             print(f"  FAIL {year}: {e}")
             traceback.print_exc()
 
+    # Write manifest.json for fast home page loading
+    manifest = {}
+    for yr in sorted(os.listdir(OUT_DIR)):
+        if not yr.endswith('.json') or yr == 'manifest.json': continue
+        try:
+            with open(os.path.join(OUT_DIR, yr)) as f:
+                d = json.load(f)
+            manifest[d['year']] = {'champion': d.get('champion','')}
+        except: pass
+    with open(os.path.join(OUT_DIR, 'manifest.json'), 'w') as f:
+        json.dump(manifest, f, separators=(',',':'))
+    print(f"  manifest.json: {len(manifest)} seasons")
     print(f"\nDone: {ok} seasons built → {os.path.abspath(OUT_DIR)}/")
 
 if __name__ == '__main__':

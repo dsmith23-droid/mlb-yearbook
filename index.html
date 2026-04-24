@@ -59,7 +59,7 @@ body{font-family:'Archivo Narrow',sans-serif;background:var(--bg);color:var(--te
 .home-hl{font-family:'Archivo',sans-serif;font-size:2.6rem;font-weight:900;color:var(--text);letter-spacing:-.03em;line-height:1}
 .home-hl span{color:var(--accent)}
 .home-sub{font-family:'Roboto Mono',monospace;font-size:.75rem;color:var(--dim);letter-spacing:.06em;margin-top:8px}
-.season-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;max-width:1280px;margin:0 auto;padding:0 20px 40px}
+.season-cards,.season-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;max-width:1280px;margin:0 auto;padding:0 20px 40px}
 .scard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);padding:0;cursor:pointer;transition:all .15s;position:relative;overflow:hidden}
 .scard:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.08)}
 .scard-top{height:5px;background:var(--accent);transition:height .15s}
@@ -225,6 +225,14 @@ body{font-family:'Archivo Narrow',sans-serif;background:var(--bg);color:var(--te
 .ng{padding:40px;text-align:center;color:var(--dim);font-family:'Roboto Mono',monospace;font-size:.78rem}
 /* ── Postseason ─────────────────────────────────────────────────────────── */
 .ps-wrap{max-width:1100px;margin:0 auto;padding:16px}
+.ps-scard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);padding:0;cursor:pointer;transition:all .15s;position:relative;overflow:hidden}
+.ps-scard:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.ps-scard-top{height:5px;transition:height .15s}
+.ps-scard:hover .ps-scard-top{height:7px}
+.ps-scard-body{padding:12px 14px}
+.ps-scard-year{font-family:'Archivo',sans-serif;font-size:1.6rem;font-weight:900;color:var(--text);line-height:1}
+.ps-scard-champ{font-size:.72rem;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ps-scard-trophy{font-size:.8rem;margin-right:3px}
 .ps-hero{display:flex;align-items:center;gap:16px;margin-bottom:20px;flex-wrap:wrap}
 .ps-title{font-family:'Archivo',sans-serif;font-size:1.4rem;font-weight:800;letter-spacing:-.02em;margin:0}
 .ps-bracket{display:grid;gap:12px;margin-bottom:24px}
@@ -519,11 +527,17 @@ body{font-family:'Archivo Narrow',sans-serif;background:var(--bg);color:var(--te
     <div class="ps-wrap">
       <div class="ps-hero">
         <h2 class="ps-title">Postseason</h2>
-        <select id="ps-year-sel" class="season-sel" onchange="loadPostseason(this.value)">
-          <option value="">— Select Year —</option>
-        </select>
       </div>
-      <div id="ps-content"></div>
+      <div id="ps-home-cards" class="season-grid" style="max-width:none;padding:20px 20px 40px"></div>
+      <div id="ps-detail" style="display:none">
+        <div class="ps-hero" style="margin-bottom:16px">
+          <button class="bbk" id="ps-back-home-btn" onclick="showPsHome()" style="font-size:.75rem">← All Seasons</button>
+          <select id="ps-year-sel" class="season-sel" onchange="loadPostseason(this.value)">
+            <option value="">— Select Year —</option>
+          </select>
+        </div>
+        <div id="ps-content"></div>
+      </div>
     </div>
   </div>
   <div id="vcs" class="view">
@@ -779,7 +793,34 @@ function ts(code){
   for(const [y,,col] of entries){if(yr>=y)s=col;}
   return s;
 }
-function tf(code){const t=D&&D.teams[code];return t?t.full:code}
+function tf(code){
+  const t=D&&D.teams[code];
+  if(t)return t.full;
+  const _TN={'NYA':'New York Yankees','BOS':'Boston Red Sox','BAL':'Baltimore Orioles',
+    'DET':'Detroit Tigers','CLE':'Cleveland Indians','MIN':'Minnesota Twins',
+    'CHA':'Chicago White Sox','KCA':'Kansas City Royals','OAK':'Oakland Athletics',
+    'CAL':'California Angels','ANA':'Anaheim Angels','LAA':'Los Angeles Angels',
+    'SEA':'Seattle Mariners','TEX':'Texas Rangers','TOR':'Toronto Blue Jays',
+    'TBA':'Tampa Bay Rays','TBD':'Tampa Bay Devil Rays','HOU':'Houston Astros',
+    'MIL':'Milwaukee Brewers','LAN':'Los Angeles Dodgers','SFN':'San Francisco Giants',
+    'SLN':'St. Louis Cardinals','CHN':'Chicago Cubs','PHI':'Philadelphia Phillies',
+    'PIT':'Pittsburgh Pirates','ATL':'Atlanta Braves','NYN':'New York Mets',
+    'CIN':'Cincinnati Reds','MON':'Montreal Expos','SDN':'San Diego Padres',
+    'COL':'Colorado Rockies','FLO':'Florida Marlins','MIA':'Miami Marlins',
+    'ARI':'Arizona Diamondbacks','WAS':'Washington Nationals',
+    'BRO':'Brooklyn Dodgers','BSN':'Boston Braves','MLN':'Milwaukee Braves',
+    'NY1':'New York Giants','SLA':'St. Louis Browns','PHA':'Philadelphia Athletics',
+    'WS1':'Washington Senators','KCM':'Kansas City Athletics','ATN':'Atlanta Braves',
+    'ACY':'Atlantic City Bacharach Giants','BIR':'Birmingham Black Barons',
+    'BLG':'Baltimore Black Sox','CAG':'Chicago American Giants',
+    'CVB':'Cleveland Buckeyes','CUX':'Cuban X-Giants','DT1':'Detroit Stars',
+    'HIL':'Hilldale Daisies','HOM':'Homestead Grays',
+    'MEM':'Memphis Red Sox','NSH':'Nashville Elite Giants','NW2':'Newark Eagles',
+    'NY6':'New York Cubans','NYL':'New York Lincoln Giants',
+    'PHG':'Philadelphia Giants','PTC':'Pittsburgh Crawfords',
+    'SSA':'St. Louis Stars','SSN':'St. Louis Stars','WEG':'Washington Elite Giants'};
+  return _TN[code]||code;
+}
 function tn(code){const t=D&&D.teams[code];return t?t.name:code}
 function esc(s){return s.split("'").join("\\'")}
 
@@ -1146,11 +1187,36 @@ function renderBox(gid){
   document.getElementById('bteams').innerHTML=buildTP(box.v,vb,vc,vRec,box.d)+buildTP(box.h,hb,hc,hRec,box.d);
 }
 
-function plink(name,team){
+function plink(name,team,year){
+  if(year){
+    // Postseason context - load season then open player
+    return `<span class="pl" onclick="openPlayerFromPostseason('${esc(name)}','${team}','${year}')">${name}</span>`;
+  }
   return `<span class="pl" onclick="openPPfromBox('${esc(name)}','${team}')">${name}</span>`;
 }
 
-function buildTP(code,tb,color,rec,date){
+async function openPlayerFromPostseason(name, team, year) {
+  // Load the regular season for that year, then open player profile
+  await loadSeason(year, true);
+  buildIdx();
+  const player = (team ? pidx[name+'|'+team] : null) || pidx[name];
+  if (!player) {
+    // Try without team
+    const anyMatch = Object.values(pidx).find(p => p.name === name);
+    if (!anyMatch) { alert('Player not found in ' + year + ' season data'); return; }
+  }
+  const p = (team ? pidx[name+'|'+team] : null) || pidx[name];
+  if (!p) return;
+  prevPPView = 'postseason';
+  currentPPName = name;
+  document.getElementById('pp-back-btn').textContent = '\u2190 Postseason';
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('vpp').classList.add('active');
+  prevView = 'pp';
+  renderPP(p);
+}
+
+function buildTP(code,tb,color,rec,date,psYear){
   const sec=ts(code);
   const lrows=(tb.l||[]).map((p,i)=>{
     const isPit=p.p;
@@ -1160,7 +1226,7 @@ function buildTP(code,tb,color,rec,date){
     const stats=`<td class="st${p.h?' val':''}">${h}-${ab}</td><td class="st${p.d?' val':''}">${p.d||''}</td><td class="st${p.t?' val':''}">${p.t||''}</td><td class="st${p.bb?' val':''}">${p.bb||''}</td><td class="st${p.k?' val':''}">${p.k||''}</td><td class="st${p.hr?' val':''}">${p.hr||''}</td><td class="st${p.rbi?' val':''}">${p.rbi||''}</td><td class="st${p.sb?' val':''}">${p.sb||''}</td>`;
     return `<tr>
       <td>${i+1}</td>
-      <td>${plink(p.n,code)}${pbadge}${btBadge}</td>
+      <td>${plink(p.n,code,psYear)}${pbadge}${btBadge}</td>
       ${stats}
     </tr>`;
   }).join('');
@@ -1172,7 +1238,7 @@ function buildTP(code,tb,color,rec,date){
     const stats=`<td class="st${p.h?' val':''}">${h}-${ab}</td><td class="st${p.d?' val':''}">${p.d||''}</td><td class="st${p.t?' val':''}">${p.t||''}</td><td class="st${p.bb?' val':''}">${p.bb||''}</td><td class="st${p.k?' val':''}">${p.k||''}</td><td class="st${p.hr?' val':''}">${p.hr||''}</td><td class="st${p.rbi?' val':''}">${p.rbi||''}</td><td class="st">${p.sb||''}</td>`;
     return `<tr style="opacity:.8;background:var(--surface2)">
       <td style="color:var(--dim);font-size:.7rem">PH</td>
-      <td>${plink(p.n,code)}<span class="pb" style="background:var(--surface2);color:var(--dim);font-size:.6rem">PH</span>${btBadge2}</td>
+      <td>${plink(p.n,code,psYear)}<span class="pb" style="background:var(--surface2);color:var(--dim);font-size:.6rem">PH</span>${btBadge2}</td>
       ${stats}
     </tr>`;
   }).join('');
@@ -1200,7 +1266,7 @@ function buildTP(code,tb,color,rec,date){
   }
 
   const prows=(tb.p||[]).map(p=>`<tr>
-    <td>${plink(p.n,code)}${p.dec?`<span class="db d${p.dec}">${p.dec}</span>`:''}</td>
+    <td>${plink(p.n,code,psYear)}${p.dec?`<span class="db d${p.dec}">${p.dec}</span>`:''}</td>
     <td class="st">${p.ip}</td><td class="st${p.h?'':''}">${p.h}</td>
     <td class="st">${p.r}</td><td class="st">${p.er}</td>
     <td class="st">${p.bb}</td><td class="st">${p.k}</td>
@@ -1218,7 +1284,7 @@ function buildTP(code,tb,color,rec,date){
     <div class="sec-label" style="border-left-color:${color}">Lineup</div>
     <table class="lt" style="background:${sec}18">
       <tr style="background:${sec}30"><th>#</th><th>Player</th><th>H-AB</th><th>2B</th><th>3B</th><th>BB</th><th>K</th><th>HR</th><th>RBI</th><th>SB</th></tr>
-      ${lrows}${benchRows}
+      ${lrows||benchRows ? lrows+benchRows : '<tr><td colspan="11" style="color:var(--muted);padding:8px;font-style:italic">No batting data available for this game</td></tr>'}
     </table>
     <div class="sec-label" style="border-left-color:${color}">Bench</div><div class="rl" style="background:${sec}10">${rlBench(tb.b||[])}</div>
     <div class="sec-label" style="border-left-color:${color}">Bullpen</div><div class="rl" style="background:${sec}10">${rlBP(tb.bp||[])}</div>
@@ -3000,20 +3066,90 @@ const PS_DATA_PATH = 'data/postseason/';
 // We probe by trying to load a manifest or just show years with data
 const PS_YEARS = []; // populated by buildPsYearSel()
 
+// Postseason year manifest - populated as years are loaded
+const _psManifest = {}; // year -> {champion}
+
 function buildPsYearSel() {
-  // Generate years from 1903 to 2025 - user may not have all
   const sel = document.getElementById('ps-year-sel');
   if (!sel) return;
   const years = [];
   for (let y = 2025; y >= 1903; y--) {
-    if (y !== 1904 && y !== 1994) years.push(y); // no WS those years
+    if (y !== 1904 && y !== 1994) years.push(y);
   }
   sel.innerHTML = '<option value="">— Select Year —</option>' +
     years.map(y => `<option value="${y}">${y}</option>`).join('');
 }
 
+async function buildPsHome() {
+  const grid = document.getElementById('ps-home-cards');
+  if (!grid) return;
+  grid.innerHTML = '<div style="color:var(--muted);padding:8px">Loading season index...</div>';
+
+  // Load all available years by probing (use a manifest file if exists, else probe)
+  const years = [];
+  for (let y = 2025; y >= 1903; y--) {
+    if (y !== 1904 && y !== 1994) years.push(y);
+  }
+
+  // Build cards - load each year's JSON to get champion
+  // To avoid 100+ fetches, probe in batches and stop on 404s for old years
+  let cards = '';
+  const loaded = [];
+
+  // Try to load a lightweight manifest first
+  try {
+    const mResp = await fetch('data/postseason/manifest.json');
+    if (mResp.ok) {
+      const manifest = await mResp.json();
+      for (const [yr, info] of Object.entries(manifest).sort((a,b)=>+b[0]-+a[0])) {
+        const champName = info.champion ? tf(info.champion) : '—';
+        const champColor = info.champion ? tc(info.champion) : 'var(--accent)';
+        cards += makePsCard(yr, champName, champColor);
+      }
+      grid.innerHTML = cards || '<div style="color:var(--muted);padding:8px">No postseason data found. Run build_postseason.py first.</div>';
+      return;
+    }
+  } catch(e) {}
+
+  // Fallback: probe recent years
+  for (const yr of years) {
+    try {
+      const resp = await fetch(`data/postseason/${yr}.json`);
+      if (!resp.ok) continue;
+      const d = await resp.json();
+      const champName = d.champion ? tf(d.champion) : '—';
+      const champColor = d.champion ? tc(d.champion) : 'var(--accent)';
+      cards += makePsCard(yr, champName, champColor);
+      loaded.push(yr);
+    } catch(e) { continue; }
+  }
+  grid.innerHTML = cards || '<div style="color:var(--muted);padding:8px">No postseason data found. Run build_postseason.py first.</div>';
+}
+
+function makePsCard(yr, champName, champColor) {
+  return `<div class="scard" onclick="loadPostseason('${yr}')">
+    <div class="scard-top" style="background:${champColor}"></div>
+    <div class="scard-body">
+      <div class="scard-year">${yr}</div>
+      <div class="scard-champ" style="color:${champColor}">🏆 ${champName}</div>
+    </div>
+  </div>`;
+}
+
+function showPsHome() {
+  document.getElementById('ps-home-cards').style.display = '';
+  document.getElementById('ps-detail').style.display = 'none';
+  _psData = null; _psYear = null;
+}
+
 async function loadPostseason(year) {
   if (!year) return;
+  // Switch to detail view
+  document.getElementById('ps-home-cards').style.display = 'none';
+  document.getElementById('ps-detail').style.display = '';
+  // Sync year selector
+  const sel = document.getElementById('ps-year-sel');
+  if (sel) sel.value = year;
   const el = document.getElementById('ps-content');
   el.innerHTML = '<div class="cs-loading">Loading ' + year + ' postseason...</div>';
   try {
@@ -3023,7 +3159,7 @@ async function loadPostseason(year) {
     _psYear = year;
     renderPsBracket();
   } catch(e) {
-    el.innerHTML = `<div style="padding:20px;color:var(--muted)">No postseason data found for ${year}. Make sure you've run build_postseason.py and uploaded the data files.</div>`;
+    el.innerHTML = `<div style="padding:20px;color:var(--muted)">No postseason data found for ${year}.</div>`;
   }
 }
 
@@ -3250,7 +3386,8 @@ async function openPsBox(gid) {
     </tr>`;
 
   // Use buildTP but pass dummy rec since postseason has no W-L record
-  document.getElementById('bteams').innerHTML = buildTP(box.v,vb,vc,null,box.d) + buildTP(box.h,hb,hc,null,box.d);
+  const psYr = _psYear||'';
+  document.getElementById('bteams').innerHTML = buildTP(box.v,vb,vc,null,box.d,psYr) + buildTP(box.h,hb,hc,null,box.d,psYr);
 
   // Add back button at top of box
   const backHtml = `<button class="bbk" style="margin:8px 16px 0;font-size:.75rem" onclick="showPsSeries('${rnd}','${sw}','${sl}');showView('postseason',true)">← Back to series</button>`;
@@ -3269,6 +3406,7 @@ async function openPsBox(gid) {
 buildHome();
 buildRgYearSel();
 buildPsYearSel();
+buildPsHome();
 </script>
 </body>
 </html>
