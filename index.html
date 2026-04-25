@@ -269,6 +269,22 @@ body{font-family:'Archivo Narrow',sans-serif;background:var(--bg);color:var(--te
 .ps-bracket-col{display:flex;flex-direction:column;gap:8px;flex:1}
 .ps-connector{display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--dim);padding:8px 0;align-self:center}
 
+.pbp-wrap{font-size:.78rem;margin-top:8px}
+.pbp-toggle{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);padding:8px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.pbp-toggle:hover{border-color:var(--border2)}
+.pbp-toggle-label{font-family:'Archivo',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:.04em;color:var(--dim);text-transform:uppercase}
+.pbp-body{display:none;border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius2) var(--radius2);overflow:hidden}
+.pbp-body.open{display:block}
+.pbp-inn-hdr{background:var(--surface2);padding:6px 12px;font-family:'Archivo',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:.04em;color:var(--dim);border-bottom:1px solid var(--border)}
+.pbp-row{display:grid;grid-template-columns:32px 60px 24px 36px 36px 1fr;gap:4px;padding:5px 12px;border-bottom:1px solid var(--border);align-items:center;font-size:.76rem}
+.pbp-row:last-child{border-bottom:none}
+.pbp-row:hover{background:var(--surface2)}
+.pbp-row.run{background:rgba(var(--accent-rgb,220,50,50),.06)}
+.pbp-score{font-variant-numeric:tabular-nums;font-weight:700;font-size:.72rem}
+.pbp-rob{font-family:'Roboto Mono',monospace;font-size:.68rem;color:var(--dim);letter-spacing:.05em}
+.pbp-cnt{font-family:'Roboto Mono',monospace;font-size:.68rem;color:var(--muted)}
+.pbp-desc{color:var(--text)}
+.pbp-desc b{color:var(--accent)}
 .cs-wrap{max-width:960px;margin:0 auto}
 .cs-hero{padding:20px 0 16px}
 .cs-result{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);margin-bottom:10px;overflow:hidden}
@@ -451,6 +467,7 @@ body{font-family:'Archivo Narrow',sans-serif;background:var(--bg);color:var(--te
     </div>
     <div class="lsw"><table class="ls" id="lst"></table></div>
     <div class="bteams" id="bteams"></div>
+    <div id="bpbp" style="max-width:900px;margin:16px auto 0"></div>
   </div>
 
   <div id="vst" class="view">
@@ -1187,6 +1204,86 @@ function renderBox(gid){
     </tr>`;
 
   document.getElementById('bteams').innerHTML=buildTP(box.v,vb,vc,vRec,box.d)+buildTP(box.h,hb,hc,hRec,box.d);
+  renderPBP(box);
+}
+
+function renderPBP(box){
+  const el=document.getElementById('bpbp');
+  if(!el)return;
+  const pbp=box.pbp||[];
+  if(!pbp.length){el.innerHTML='';return;}
+
+  // Build name lookup from box score lineups
+  const names={};
+  for(const [side,ck] of [['vb','v'],['hb','h']]){
+    const tb=box[side];
+    // Include ALL players — lineup, all bench, all pitchers
+    const all=[...(tb.l||[]),...(tb.b||[]),...(tb.p||[]),...(tb.bp||[])];
+    for(const p of all){ if(p.id&&p.n) names[p.id]=p.n; }
+  }
+  // Also check D.births as fallback for players not in box
+  const nm=id=>{
+    if(names[id])return names[id];
+    // Try player index
+    const pidxMatch=Object.values(pidx||{}).find(p=>p.id===id||p.name===id);
+    if(pidxMatch)return pidxMatch.name;
+    return id; // fallback to ID
+  };
+
+  // Group by inning+half
+  const inns=[];
+  let curInn=null, curKey='';
+  for(const p of pbp){
+    const key=p.i+'|'+p.tb;
+    if(key!==curKey){
+      curKey=key;
+      const side=p.tb==='0'?'Top':'Bottom';
+      const teamCode=p.tb==='0'?box.v:box.h;
+      const score=`${p.sv}-${p.sh}`;
+      curInn={hdr:`${side} ${p.i} · ${tf(teamCode)} · ${score}`,rows:[],tb:p.tb};
+      inns.push(curInn);
+    }
+    curInn.rows.push(p);
+  }
+
+  const ROB_DISP=rob=>{
+    const d=rob||'---';
+    const s1=d[0]==='1'?'⬤':'○';
+    const s2=d[1]==='2'?'⬤':'○';
+    const s3=d[2]==='3'?'⬤':'○';
+    return `<span style="font-size:.6rem;letter-spacing:1px">${s2}${s3}<br>${s1}</span>`;
+  };
+
+  let html=`<div class="pbp-wrap">
+    <div class="pbp-toggle" onclick="this.nextElementSibling.classList.toggle('open');this.querySelector('.pbp-arr').textContent=this.nextElementSibling.classList.contains('open')?'▲':'▼'">
+      <span class="pbp-toggle-label">Play by Play</span>
+      <span class="pbp-arr" style="font-size:.7rem;color:var(--muted)">▼</span>
+    </div>
+    <div class="pbp-body">
+    <div class="pbp-row" style="background:var(--surface2);font-weight:700;font-size:.68rem;color:var(--dim);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--border)">
+      <span>Score</span><span>Batter</span><span>Out</span><span>ROB</span><span>Cnt</span><span>Result</span>
+    </div>`;
+
+  for(const inn of inns){
+    const color=inn.tb==='0'?tc(box.v):tc(box.h);
+    html+=`<div class="pbp-inn-hdr" style="border-left:3px solid ${color}">${inn.hdr}</div>`;
+    for(const p of inn.rows){
+      const isRun=p.runs>0;
+      const batter=nm(p.bat);
+      const pitcher=nm(p.pit);
+      html+=`<div class="pbp-row${isRun?' run':''}">
+        <span class="pbp-score">${p.sv}-${p.sh}</span>
+        <span class="pbp-desc" style="font-weight:500">${batter}</span>
+        <span style="font-family:'Roboto Mono',monospace;font-size:.65rem;color:var(--dim)">${p.o}</span>
+        <span class="pbp-rob">${p.rob}</span>
+        <span class="pbp-cnt">${p.cnt}</span>
+        <span class="pbp-desc">${isRun?'<b>'+p.desc+'</b>':p.desc} <span style="color:var(--muted);font-size:.7rem">vs ${pitcher}</span></span>
+      </div>`;
+    }
+  }
+
+  html+=`</div></div>`;
+  el.innerHTML=html;
 }
 
 function plink(name,team,year){
@@ -3516,6 +3613,8 @@ async function openPsBox(gid) {
   btn.innerHTML = backHtml;
   boxEl.insertBefore(btn, firstChild);
 
+  renderPBP(box);
+  renderPBP(box);
   showView('box', true);
 }
 

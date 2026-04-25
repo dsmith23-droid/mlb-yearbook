@@ -45,6 +45,97 @@ def si(v):
     try: return int(v) if v and str(v).strip() else 0
     except: return 0
 
+def _rob(r1, r2, r3):
+    return ('1' if r1 else '-')+('2' if r2 else '-')+('3' if r3 else '-')
+
+_FPOS = {'1':'P','2':'C','3':'1B','4':'2B','5':'3B','6':'SS','7':'LF','8':'CF','9':'RF'}
+_LOC_ZONE = {
+    '7S':'Short LF','7M':'LF','7D':'Deep LF','7LD':'LF Line','7LS':'LF Line',
+    '8S':'Short CF','8M':'CF','8D':'Deep CF','8LS':'LF-CF','8RS':'CF-RF',
+    '9S':'Short RF','9M':'RF','9D':'Deep RF','9LD':'RF Line','9LS':'RF Line',
+    '5S':'3B','5M':'3B','5D':'Deep 3B','5F':'3B Foul',
+    '3S':'1B','3M':'1B','3D':'Deep 1B','3F':'1B Foul',
+    '4S':'2B','4M':'2B','4D':'2B','6S':'SS','6M':'SS','6D':'SS',
+    '2':'C','23':'C-1B','13':'P-1B','78':'LF-CF Gap','89':'CF-RF Gap',
+    '34':'1B-2B','56':'SS-3B','46':'2B-SS','15':'3B-1B',
+}
+
+def _fseq_str(fseq):
+    if not fseq: return ''
+    parts = [_FPOS.get(c,c) for c in fseq if c.isdigit()]
+    return '-'.join(parts) if parts else ''
+
+def _loc_str(loc):
+    loc = loc.rstrip('+-') if loc else ''
+    if not loc: return ''
+    for l in [loc, loc[:3], loc[:2], loc[:1]]:
+        if l in _LOC_ZONE: return 'to ' + _LOC_ZONE[l]
+    return ''
+
+def _decode_play(r):
+    sb = []
+    if r.get('sb2')=='1': sb.append('SB 2B')
+    if r.get('sb3')=='1': sb.append('SB 3B')
+    if r.get('sbh')=='1': sb.append('SB Home')
+    if r.get('cs2')=='1': sb.append('CS 2B')
+    if r.get('cs3')=='1': sb.append('CS 3B')
+    if r.get('csh')=='1': sb.append('CS Home')
+    if r.get('wp')=='1': sb.append('Wild Pitch')
+    if r.get('pb')=='1': sb.append('Passed Ball')
+    if r.get('bk')=='1': sb.append('Balk')
+    if r.get('pa')!='1' and sb:
+        return '; '.join(sb)
+    ht = r.get('hittype','')
+    loc = r.get('loc','')
+    fseq = r.get('fseq','')
+    runs = si(r.get('runs',0))
+    zone = _loc_str(loc)
+    fs = _fseq_str(fseq)
+    if r.get('hr')=='1':
+        on = sum(1 for k in ['br1_pre','br2_pre','br3_pre'] if r.get(k))
+        desc = ['Solo HR','2-Run HR','3-Run HR','Grand Slam'][min(on,3)]
+        if zone: desc += f' {zone}'
+    elif r.get('triple')=='1': desc = f"Triple{' '+zone if zone else ''}"
+    elif r.get('double')=='1': desc = f"Double{' '+zone if zone else ''}"
+    elif r.get('single')=='1': desc = f"Single{' '+zone if zone else ''}"
+    elif r.get('walk')=='1': desc = 'Intentional Walk' if r.get('iw')=='1' else 'Walk'
+    elif r.get('hbp')=='1': desc = 'Hit by Pitch'
+    elif r.get('k')=='1': desc = 'Strikeout'
+    elif r.get('roe')=='1': desc = f"Reached on Error{' ('+fs+')' if fs else ''}"
+    elif r.get('fc')=='1': desc = f"Fielder's Choice{' ('+fs+')' if fs else ''}"
+    elif r.get('ground')=='1': desc = f"Groundout{': '+fs if fs else ''}"
+    elif r.get('fly')=='1': desc = f"Flyball{': '+fs if fs else ''}{' '+zone if zone else ''}"
+    elif r.get('line')=='1': desc = f"Lineout{': '+fs if fs else ''}{' '+zone if zone else ''}"
+    elif r.get('bunt')=='1': desc = f"Bunt{' ('+fs+')' if fs else ''}"
+    else: desc = f"Out{' ('+fs+')' if fs else ''}"
+    if sb: desc += '; ' + '; '.join(sb)
+    if runs > 0: desc += f' ({runs}R)'
+    return desc
+
+def _build_pbp(plays, bio=None):
+    result = []
+    for r in plays:
+        has_base_event = any(r.get(k)=='1' for k in ['sb2','sb3','sbh','cs2','cs3','csh','wp','pb','bk'])
+        if r.get('pa')!='1' and not has_base_event:
+            continue
+        def nm(pid):
+            if not pid: return ''
+            if bio and pid in bio:
+                return bio[pid].get('name', pid)
+            return pid
+        result.append({
+            'i':r.get('inning',''),'tb':r.get('top_bot','0'),
+            'o':r.get('outs_pre','0'),'o2':r.get('outs_post','0'),
+            'sv':si(r.get('score_v',0)),'sh':si(r.get('score_h',0)),
+            'rob':_rob(bool(r.get('br1_pre')),bool(r.get('br2_pre')),bool(r.get('br3_pre'))),
+            'bat':nm(r.get('batter','')), 'pit':nm(r.get('pitcher','')),
+            'np':r.get('nump','') or '',
+            'cnt':f"{r.get('balls','')}-{r.get('strikes','')}",
+            'runs':si(r.get('runs',0)),
+            'desc':_decode_play(r),
+        })
+    return result
+
 POS = {1:'P',2:'C',3:'1B',4:'2B',5:'3B',6:'SS',7:'LF',8:'CF',9:'RF',10:'DH',11:'PH',12:'PR'}
 
 ROUND_ORDER = ['wildcard','divisionseries','lcs','worldseries','championship']
@@ -188,11 +279,13 @@ def build_year(year, gameinfo_rows, batting_rows, pitching_rows, teamstats_rows,
                 'e': si(team_ts.get('d_e',0)),
             }
 
+        _pbp = _build_pbp(plays_by_gid.get(gid,[]), _BIO)
         box_scores[gid] = {
             'gid': gid, 'd': g['date'], 'v': vis, 'h': hom,
             'gt': g['gametype'],
             'vb': make_team_box(vis, 'v', vts),
             'hb': make_team_box(hom, 'h', hts),
+            'pbp': _pbp,
         }
 
     # Build series summaries with wins per team

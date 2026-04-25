@@ -42,9 +42,12 @@ if os.path.exists(BIO_FILE):
     with open(BIO_FILE, encoding='utf-8', errors='replace') as _bf:
         for _row in csv.DictReader(_bf):
             _pid = _row['id'].strip()
+            _first = (_row.get('usename') or _row.get('firstname','')).strip()
+            _last  = _row.get('lastname','').strip()
             _BIO_HAND[_pid] = {'bt': _row.get('bats','').strip(),
                                'th': _row.get('throws','').strip(),
-                               'born': _row.get('birthdate','').strip()}
+                               'born': _row.get('birthdate','').strip(),
+                               'name': f"{_first} {_last}".strip() or _pid}
 
 # Team code aliases: OD rosters/transactions sometimes differ from TEAM files
 # Static aliases: OD/transaction code -> TEAM file code (year-independent)
@@ -144,6 +147,98 @@ def _get_birth(name):
 def safe_int(v, default=0):
     try: return int(v) if v and str(v).strip() else default
     except: return default
+
+def _rob(r1, r2, r3):
+    return ('1' if r1 else '-')+('2' if r2 else '-')+('3' if r3 else '-')
+
+_FPOS = {'1':'P','2':'C','3':'1B','4':'2B','5':'3B','6':'SS','7':'LF','8':'CF','9':'RF'}
+_LOC_ZONE = {
+    '7S':'Short LF','7M':'LF','7D':'Deep LF','7LD':'LF Line','7LS':'LF Line',
+    '8S':'Short CF','8M':'CF','8D':'Deep CF','8LS':'LF-CF','8RS':'CF-RF',
+    '9S':'Short RF','9M':'RF','9D':'Deep RF','9LD':'RF Line','9LS':'RF Line',
+    '5S':'3B','5M':'3B','5D':'Deep 3B','5F':'3B Foul',
+    '3S':'1B','3M':'1B','3D':'Deep 1B','3F':'1B Foul',
+    '4S':'2B','4M':'2B','4D':'2B','6S':'SS','6M':'SS','6D':'SS',
+    '2':'C','23':'C-1B','13':'P-1B','78':'LF-CF Gap','89':'CF-RF Gap',
+    '34':'1B-2B','56':'SS-3B','46':'2B-SS','15':'3B-1B',
+}
+
+def _fseq_str(fseq):
+    if not fseq: return ''
+    parts = [_FPOS.get(c,c) for c in fseq if c.isdigit()]
+    return '-'.join(parts) if parts else ''
+
+def _loc_str(loc):
+    loc = loc.rstrip('+-') if loc else ''
+    if not loc: return ''
+    for l in [loc, loc[:3], loc[:2], loc[:1]]:
+        if l in _LOC_ZONE: return 'to ' + _LOC_ZONE[l]
+    return ''
+
+def _decode_play(r):
+    sb = []
+    if r.get('sb2')=='1': sb.append('SB 2B')
+    if r.get('sb3')=='1': sb.append('SB 3B')
+    if r.get('sbh')=='1': sb.append('SB Home')
+    if r.get('cs2')=='1': sb.append('CS 2B')
+    if r.get('cs3')=='1': sb.append('CS 3B')
+    if r.get('csh')=='1': sb.append('CS Home')
+    if r.get('wp')=='1': sb.append('Wild Pitch')
+    if r.get('pb')=='1': sb.append('Passed Ball')
+    if r.get('bk')=='1': sb.append('Balk')
+    if r.get('pa')!='1' and sb:
+        return '; '.join(sb)
+    ht = r.get('hittype','')
+    loc = r.get('loc','')
+    fseq = r.get('fseq','')
+    runs = safe_int(r.get('runs',0))
+    zone = _loc_str(loc)
+    fs = _fseq_str(fseq)
+    if r.get('hr')=='1':
+        on = sum(1 for k in ['br1_pre','br2_pre','br3_pre'] if r.get(k))
+        desc = ['Solo HR','2-Run HR','3-Run HR','Grand Slam'][min(on,3)]
+        if zone: desc += f' {zone}'
+    elif r.get('triple')=='1': desc = f"Triple{' '+zone if zone else ''}"
+    elif r.get('double')=='1': desc = f"Double{' '+zone if zone else ''}"
+    elif r.get('single')=='1': desc = f"Single{' '+zone if zone else ''}"
+    elif r.get('walk')=='1': desc = 'Intentional Walk' if r.get('iw')=='1' else 'Walk'
+    elif r.get('hbp')=='1': desc = 'Hit by Pitch'
+    elif r.get('k')=='1': desc = 'Strikeout'
+    elif r.get('roe')=='1': desc = f"Reached on Error{' ('+fs+')' if fs else ''}"
+    elif r.get('fc')=='1': desc = f"Fielder's Choice{' ('+fs+')' if fs else ''}"
+    elif r.get('ground')=='1': desc = f"Groundout{': '+fs if fs else ''}"
+    elif r.get('fly')=='1': desc = f"Flyball{': '+fs if fs else ''}{' '+zone if zone else ''}"
+    elif r.get('line')=='1': desc = f"Lineout{': '+fs if fs else ''}{' '+zone if zone else ''}"
+    elif r.get('bunt')=='1': desc = f"Bunt{' ('+fs+')' if fs else ''}"
+    else: desc = f"Out{' ('+fs+')' if fs else ''}"
+    if sb: desc += '; ' + '; '.join(sb)
+    if runs > 0: desc += f' ({runs}R)'
+    return desc
+
+def _build_pbp(plays, bio=None):
+    result = []
+    for r in plays:
+        has_base_event = any(r.get(k)=='1' for k in ['sb2','sb3','sbh','cs2','cs3','csh','wp','pb','bk'])
+        if r.get('pa')!='1' and not has_base_event:
+            continue
+        def nm(pid):
+            if not pid: return ''
+            if bio and pid in bio:
+                b = bio[pid]
+                return b.get('name', pid)
+            return pid
+        result.append({
+            'i':r.get('inning',''),'tb':r.get('top_bot','0'),
+            'o':r.get('outs_pre','0'),'o2':r.get('outs_post','0'),
+            'sv':safe_int(r.get('score_v',0)),'sh':safe_int(r.get('score_h',0)),
+            'rob':_rob(bool(r.get('br1_pre')),bool(r.get('br2_pre')),bool(r.get('br3_pre'))),
+            'bat':nm(r.get('batter','')), 'pit':nm(r.get('pitcher','')),
+            'np':r.get('nump','') or '',
+            'cnt':f"{r.get('balls','')}-{r.get('strikes','')}",
+            'runs':safe_int(r.get('runs',0)),
+            'desc':_decode_play(r),
+        })
+    return result
 
 # ── Core builder ─────────────────────────────────────────────────────────────
 def build_season(year):
@@ -526,11 +621,13 @@ def build_season(year):
             _s = gid_subs[gid]
             if _s.get('v'): _bx_vb['subs'] = _s['v']
             if _s.get('h'): _bx_hb['subs'] = _s['h']
+        _pbp = _build_pbp(plays_by_game.get(gid, []), _BIO_HAND) if plays_by_game.get(gid) else []
         box_scores[gid] = {
             'gid': gid, 'v': vis, 'h': home, 'd': date_str,
             'vb': _bx_vb,
             'hb': _bx_hb,
-            'att': g['attendance']
+            'att': g['attendance'],
+            'pbp': _pbp,
         }
 
 
@@ -588,34 +685,15 @@ if __name__ == '__main__':
     print(f"Building {len(years)} season(s) into {os.path.abspath(OUT_DIR)}/\n")
     ok, skipped, failed = 0, 0, 0
 
-    import multiprocessing as _mp
-    import subprocess as _sp
-    import sys as _sys
-    workers = min(_mp.cpu_count(), len(years), 8)
-
-    if workers > 1 and len(years) > 1:
-        print(f"  Using {workers} parallel workers\n")
-        # Launch build_season.py as separate processes — avoids Windows pickling issues
-        _script = __file__  # this file handles single-year args too
-        from concurrent.futures import ThreadPoolExecutor as _TPE
-        def _run_year(y):
-            r = _sp.run([_sys.executable, _script, str(y)],
-                        capture_output=True, text=True)
-            ok = r.returncode == 0 and 'OK' in r.stdout
-            skip = r.returncode == 0 and 'OK' not in r.stdout
-            out = (r.stdout + r.stderr).strip()
-            return (y, 'ok' if ok else ('skip' if skip else 'fail'), out if not ok else None)
-        with _TPE(max_workers=workers) as ex:
-            results = list(ex.map(_run_year, years))
-    else:
-        results = [_build_one(y) for y in years]
-
-    for y, status, msg in sorted(results, key=lambda r: r[0]):
-        if status == 'ok':     ok += 1
-        elif status == 'skip': skipped += 1
-        else:
+    for year in years:
+        try:
+            result = build_season(year)
+            if result: ok += 1
+            else:       skipped += 1
+        except Exception as e:
+            print(f"  FAIL {year}: {e}")
+            traceback.print_exc()
             failed += 1
-            print(f"  FAIL {y}:\n{msg}")
 
     print(f"\nDone: {ok} built, {skipped} skipped, {failed} failed")
     if ok:
