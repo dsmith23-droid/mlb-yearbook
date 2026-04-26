@@ -59,6 +59,40 @@ def _loc_str(loc):
         if l in _LOC_ZONE: return 'to ' + _LOC_ZONE[l]
     return ''
 
+def _ev_loc(ev):
+    """Extract hit location from event string (e.g. S7->LF, D8->CF, HR/F9->RF)."""
+    if not ev: return ''
+    base = ev.split('/')[0].split('.')[0]
+    mod  = ev.split('/')[1].split('.')[0] if '/' in ev else ''
+    # Hits with fielder in base: S7, D9, T8
+    for prefix in ['T','D','S']:
+        if base.startswith(prefix):
+            rest = base[len(prefix):]
+            if rest and rest[0].isdigit():
+                return _FPOS.get(rest[0], '')
+            return ''
+    # HR - location in modifier: F9D, F7, etc.
+    if base in ('HR','H'):
+        m = mod.lstrip('FLGPBfbglp')
+        if m and m[0].isdigit():
+            return _FPOS.get(m[0], '')
+        return ''
+    return ''
+
+def _ev_hittype(ev):
+    """Get descriptive hit type from event modifier."""
+    if '/' not in ev: return ''
+    mod = ev.split('/')[1].split('.')[0]
+    if mod[:2] in ('BG','BP','BF'): return 'Bunt'
+    c = mod[0] if mod else ''
+    return {'G':'Ground Ball','F':'Fly Ball','L':'Line Drive','P':'Pop Up'}.get(c,'')
+
+def _abbr(name):
+    parts = name.strip().split()
+    if len(parts) >= 2:
+        return parts[0][0] + '. ' + ' '.join(parts[1:])
+    return name
+
 def _decode_play(r):
     sb = []
     if r.get('sb2')=='1': sb.append('SB 2B')
@@ -72,32 +106,69 @@ def _decode_play(r):
     if r.get('bk')=='1': sb.append('Balk')
     if r.get('pa')!='1' and sb:
         return '; '.join(sb)
-    ht = r.get('hittype','')
-    loc = r.get('loc','')
+    ev   = r.get('event','')
+    ht   = r.get('hittype','')
+    loc  = r.get('loc','')
     fseq = r.get('fseq','')
     runs = safe_int(r.get('runs',0))
+    # Location: prefer loc field (detailed), fall back to event string
     zone = _loc_str(loc)
+    if not zone:
+        ev_f = _ev_loc(ev)
+        if ev_f: zone = 'to ' + ev_f
     fs = _fseq_str(fseq)
+    # Hit type: prefer hittype field, fall back to event modifier
+    ht_mod = _ev_hittype(ev) if not ht else ''
+    ht_desc = {'G':'Ground Ball','F':'Fly Ball','L':'Line Drive','P':'Pop Up'}.get(ht, ht_mod)
+    # Bracket hit type if we have it and it adds info
+    ht_sfx = f' ({ht_desc})' if ht_desc and ht_desc != 'Bunt' else ''
     if r.get('hr')=='1':
         on = sum(1 for k in ['br1_pre','br2_pre','br3_pre'] if r.get(k))
         desc = ['Solo HR','2-Run HR','3-Run HR','Grand Slam'][min(on,3)]
-        if zone: desc += f' {zone}'
-    elif r.get('triple')=='1': desc = f"Triple{' '+zone if zone else ''}"
-    elif r.get('double')=='1': desc = f"Double{' '+zone if zone else ''}"
-    elif r.get('single')=='1': desc = f"Single{' '+zone if zone else ''}"
-    elif r.get('walk')=='1': desc = 'Intentional Walk' if r.get('iw')=='1' else 'Walk'
+        if zone: desc += ' ' + zone
+    elif r.get('triple')=='1':
+        desc = f"Triple{' '+zone if zone else ''}{ht_sfx}"
+    elif r.get('double')=='1':
+        desc = f"Double{' '+zone if zone else ''}{ht_sfx}"
+    elif r.get('single')=='1':
+        desc = f"Single{' '+zone if zone else ''}{ht_sfx}"
+    elif r.get('walk')=='1':
+        desc = 'Intentional Walk' if r.get('iw')=='1' else 'Walk'
     elif r.get('hbp')=='1': desc = 'Hit by Pitch'
-    elif r.get('k')=='1': desc = 'Strikeout'
+    elif r.get('k')=='1':   desc = 'Strikeout'
     elif r.get('roe')=='1': desc = f"Reached on Error{' ('+fs+')' if fs else ''}"
-    elif r.get('fc')=='1': desc = f"Fielder's Choice{' ('+fs+')' if fs else ''}"
+    elif r.get('fc')=='1':  desc = f"Fielder's Choice{' ('+fs+')' if fs else ''}"
     elif r.get('ground')=='1': desc = f"Groundout{': '+fs if fs else ''}"
-    elif r.get('fly')=='1': desc = f"Flyball{': '+fs if fs else ''}{' '+zone if zone else ''}"
-    elif r.get('line')=='1': desc = f"Lineout{': '+fs if fs else ''}{' '+zone if zone else ''}"
+    elif r.get('fly')=='1':
+        desc = f"Flyball{': '+fs if fs else ''}{' '+zone if zone else ''}"
+    elif r.get('line')=='1':
+        desc = f"Lineout{': '+fs if fs else ''}{' '+zone if zone else ''}"
     elif r.get('bunt')=='1': desc = f"Bunt{' ('+fs+')' if fs else ''}"
     else: desc = f"Out{' ('+fs+')' if fs else ''}"
     if sb: desc += '; ' + '; '.join(sb)
     if runs > 0: desc += f' ({runs}R)'
     return desc
+
+def _runner_advances(r, bio):
+    def nm(pid):
+        if not pid: return ''
+        b = bio.get(pid, {}) if bio else {}
+        name = b.get('name', pid)
+        return _abbr(name) if ' ' in name else name
+    pre = {1: r.get('br1_pre',''), 2: r.get('br2_pre',''), 3: r.get('br3_pre','')}
+    post_pids = {r.get(f'br{b}_post',''): b for b in [1,2,3] if r.get(f'br{b}_post','')}
+    advances = []
+    for base in [1,2,3]:
+        pid = pre[base]
+        if not pid: continue
+        name = nm(pid)
+        if r.get(f'run{base}') == '1':
+            advances.append(f'{name} Scores')
+        elif pid in post_pids:
+            dest = post_pids[pid]
+            if dest != base:
+                advances.append(f'{name} to {dest}B')
+    return '; '.join(advances) if advances else ''
 
 def _build_pbp(plays, bio=None):
     result = []
@@ -107,9 +178,11 @@ def _build_pbp(plays, bio=None):
             continue
         def nm(pid):
             if not pid: return ''
-            if bio and pid in bio:
-                return bio[pid].get('name', pid)
-            return pid
+            b = bio.get(pid, {}) if bio else {}
+            return b.get('name', pid)
+        adv = _runner_advances(r, bio)
+        desc = _decode_play(r)
+        full_desc = desc + ('; ' + adv if adv else '')
         result.append({
             'i':r.get('inning',''),'tb':r.get('top_bot','0'),
             'o':r.get('outs_pre','0'),'o2':r.get('outs_post','0'),
@@ -119,7 +192,7 @@ def _build_pbp(plays, bio=None):
             'np':r.get('nump','') or '',
             'cnt':f"{r.get('balls','')}-{r.get('strikes','')}",
             'runs':safe_int(r.get('runs',0)),
-            'desc':_decode_play(r),
+            'desc':full_desc,
         })
     return result
 
