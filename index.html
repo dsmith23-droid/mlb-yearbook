@@ -592,7 +592,7 @@ body{font-family:'Archivo Narrow',sans-serif;background:var(--bg);color:var(--te
   <div id="vpp" class="view">
     <div class="bxhdr">
       <button class="bbk" id="pp-back-btn" onclick="goBackFromPP()">&#8592; Players</button>
-      <div style="flex:1;min-width:0"><div class="btitle ppn" id="ppname"></div><div class="bsub" id="ppmeta"></div></div>
+      <div style="flex:1;min-width:0"><div class="btitle ppn" id="ppname"></div><div class="bsub" id="ppmeta"></div><div id="pp-twoway-tabs" style="display:none;margin-top:6px;gap:6px"></div></div>
       <button class="bbk" id="pp-career-btn" onclick="goToCareerFromPP()" style="flex-shrink:0;white-space:nowrap">Career &#8599;</button>
     </div>
     <div id="ppcontent"></div>
@@ -791,7 +791,7 @@ let runningRecords=null; // computed once per season load
 const MO=['','January','February','March','April','May','June','July','August','September','October','November','December'];
 const MS=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-function dp(pos){if(!pos)return "";return pos==="?"?"DH":pos;}
+function dp(pos){if(!pos||pos==="undefined")return "";const m={"?":"DH","PP":"P","PH":"PH","PR":"PR"};return m[pos]||pos;}
 function fd(d){return MO[+d.slice(4,6)]+' '+parseInt(d.slice(6,8))+', '+d.slice(0,4)}
 function fds(d){return MS[+d.slice(4,6)]+' '+parseInt(d.slice(6,8))}
 function tc(code){
@@ -1055,7 +1055,7 @@ function goBack(){
   else showView('calendar');
 }
 
-function openPP(name,team,fromView){
+function openPP(name,team,fromView,mode){
   buildIdx();
   // Try team-specific key first for disambiguation, then plain name
   const player=(team?pidx[name+'|'+team]:null)||pidx[name]||(team?pidx[name+'|'+team]:null);
@@ -1066,7 +1066,7 @@ function openPP(name,team,fromView){
   document.getElementById('pp-back-btn').textContent=labels[src]||'\u2190 Back';
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById('vpp').classList.add('active');
-  renderPP(player);
+  renderPP(player, mode||'');
 }
 
 function openPPfromBox(name,team){
@@ -1608,6 +1608,10 @@ function buildIdx(){
       const hasPosStart=pl.games.some(g=>g.role==='S'&&g.pos&&g.pos!=='P'&&g.pos!=='?');
       pl.isPitcher=hasIP&&!hasPosStart;
     }
+    // Two-way detection: significant batting AND pitching
+    const sigIP  = pl.games.reduce((s,g)=>s+(g.ipouts||0),0) >= 20*3; // 20+ IP
+    const sigAB  = pl.games.reduce((s,g)=>s+(g.ab||0),0) >= 50;
+    pl.isTwoWay  = sigIP && sigAB;
   });
 }
 
@@ -1657,14 +1661,20 @@ function filterPlayers(q){
   }).join('');
 }
 
-function renderPP(player){
+function renderPP(player, mode){
   _ppPlayer=player;
+  const isTwoWay = player.isTwoWay||false;
+  if(!mode && isTwoWay) mode='bat';
+  if(mode) _ppMode=mode;
   const teams=player.teams||[];
   const color=tc(teams[0]);
-  const isPitcher=player.isPitcher;
-  const starts=player.games.filter(g=>g.role==='S');
+  const isPitcher = isTwoWay ? (mode==='pit') : player.isPitcher;
+  // For two-way pitching mode: only show games where he actually pitched
+  const starts=isPitcher
+    ? player.games.filter(g=>g.role==='S'&&(g.ipouts||0)>0)
+    : player.games.filter(g=>g.role==='S');
   const bench=player.games.filter(g=>g.role==='B'&&g.appeared);
-  const relief=player.games.filter(g=>(g.role==='BP'||g.role==='S')&&g.appeared&&!g.gs);
+  const relief=player.games.filter(g=>(g.role==='BP'||g.role==='S')&&g.appeared&&!g.gs&&(g.ipouts||0)>0);
   const positions=[...new Set(starts.map(g=>g.pos).filter(Boolean))].join(' / ')||'—';
   document.getElementById('ppname').textContent=player.name;
   const teamStr=teams.map(t=>`<span class='pl' style='cursor:pointer' onclick="openTeamSchedule('${t}','pp')">${D.teams[t]?D.teams[t].full:t}</span>`).join(' → ');
@@ -1682,6 +1692,19 @@ function renderPP(player){
   const btHand=player.games.find(g=>g.bt)?player.games.find(g=>g.bt).bt:'';
   const handStr=btHand?(' · Bats '+(btHand==='B'?'Switch':btHand)):'';
   document.getElementById('ppmeta').innerHTML=teamStr+' · '+curSeason+ageStr+' · '+player.games.filter(g=>g.role==='S'||g.appeared).length+' G · '+positions+handStr;
+  // Two-way tab buttons
+  const twEl=document.getElementById('pp-twoway-tabs');
+  if(twEl){
+    if(isTwoWay){
+      twEl.style.display='';
+      twEl.innerHTML=`
+        <button class="bbk" onclick="renderPP(_ppPlayer,'bat')" style="font-size:.75rem;${mode==='bat'||!mode?'border-color:var(--accent);color:var(--accent)':''}">⚾ Batting</button>
+        <button class="bbk" onclick="renderPP(_ppPlayer,'pit')" style="font-size:.75rem;${mode==='pit'?'border-color:var(--accent);color:var(--accent)':''}">⚾ Pitching</button>`;
+    } else {
+      twEl.style.display='none';
+      twEl.innerHTML='';
+    }
+  }
 
   const ab=starts.reduce((s,g)=>s+(g.ab||0),0),h=starts.reduce((s,g)=>s+(g.h||0),0);
   const bb=starts.reduce((s,g)=>s+(g.bb||0),0),k=starts.reduce((s,g)=>s+(g.k||0),0);
@@ -1693,14 +1716,15 @@ function renderPP(player){
   const totIpouts=allP.reduce((s,g)=>s+(g.ipouts||0),0);
   const totPh=allP.reduce((s,g)=>s+(g.ph||0),0),totPer=allP.reduce((s,g)=>s+(g.per||0),0);
   const totPbb=allP.reduce((s,g)=>s+(g.pbb||0),0),totPk=allP.reduce((s,g)=>s+(g.pk||0),0);
-  const totW=player.games.filter(g=>g.dec==='W').length;
-  const totL=player.games.filter(g=>g.dec==='L').length;
-  const totSv=player.games.filter(g=>g.dec==='S').length;
+  const pitGames=player.games.filter(g=>(g.ipouts||0)>0);
+  const totW=pitGames.filter(g=>g.dec==='W').length;
+  const totL=pitGames.filter(g=>g.dec==='L').length;
+  const totSv=pitGames.filter(g=>g.dec==='S').length;
   const era=totIpouts>0?(totPer/(totIpouts/27)).toFixed(2):'—';
   const ipDisp=Math.floor(totIpouts/3)+'.'+(totIpouts%3);
   const ipToOuts=ip=>{if(!ip)return 0;const p=ip.split('.');return parseInt(p[0])*3+(parseInt(p[1])||0);};
 
-  const sorted=[...player.games].filter(g=>g.role==='S'||g.appeared).sort((a,b)=>a.date.localeCompare(b.date));
+  const sorted=[...player.games].filter(g=>isPitcher ? (g.ipouts||0)>0 : (g.role==='S'||g.appeared)).sort((a,b)=>a.date.localeCompare(b.date));
 
   const _sRows=[],_bRows=[];
   const rows=sorted.map(g=>{
@@ -1725,11 +1749,11 @@ function renderPP(player){
     const bcol=res==='W'?'color:#166534;font-weight:700':res==='L'?'color:#991b1b;font-weight:700':'color:var(--muted)';
     if(g.role==='B')return `<tr onclick="openBox('${g.gid}','pp')">
       <td>${fds(g.date)}</td><td>${tdot}${tname}</td><td>${odotB}${opp}</td><td>PH/PR</td><td style="${bcol}">${score}</td>
-      <td>${g.ab}</td><td>${g.h}</td><td>${g.d||''}</td><td>${g.t||''}</td><td>${g.bb}</td><td>${g.k}</td><td>${g.hr||''}</td><td>${g.rbi||''}</td><td>${g.sb||''}</td><td>${g.cs||''}</td>
+      <td>${g.ab??0}</td><td>${g.h??0}</td><td>${g.d||''}</td><td>${g.t||''}</td><td>${g.bb??0}</td><td>${g.k??0}</td><td>${g.hr||''}</td><td>${g.rbi||''}</td><td>${g.sb||''}</td><td>${g.cs||''}</td>
     </tr>`;
     return `<tr onclick="openBox('${g.gid}','pp')">
       <td>${fds(g.date)}</td><td>${tdot}${tname}</td><td>${odotB}${opp}${g.ph?`<span style='font-size:.6rem;color:var(--muted);margin-left:3px'>${g.ph}P</span>`:''}</td><td>${dp(g.pos)||'\u2014'}</td><td style="${bcol}">${score}</td>
-      <td>${g.ab}</td><td>${g.h}</td><td>${g.d||''}</td><td>${g.t||''}</td><td>${g.bb}</td><td>${g.k}</td><td>${g.hr||''}</td><td>${g.rbi||''}</td><td>${g.sb||''}</td><td>${g.cs||''}</td>
+      <td>${g.ab??0}</td><td>${g.h??0}</td><td>${g.d||''}</td><td>${g.t||''}</td><td>${g.bb??0}</td><td>${g.k??0}</td><td>${g.hr||''}</td><td>${g.rbi||''}</td><td>${g.sb||''}</td><td>${g.cs||''}</td>
     </tr>`;
   });
   // Split rows into starts and bench/relief
@@ -1747,7 +1771,7 @@ function renderPP(player){
   const rowsJoined=rows.join('');
   document.getElementById('ppcontent').innerHTML=`
     <div class="stat-bar" style="border-left:4px solid ${color};border-top:3px solid ${color};padding-top:11px">
-      <span><b>G</b>${player.games.filter(g=>g.role==='S'||g.appeared).length}</span>
+      <span><b>G</b>${isPitcher ? starts.length + relief.length : player.games.filter(g=>g.role==='S'||g.appeared).length}</span>
       <span><b>GS</b>${starts.length}</span>
       ${isPitcher&&player.games.filter(g=>g.role==='BP'&&g.appeared).length>0?`<span><b>RP</b>${player.games.filter(g=>g.role==='BP'&&g.appeared).length}</span>`:''}
       ${isPitcher
@@ -1928,91 +1952,122 @@ async function csLoadAll(name,sid,birth){
   const results=await Promise.all(seasons.map(yr=>csLoadSeasonData(name,yr,birth,teamsMap?teamsMap[yr]:null,entry&&entry.pid?entry.pid:null)));
   // Determine if pitcher from any season
   const isPitcher=results.some(r=>r&&r.isPitcher);
-  const headers=isPitcher
-    ?'<th>Year</th><th>Age</th><th>Team</th><th>G</th><th>GS</th><th>W</th><th>L</th><th>SV</th><th>IP</th><th>ERA</th><th>H</th><th>BB</th><th>K</th>'
-    :'<th>Year</th><th>Age</th><th>Team</th><th>G</th><th>GS</th><th>AB</th><th>H</th><th>AVG</th><th>2B</th><th>3B</th><th>HR</th><th>RBI</th><th>BB</th><th>K</th>';
-  const rows=results.filter(Boolean).map(r=>{
-    const yr=r.year;
-    const col=r.teamCode?`color:${r.teamColor}`:'';
-    let ageDisp='—';
-    // Use birth year from career index (reliable) not d.births (may be wrong player)
-    const knownBirthYr=birth?+birth:0;
-    if(knownBirthYr>1800){
-      ageDisp=String(+yr-knownBirthYr);
-    } else if(r.birth&&r.birth.length===8){
+  const batHdr='<th>Year</th><th>Age</th><th>Team</th><th>G</th><th>GS</th><th>AB</th><th>H</th><th>AVG</th><th>2B</th><th>3B</th><th>HR</th><th>RBI</th><th>BB</th><th>K</th>';
+  const pitHdr='<th>Year</th><th>Age</th><th>Team</th><th>G</th><th>GS</th><th>W</th><th>L</th><th>SV</th><th>IP</th><th>ERA</th><th>H</th><th>BB</th><th>K</th>';
+
+  // Helper to build one season row
+  function mkBatRow(r, yr, ageDisp, col){
+    const avg=r.ab>0?('.'+Math.round(r.h/r.ab*1000).toString().padStart(3,'0')):'—';
+    return `<tr onclick="loadSeason('${yr}').then(()=>openPP('${esc(name)}','','','pit'))">
+      <td>${yr}</td><td>${ageDisp}</td><td style="${col}">${r.teamName}</td>
+      <td class="${r.pg?'cs-val':''}">${r.pg||0}</td><td class="${r.gs?'cs-val':''}">${r.gs||0}</td>
+      <td class="${r.ab?'cs-val':''}">${r.ab||0}</td><td class="${r.h?'cs-val':''}">${r.h||0}</td>
+      <td class="${r.ab?'cs-val':''}">${r.ab>0?avg:'—'}</td>
+      <td class="${r.d?'cs-val':''}">${r.d||0}</td><td class="${r.t?'cs-val':''}">${r.t||0}</td>
+      <td class="${r.hr?'cs-val':''}">${r.hr||0}</td><td class="${r.rbi?'cs-val':''}">${r.rbi||0}</td>
+      <td class="${r.bb?'cs-val':''}">${r.bb||0}</td><td class="${r.k?'cs-val':''}">${r.k||0}</td>
+    </tr>`;
+  }
+  function mkPitRow(r, yr, ageDisp, col){
+    const era=r.ipouts>0?(r.per/(r.ipouts/27)).toFixed(2):'—';
+    const ip=Math.floor(r.ipouts/3)+'.'+(r.ipouts%3);
+    return `<tr onclick="loadSeason('${yr}').then(()=>openPP('${esc(name)}','','','pit'))">
+      <td>${yr}</td><td>${ageDisp}</td><td style="${col}">${r.teamName}</td>
+      <td class="${r.pg?'cs-val':''}">${r.pg||0}</td><td class="${r.gs?'cs-val':''}">${r.gs||0}</td>
+      <td class="${r.w?'cs-val':''}">${r.w||0}</td><td class="${r.l?'cs-val':''}">${r.l||0}</td>
+      <td class="${r.sv?'cs-val':''}">${r.sv||0}</td>
+      <td class="${r.ipouts?'cs-val':''}">${r.ipouts?ip:'—'}</td>
+      <td class="${r.ipouts?'cs-val':''}">${era}</td>
+      <td class="${r.ph?'cs-val':''}">${r.ph||0}</td>
+      <td class="${r.pbb?'cs-val':''}">${r.pbb||0}</td>
+      <td class="${r.pk?'cs-val':''}">${r.pk||0}</td>
+    </tr>`;
+  }
+
+  function getAge(r, yr, birth){
+    const knownBirthYr = birth ? +birth : 0;
+    if(knownBirthYr>1800) return String(+yr-knownBirthYr);
+    if(r.birth&&r.birth.length===8){
       const by=+r.birth.slice(0,4),bm=+r.birth.slice(4,6),bd=+r.birth.slice(6,8);
-      let age=+yr-by;
-      if(bm>4||(bm===4&&bd>1))age--;
-      ageDisp=String(age);
+      let age=+yr-by; if(bm>4||(bm===4&&bd>1))age--; return String(age);
     }
-    if(isPitcher){
-      const era=r.ipouts>0?(r.per/(r.ipouts/27)).toFixed(2):'—';
-      const ip=Math.floor(r.ipouts/3)+'.'+(r.ipouts%3);
-      return `<tr onclick="loadSeason('${yr}').then(()=>openPP('${esc(name)}'))">
-        <td>${yr}</td>
-        <td>${ageDisp}</td>
-        <td style="${col}">${r.teamName}</td>
-        <td class="${r.g?'cs-val':''}">${r.g||0}</td>
-        <td class="${r.gs?'cs-val':''}">${r.gs||0}</td>
-        <td class="${r.w?'cs-val':''}">${r.w||0}</td>
-        <td class="${r.l?'cs-val':''}">${r.l||0}</td>
-        <td class="${r.sv?'cs-val':''}">${r.sv||0}</td>
-        <td class="${r.ipouts?'cs-val':''}">${r.ipouts?ip:'—'}</td>
-        <td class="${r.ipouts?'cs-val':''}">${era}</td>
-        <td class="${r.ph?'cs-val':''}">${r.ph||0}</td>
-        <td class="${r.pbb?'cs-val':''}">${r.pbb||0}</td>
-        <td class="${r.pk?'cs-val':''}">${r.pk||0}</td>
-      </tr>`;
-    } else {
-      const avg=r.ab>0?('.'+Math.round(r.h/r.ab*1000).toString().padStart(3,'0')):'—';
-      return `<tr onclick="loadSeason('${yr}').then(()=>openPP('${esc(name)}'))">
-        <td>${yr}</td>
-        <td>${ageDisp}</td>
-        <td style="${col}">${r.teamName}</td>
-        <td class="${r.g?'cs-val':''}">${r.g||0}</td>
-        <td class="${r.gs?'cs-val':''}">${r.gs||0}</td>
-        <td class="${r.ab?'cs-val':''}">${r.ab||0}</td>
-        <td class="${r.h?'cs-val':''}">${r.h||0}</td>
-        <td class="${r.ab?'cs-val':''}">${r.ab>0?avg:'—'}</td>
-        <td class="${r.d?'cs-val':''}">${r.d||0}</td>
-        <td class="${r.t?'cs-val':''}">${r.t||0}</td>
-        <td class="${r.hr?'cs-val':''}">${r.hr||0}</td>
-        <td class="${r.rbi?'cs-val':''}">${r.rbi||0}</td>
-        <td class="${r.bb?'cs-val':''}">${r.bb||0}</td>
-        <td class="${r.k?'cs-val':''}">${r.k||0}</td>
-      </tr>`;
-    }
-  }).join('');
-  statsDiv.innerHTML=`<table class="cs-tbl"><tr>${headers}</tr>${rows}
-  <tr style="border-top:2px solid var(--border);font-weight:700;background:var(--surface2)">
-    <td colspan="2" style="font-style:italic">Career</td><td></td><td style="color:var(--accent)">${results.filter(Boolean).reduce((s,r)=>s+(r.g||0),0)}</td>
-    <td>${results.filter(Boolean).reduce((s,r)=>s+(r.gs||0),0)}</td>
-    ${isPitcher?`
-      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.w||0),0)}</td>
-      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.l||0),0)}</td>
-      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.sv||0),0)}</td>
-      <td>${(()=>{const o=results.filter(Boolean).reduce((s,r)=>s+(r.ipouts||0),0);return Math.floor(o/3)+'.'+o%3;})()}</td>
-      <td>${(()=>{const o=results.filter(Boolean).reduce((s,r)=>s+(r.ipouts||0),0),e=results.filter(Boolean).reduce((s,r)=>s+(r.per||0),0);return o>0?(e/(o/27)).toFixed(2):'—';})()}</td>
-      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.ph||0),0)}</td>
-      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.pbb||0),0)}</td>
-      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.pk||0),0)}</td>`
-    :`
-      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.ab||0),0)}</td>
-      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.h||0),0)}</td>
-      <td>${(()=>{const ab=results.filter(Boolean).reduce((s,r)=>s+(r.ab||0),0),h=results.filter(Boolean).reduce((s,r)=>s+(r.h||0),0);return ab>0?('.'+Math.round(h/ab*1000).toString().padStart(3,'0')):'—';})()}</td>
+    return '—';
+  }
+
+  // Build batting and pitching rows separately
+  const batRows = results.filter(Boolean)
+    .filter(r=>r.ab>=10)
+    .map(r=>mkBatRow(r, r.year, getAge(r,r.year,birth), r.teamCode?`color:${r.teamColor}`:''));
+  const pitRows = results.filter(Boolean)
+    .filter(r=>r.ipouts>=9)
+    .map(r=>mkPitRow(r, r.year, getAge(r,r.year,birth), r.teamCode?`color:${r.teamCode?r.teamColor:''}`:'')); 
+
+  const hasSigPitching = results.filter(Boolean).some(r=>r.ipouts>=20);
+  const hasSigBatting  = results.filter(Boolean).some(r=>r.ab>=50);
+  const isTwoWay = hasSigPitching && hasSigBatting;
+  const isPitcherOnly = isPitcher && !isTwoWay;
+
+  // Career totals rows
+  const mkBatTotals = () => {
+    const ab=results.filter(Boolean).reduce((s,r)=>s+(r.ab||0),0);
+    const h=results.filter(Boolean).reduce((s,r)=>s+(r.h||0),0);
+    const avg=ab>0?('.'+Math.round(h/ab*1000).toString().padStart(3,'0')):'—';
+    return `<tr style="border-top:2px solid var(--border);font-weight:700;background:var(--surface2)">
+      <td colspan="2" style="font-style:italic">Career</td><td></td>
+      <td style="color:var(--accent)">${results.filter(Boolean).reduce((s,r)=>s+(r.g||0),0)}</td>
+      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.gs||0),0)}</td>
+      <td>${ab}</td><td>${h}</td><td>${avg}</td>
       <td>${results.filter(Boolean).reduce((s,r)=>s+(r.d||0),0)}</td>
       <td>${results.filter(Boolean).reduce((s,r)=>s+(r.t||0),0)}</td>
       <td>${results.filter(Boolean).reduce((s,r)=>s+(r.hr||0),0)}</td>
       <td>${results.filter(Boolean).reduce((s,r)=>s+(r.rbi||0),0)}</td>
       <td>${results.filter(Boolean).reduce((s,r)=>s+(r.bb||0),0)}</td>
-      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.k||0),0)}</td>`}
-  </tr>
-</table>
+      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.k||0),0)}</td>
+    </tr>`;
+  };
+  const mkPitTotals = () => {
+    const ip=results.filter(Boolean).reduce((s,r)=>s+(r.ipouts||0),0);
+    const er=results.filter(Boolean).reduce((s,r)=>s+(r.per||0),0);
+    const era=ip>0?(er/(ip/27)).toFixed(2):'—';
+    return `<tr style="border-top:2px solid var(--border);font-weight:700;background:var(--surface2)">
+      <td colspan="2" style="font-style:italic">Career</td><td></td>
+      <td style="color:var(--accent)">${results.filter(Boolean).filter(r=>r.ipouts>=9).reduce((s,r)=>s+(r.pg||0),0)}</td>
+      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.gs||0),0)}</td>
+      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.w||0),0)}</td>
+      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.l||0),0)}</td>
+      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.sv||0),0)}</td>
+      <td>${(()=>{const o=results.filter(Boolean).reduce((s,r)=>s+(r.ipouts||0),0);return Math.floor(o/3)+'.'+o%3;})()}</td>
+      <td>${era}</td>
+      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.ph||0),0)}</td>
+      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.pbb||0),0)}</td>
+      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.pk||0),0)}</td>
+    </tr>`;
+  };
+
+  // Build the HTML
+  let tableHTML = '';
+  if(isTwoWay){
+    // Two separate tables
+    if(batRows.length){
+      tableHTML += `<div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin:8px 0 4px">Batting</div>
+        <table class="cs-tbl"><tr>${batHdr}</tr>${batRows.join('')}${mkBatTotals()}</table>`;
+    }
+    if(pitRows.length){
+      tableHTML += `<div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin:14px 0 4px">Pitching</div>
+        <table class="cs-tbl"><tr>${pitHdr}</tr>${pitRows.join('')}${mkPitTotals()}</table>`;
+    }
+  } else if(isPitcherOnly){
+    tableHTML = `<table class="cs-tbl"><tr>${pitHdr}</tr>${pitRows.join('')}${mkPitTotals()}</table>`;
+  } else {
+    tableHTML = `<table class="cs-tbl"><tr>${batHdr}</tr>${batRows.join('')}${mkBatTotals()}</table>`;
+  }
+
+  statsDiv.innerHTML=`${tableHTML}
 <div style="margin-top:12px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2)">
-  <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:.04em;color:var(--dim);text-transform:uppercase;margin-bottom:8px">Career Milestone Finder</div>
+  <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin-bottom:8px">Career Milestone Finder</div>
   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
     <select id="ms-stat-career-${sid}" class="season-sel" style="color:var(--text);font-size:.78rem">
-      ${isPitcher
+      ${isPitcherOnly
         ?'<option value="k_pit">Strikeouts (P)</option><option value="w">Wins</option><option value="sv">Saves</option>'
         :'<option value="h">Hits</option><option value="hr">Home Runs</option><option value="rbi">RBI</option><option value="k_bat">Strikeouts (B)</option><option value="sb">Stolen Bases</option>'}
     </select>
@@ -2121,9 +2176,11 @@ async function csLoadSeasonData(name,year,birthYear,allowedTeams,pid){
     }
     } // end interleave detection
     // Determine isPitcher from actual pitching appearances in game log
-    const isPitcher=filteredLog.some(gl=>gl.stats.ip>0);
+    const totalIP=filteredLog.reduce((s,gl)=>s+(gl.stats.ip||0),0);
+    const totalAB=filteredLog.reduce((s,gl)=>s+(gl.stats.ab||0),0);
+    const isPitcher=totalIP>9&&totalIP>totalAB;
     // Sum stats from filtered game log
-    let g=filteredLog.length,gs=0,w=0,l=0,sv=0,ipouts=0,per=0,pbb=0,pk=0,ph=0;
+    let g=filteredLog.length,pg=0,gs=0,w=0,l=0,sv=0,ipouts=0,per=0,pbb=0,pk=0,ph=0;
     let ab=0,h=0,dbl=0,tpl=0,bb=0,k=0,hr=0,rbi=0;
     const teams=new Set();
     for(const gl of filteredLog){
@@ -2132,13 +2189,14 @@ async function csLoadSeasonData(name,year,birthYear,allowedTeams,pid){
       ab+=s.ab;h+=s.h;dbl+=(s.d||0);tpl+=(s.t||0);hr+=s.hr;rbi+=s.rbi;bb+=s.bb;k+=s.k;
       ipouts+=s.ip;per+=s.er;pbb+=s.pbb;pk+=s.pk;ph+=s.ph;
       if(s.gs)gs++;if(s.w)w++;if(s.l)l++;if(s.sv)sv++;
+      if((s.ip||0)>0)pg++;
     }
     const teamArr=[...teams];
     const teamCode=teamArr[0]||null;
     const teamColor=teamCode?(()=>{const e=COLORS[teamCode];if(!e)return'#888';const yr=+year;let p=e[0][1];for(const [y,c] of e){if(yr>=y)p=c;}return p;})():'#888';
     const teamName=teamArr.map(t=>d.teams[t]?d.teams[t].name:t).join('/');
     const birth=d.births&&d.births[name]?d.births[name]:null;
-    return {year,isPitcher,teams:teamArr,teamCode,teamColor,teamName,g,gs,w,l,sv,ipouts,per,pbb,pk,ph,ab,h,d:dbl,t:tpl,bb,k,hr,rbi,birth};
+    return {year,isPitcher,teams:teamArr,teamCode,teamColor,teamName,g,pg,gs,w,l,sv,ipouts,per,pbb,pk,ph,ab,h,d:dbl,t:tpl,bb,k,hr,rbi,birth};
   }catch(e){return null;}
 }
 async function csLoadSeason(name,year){
