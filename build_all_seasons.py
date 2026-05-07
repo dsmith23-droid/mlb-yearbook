@@ -685,7 +685,9 @@ def build_season(year):
             'vr': vis_r, 'hr': home_r,
             'vsp': vis_sp, 'hsp': home_sp,
             'w': wteam, 'att': g['attendance'],
-            'n': g['number'] if g['number'] in ('1', '2') else ''
+            'n': g['number'] if g['number'] in ('1', '2') else '',
+            'st': g.get('starttime','').strip(),
+            'dn': g.get('daynight','').strip()
         })
         _bx_vb = build_team_box(gid, vis,  date_str)
         _bx_hb = build_team_box(gid, home, date_str)
@@ -699,6 +701,8 @@ def build_season(year):
             'vb': _bx_vb,
             'hb': _bx_hb,
             'att': g['attendance'],
+            'st': g.get('starttime','').strip(),
+            'dn': g.get('daynight','').strip(),
             'pbp': _pbp,
         }
 

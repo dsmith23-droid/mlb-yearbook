@@ -555,7 +555,8 @@ def build_season(year, data_dir, opening_day_file, transactions_file):
         elif wteam==home: records[home]['w']+=1; records[vis]['l']+=1
         games_by_date[date_str].append({'gid':gid,'v':vis,'h':home,'vr':vis_r,'hr':home_r,
             'vsp':vis_sp,'hsp':home_sp,'w':wteam,'att':g['attendance'],
-            'n':g['number'] if g['number'] in ('1','2') else ''})
+            'n':g['number'] if g['number'] in ('1','2') else '',
+            'st': g.get('starttime','').strip()})
         _bx = {'gid':gid,'v':vis,'h':home,'d':date_str,
             'vb':build_team_box(gid,vis,date_str),'hb':build_team_box(gid,home,date_str),'att':g['attendance']}
         if gid in gid_subs:
@@ -563,6 +564,8 @@ def build_season(year, data_dir, opening_day_file, transactions_file):
             if s.get('v'): _bx['vb']['subs'] = s['v']
             if s.get('h'): _bx['hb']['subs'] = s['h']
         _bx['pbp'] = _build_pbp(plays_by_gm.get(gid, []), _BIO_HAND)
+        _bx['st'] = g.get('starttime','').strip()
+        _bx['dn'] = g.get('daynight','').strip()
         box_scores[gid] = _bx
 
     # Collect all player names for births lookup

@@ -792,6 +792,19 @@ const MO=['','January','February','March','April','May','June','July','August','
 const MS=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 function dp(pos){if(!pos||pos==="undefined")return "";const m={"?":"DH","PP":"P","PH":"PH","PR":"PR"};return m[pos]||pos;}
+function fmtST(t){
+  if(!t) return '';
+  t=t.trim();
+  // "2:13PM" -> "2:13 PM"
+  const m1=t.match(/^(\d+:\d+)(AM|PM)$/i);
+  if(m1) return m1[1]+' '+m1[2].toUpperCase();
+  // "1905" -> "7:05 PM"
+  if(/^\d{4}$/.test(t)){
+    const h=+t.slice(0,2), m=t.slice(2);
+    return (h%12||12)+':'+m+' '+(h<12?'AM':'PM');
+  }
+  return t;
+}
 function fd(d){return MO[+d.slice(4,6)]+' '+parseInt(d.slice(6,8))+', '+d.slice(0,4)}
 function fds(d){return MS[+d.slice(4,6)]+' '+parseInt(d.slice(6,8))}
 function tc(code){
@@ -1176,7 +1189,7 @@ function renderBox(gid){
   const vRec=getRecordAsOf(box.v,box.d),hRec=getRecordAsOf(box.h,box.d);
 
   document.getElementById('btitle').textContent=tf(box.v)+' at '+tf(box.h);
-  document.getElementById('bsub').textContent=fd(box.d)+(box.att?' · Att: '+parseInt(box.att).toLocaleString():'');
+  document.getElementById('bsub').textContent=fd(box.d)+(box.st?' · '+fmtST(box.st):box.dn?' · '+box.dn[0].toUpperCase()+box.dn.slice(1):'')+(box.att?' · Att: '+parseInt(box.att).toLocaleString():'');
 
   const maxI=Math.max(vb.i.length,hb.i.length);
   const inH=Array.from({length:maxI},(_,i)=>`<th>${i+1}</th>`).join('');
@@ -3629,7 +3642,7 @@ async function openPsBox(gid) {
 
   // Inject into the existing vbox DOM so it looks exactly like regular season
   document.getElementById('btitle').textContent = tf(box.v) + ' at ' + tf(box.h);
-  document.getElementById('bsub').textContent = dateStr + ' · ' + gt;
+  document.getElementById('bsub').textContent = dateStr + ' · ' + gt + (box.st?' · '+fmtST(box.st):box.dn?' · '+box.dn[0].toUpperCase()+box.dn.slice(1):'') + (box.att?' · Att: '+parseInt(box.att).toLocaleString():'');
 
   const vb = box.vb, hb = box.hb;
   const vc = tc(box.v), hc = tc(box.h);

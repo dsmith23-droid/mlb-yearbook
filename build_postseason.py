@@ -359,6 +359,8 @@ def build_year(year, gameinfo_rows, batting_rows, pitching_rows, teamstats_rows,
             'vb': make_team_box(vis, 'v', vts),
             'hb': make_team_box(hom, 'h', hts),
             'pbp': _pbp,
+            'st': g.get('starttime','').strip(),
+            'dn': g.get('daynight','').strip(),
         }
 
     # Build series summaries with wins per team
