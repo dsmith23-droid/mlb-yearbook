@@ -411,8 +411,11 @@ def build_season(year, data_dir, opening_day_file, transactions_file):
     plays_path = os.path.join(data_dir, f'{year}plays.csv')
     if os.path.exists(plays_path):
         plays_by_gm = defaultdict(list)
+        pitch_counts = defaultdict(lambda: defaultdict(int))
         with open(plays_path, encoding='utf-8', errors='replace') as f:
             for row in csv.DictReader(f):
+                if row.get('pa')=='1' and row.get('nump','').isdigit():
+                    pitch_counts[row['gid']][row['pitcher']] += int(row['nump'])
                 if row.get('gametype') in ('regular','playoff'):
                     plays_by_gm[row['gid']].append(row)
         for gid_p, prows in plays_by_gm.items():
@@ -566,6 +569,7 @@ def build_season(year, data_dir, opening_day_file, transactions_file):
         _bx['pbp'] = _build_pbp(plays_by_gm.get(gid, []), _BIO_HAND)
         _bx['st'] = g.get('starttime','').strip()
         _bx['dn'] = g.get('daynight','').strip()
+        _bx['tp'] = sum(pitch_counts.get(gid,{}).values())
         box_scores[gid] = _bx
 
     # Collect all player names for births lookup

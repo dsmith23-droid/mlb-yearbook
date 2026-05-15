@@ -507,10 +507,13 @@ def build_season(year):
     plays_path = os.path.join(data_dir, f'{y}plays.csv')
     if os.path.exists(plays_path):
         plays_by_game = defaultdict(list)
+        pitch_counts = defaultdict(lambda: defaultdict(int))
         with open(plays_path, encoding='utf-8', errors='replace') as f:
             for row in csv.DictReader(f):
                 if row.get('gametype') in ('regular','playoff'):
                     plays_by_game[row['gid']].append(row)
+                    if row.get('pa')=='1' and row.get('nump','').isdigit():
+                        pitch_counts[row['gid']][row['pitcher']] += int(row['nump'])
         for gid_p, prows in plays_by_game.items():
             subs_v, subs_h = {}, {}
             for side, subs_d in [('0', subs_v), ('1', subs_h)]:
@@ -592,7 +595,8 @@ def build_season(year):
             pitchers.append({'n': nm, 'id': r['id'], 'th': _BIO_HAND.get(r['id'], {}).get('th', ''), 'born': _BIO_HAND.get(r['id'], {}).get('born', ''), 'ip': ip, 'gs': r['p_gs'] == '1',
                              'h': safe_int(r['p_h']),  'r': safe_int(r['p_r']),
                              'er': safe_int(r['p_er']), 'bb': safe_int(r['p_w']),
-                             'k':  safe_int(r['p_k']),  'dec': dec})
+                             'k':  safe_int(r['p_k']),  'dec': dec,
+                             'np': pitch_counts.get(gid,{}).get(r['id'],0)})
 
         appeared_batters   = set(sub_bat.keys())
         starter_names      = {p['n'] for p in pitchers if p['gs']}
@@ -687,7 +691,8 @@ def build_season(year):
             'w': wteam, 'att': g['attendance'],
             'n': g['number'] if g['number'] in ('1', '2') else '',
             'st': g.get('starttime','').strip(),
-            'dn': g.get('daynight','').strip()
+            'dn': g.get('daynight','').strip(),
+            'tp': sum(pitch_counts.get(gid,{}).values())
         })
         _bx_vb = build_team_box(gid, vis,  date_str)
         _bx_hb = build_team_box(gid, home, date_str)
@@ -696,6 +701,7 @@ def build_season(year):
             if _s.get('v'): _bx_vb['subs'] = _s['v']
             if _s.get('h'): _bx_hb['subs'] = _s['h']
         _pbp = _build_pbp(plays_by_game.get(gid, []), _BIO_HAND) if plays_by_game.get(gid) else []
+        _tp = sum(pitch_counts.get(gid,{}).values())
         box_scores[gid] = {
             'gid': gid, 'v': vis, 'h': home, 'd': date_str,
             'vb': _bx_vb,
@@ -703,6 +709,7 @@ def build_season(year):
             'att': g['attendance'],
             'st': g.get('starttime','').strip(),
             'dn': g.get('daynight','').strip(),
+            'tp': _tp if _tp else 0,
             'pbp': _pbp,
         }
 

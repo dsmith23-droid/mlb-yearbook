@@ -1167,7 +1167,7 @@ function openPanel(ds){
       <div class="dp-foot">
         ${g.v}: <span class="dp-sp" onclick="event.stopPropagation();openPP('${esc(g.vsp)}','${g.v}')">${g.vsp}</span> · <span style="color:var(--dim)">${vRec.w}-${vRec.l}</span><br>
         ${g.h}: <span class="dp-sp" onclick="event.stopPropagation();openPP('${esc(g.hsp)}','${g.h}')">${g.hsp}</span> · <span style="color:var(--dim)">${hRec.w}-${hRec.l}</span>
-        ${g.att?'<br>Att: '+parseInt(g.att).toLocaleString():''}
+        ${(g.att?'<br>Att: '+parseInt(g.att).toLocaleString():'')}
       </div>
     </div>`;
   }).join('');
@@ -1371,7 +1371,7 @@ function buildTP(code,tb,color,rec,date,psYear){
     return items.map(p=>{
       if(p.a){
         const dec=p.dec?`<span class="db d${p.dec}">${p.dec}</span>`:'';
-        return `<span class="ri app" onclick="openPPfromBox('${esc(p.n)}','${code}')">${p.n}${dec}<span class="ri-stats">${p.ip} ${p.h}H ${p.r}R</span></span>`;
+        return `<span class="ri app" onclick="openPPfromBox('${esc(p.n)}','${code}')">${p.n}${dec}<span class="ri-stats">${p.ip} ${p.h||0}H ${p.r||0}R${p.np?" "+p.np+"P":""}</span></span>`;
       }
       return `<span class="ri" onclick="openPPfromBox('${esc(p.n)}','${code}')">${p.n}</span>`;
     }).join('');
@@ -1381,7 +1381,7 @@ function buildTP(code,tb,color,rec,date,psYear){
     <td>${plink(p.n,code,psYear)}${p.dec?`<span class="db d${p.dec}">${p.dec}</span>`:''}</td>
     <td class="st">${p.ip}</td><td class="st${p.h?'':''}">${p.h}</td>
     <td class="st">${p.r}</td><td class="st">${p.er}</td>
-    <td class="st">${p.bb}</td><td class="st">${p.k}</td>
+    <td class="st">${p.bb||0}</td><td class="st">${p.k||0}</td><td class="st${p.np?' val':''}">${p.np||''}</td>
   </tr>`).join('');
 
   const activeCount=(tb.l||[]).length+(tb.b||[]).length+(tb.bp||[]).length;
@@ -1402,7 +1402,7 @@ function buildTP(code,tb,color,rec,date,psYear){
     <div class="sec-label" style="border-left-color:${color}">Bullpen</div><div class="rl" style="background:${sec}10">${rlBP(tb.bp||[])}</div>
     <div class="sec-label" style="border-left-color:${color}">Pitching</div>
     <table class="ptbl">
-      <tr><th>Pitcher</th><th>IP</th><th>H</th><th>R</th><th>ER</th><th>BB</th><th>K</th></tr>
+      <tr><th>Pitcher</th><th>IP</th><th>H</th><th>R</th><th>ER</th><th>BB</th><th>K</th><th>NP</th></tr>
       ${prows}
     </table>
   </div>`;
@@ -1430,7 +1430,7 @@ function renderTeamSchedule(teamCode){
         const oppR=isHome?parseInt(g.vr||0):parseInt(g.hr||0);
         const res=g.w===teamCode?'W':g.w?'L':'';
         const rec=getRecordAsOf(teamCode,date);
-        games.push({date,gid:g.gid,opp,isHome,tmR,oppR,res,sp:isHome?g.hsp:g.vsp,rec,n:g.n});
+        games.push({date,gid:g.gid,opp,isHome,tmR,oppR,res,sp:isHome?g.hsp:g.vsp,rec,n:g.n,tp:g.tp||0});
       }
     }
   }
@@ -1561,8 +1561,8 @@ function buildIdx(){
         const ex=pl.games.find(g=>g.gid===gid);
         const ipouts=ipToOuts(p.ip);
         const role=p.gs?'S':'BP';
-        if(!ex)pl.games.push({date:box.d,gid,team:code,opp,side,role,appeared:true,ip:p.ip,ipouts,ph:p.h,pr:p.r,per:p.er,pbb:p.bb,pk:p.k,dec:p.dec,tr:tr2,or:or2});
-        else{ex.role=role;ex.appeared=true;ex.ip=p.ip;ex.ipouts=ipouts;ex.ph=p.h;ex.pr=p.r;ex.per=p.er;ex.pbb=p.bb;ex.pk=p.k;ex.dec=p.dec;}
+        if(!ex)pl.games.push({date:box.d,gid,team:code,opp,side,role,appeared:true,ip:p.ip,ipouts,ph:p.h,pr:p.r,per:p.er,pbb:p.bb,pk:p.k,dec:p.dec,np:p.np||0,tr:tr2,or:or2});
+        else{ex.role=role;ex.appeared=true;ex.ip=p.ip;ex.ipouts=ipouts;ex.ph=p.h;ex.pr=p.r;ex.per=p.er;ex.pbb=p.bb;ex.pk=p.k;ex.dec=p.dec;ex.np=p.np||0;}
       });
     });
   });
@@ -1755,7 +1755,7 @@ function renderPP(player, mode){
         <td>${g.role==='S'?'GS':'RP'}</td><td style="${prcol}">${score}</td>
         <td>${g.ip||'—'}</td><td>${g.ph!=null?g.ph:'—'}</td>
         <td>${g.per!=null?g.per:'—'}</td><td>${g.pbb!=null?g.pbb:'—'}</td>
-        <td>${g.pk!=null?g.pk:'—'}</td><td>${dec}</td>
+        <td>${g.pk!=null?g.pk:'—'}</td><td>${dec}</td><td>${g.np||''}</td>
       </tr>`;
     }
     const odotB=`<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${tc(g.opp)};margin-right:4px;vertical-align:middle"></span>`;
@@ -1788,7 +1788,8 @@ function renderPP(player, mode){
       <span><b>GS</b>${starts.length}</span>
       ${isPitcher&&player.games.filter(g=>g.role==='BP'&&g.appeared).length>0?`<span><b>RP</b>${player.games.filter(g=>g.role==='BP'&&g.appeared).length}</span>`:''}
       ${isPitcher
-        ?`<span><b>W</b>${totW}</span><span><b>L</b>${totL}</span><span><b>SV</b>${totSv}</span><span><b>IP</b>${ipDisp}</span><span><b>ERA</b>${era}</span><span><b>H</b>${totPh}</span><span><b>BB</b>${totPbb}</span><span><b>K</b>${totPk}</span>`
+        ?`<span><b>W</b>${totW}</span><span><b>L</b>${totL}</span><span><b>SV</b>${totSv}</span><span><b>IP</b>${ipDisp}</span><span><b>ERA</b>${era}</span><span><b>H</b>${totPh}</span><span><b>BB</b>${totPbb}</span><span><b>K</b>${totPk}</span>
+      <span><b>NP</b>${allP.reduce((s,g)=>s+(g.np||0),0)||'—'}</span>`
         :`<span><b>AB</b>${ab}</span><span><b>H</b>${h}</span><span><b>AVG</b>${avg}</span><span><b>2B</b>${d}</span><span><b>3B</b>${t2}</span><span><b>HR</b>${hr}</span><span><b>RBI</b>${rbi}</span><span><b>BB</b>${bb}</span><span><b>K</b>${k}</span><span><b>SB</b>${sb}</span><span><b>CS</b>${cs}</span>`
       }
     </div>
@@ -1840,7 +1841,7 @@ function renderPP(player, mode){
       return pp?'<div class="splits-bar" style="gap:12px">'+pp+'</div>':'';
     })()}
     ${(()=>{
-      const pitHdr='<th>Date</th><th>Team</th><th>Opp</th><th>Role</th><th>Result</th><th>IP</th><th>H</th><th>ER</th><th>BB</th><th>K</th><th>Dec</th>';
+      const pitHdr='<th>Date</th><th>Team</th><th>Opp</th><th>Role</th><th>Result</th><th>IP</th><th>H</th><th>ER</th><th>BB</th><th>K</th><th>Dec</th><th>NP</th>';
       const batHdr='<th>Date</th><th>Team</th><th>Opp</th><th>Pos</th><th>Result</th><th>AB</th><th>H</th><th>2B</th><th>3B</th><th>BB</th><th>K</th><th>HR</th><th>RBI</th><th>SB</th><th>CS</th>';
       const hdr=isPitcher?pitHdr:batHdr;
       function mkTbl(rws,label){
