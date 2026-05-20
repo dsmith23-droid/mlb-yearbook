@@ -2439,6 +2439,57 @@ function buildRgYearSel(){
 }
 
 // ── Head-to-Head Records ──────────────────────────────────────────────────────
+function showH2HGames(oppCode){
+  // Filter current team's schedule to games vs oppCode only
+  const teamCode = _rosterTeam;
+  const games = [];
+  for(const date of D.dates){
+    for(const g of (D.games_by_date[date]||[])){
+      if((g.v===teamCode||g.h===teamCode)){
+        const isHome = g.h===teamCode;
+        const opp = isHome?g.v:g.h;
+        if(opp !== oppCode) continue;
+        const tmR=isHome?parseInt(g.hr||0):parseInt(g.vr||0);
+        const oppR=isHome?parseInt(g.vr||0):parseInt(g.hr||0);
+        const res=g.w===teamCode?'W':g.w?'L':'';
+        const rec=getRecordAsOf(teamCode,date);
+        games.push({date,gid:g.gid,opp,isHome,tmR,oppR,res,sp:isHome?g.hsp:g.vsp,rec,n:g.n,tp:g.tp||0});
+      }
+    }
+  }
+  const oppColor = tc(oppCode);
+  const oppName = tf(oppCode);
+  const w = games.filter(g=>g.res==='W').length;
+  const l = games.filter(g=>g.res==='L').length;
+  // Update subtitle to show filter
+  document.getElementById('team-sub').textContent =
+    curSeason+' · vs '+oppName+' · '+w+'-'+l+' · Click ← to go back';
+  document.getElementById('team-back-btn').textContent = '← Back';
+  document.getElementById('team-back-btn').onclick = function(){
+    renderTeamSchedule(teamCode);
+    document.getElementById('team-back-btn').onclick = null;
+  };
+  // Render filtered games
+  const oppColor2 = tc(oppCode);
+  document.getElementById('sched-grid').innerHTML = games.map(g=>{
+    const gn=g.n?` G${g.n}`:'';
+    const ha=g.isHome?'vs':'@';
+    return `<div class="sg-card" onclick="openBox('${g.gid}','team')">
+      <div class="sg-date">${fds(g.date)}${gn}</div>
+      <div class="sg-matchup">
+        <span class="sg-team" style="color:${oppColor2}">${ha} ${oppName}</span>
+        <span class="sg-score sg-${g.res}">${g.tmR}-${g.oppR}</span>
+      </div>
+      <div class="sg-result">
+        <span class="sg-${g.res}" style="font-weight:700;min-width:14px">${g.res}</span>
+        <span style="color:var(--dim)">${g.rec.w}-${g.rec.l}</span>
+        <span style="color:var(--dim);margin-left:auto">${g.sp}</span>
+      </div>
+    </div>`;
+  }).join('');
+  showTeamTab('sched');
+}
+
 function buildH2H(teamCode,games){
   const h2h={};
   games.forEach(g=>{
@@ -2457,7 +2508,7 @@ function buildH2H(teamCode,games){
   grid.innerHTML=sorted.map(([opp,r])=>{
     const pct=r.w+r.l>0?(r.w/(r.w+r.l)*100).toFixed(0):'—';
     const col=tc(opp);
-    return `<div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid ${col};border-radius:var(--radius2);padding:10px 12px;cursor:pointer" onclick="openTeamSchedule('${opp}','h2h')">
+    return `<div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid ${col};border-radius:var(--radius2);padding:10px 12px;cursor:pointer" onclick="showH2HGames('${opp}')">
       <div style="font-family:'Archivo Narrow',sans-serif;font-weight:700;color:${col};font-size:.85rem">${tf(opp)}</div>
       <div style="font-family:'Roboto Mono',monospace;font-size:.72rem;color:var(--muted);margin-top:4px">
         <span style="color:var(--green)">${r.w}W</span> · <span style="color:var(--red)">${r.l}L</span>${r.t?` · ${r.t}T`:''} · <span style="color:var(--text)">${pct}%</span>
