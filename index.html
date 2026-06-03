@@ -30,10 +30,11 @@ body{font-family:'Archivo Narrow',sans-serif;background:var(--bg);color:var(--te
 .stitle{font-family:'Archivo',sans-serif;font-size:1.1rem;font-weight:900;color:var(--text);letter-spacing:-.02em;cursor:pointer;display:flex;align-items:center;gap:8px;white-space:nowrap}
 .stitle-diamond{width:18px;height:18px;background:var(--accent);transform:rotate(45deg);flex-shrink:0}
 .stitle span{color:var(--accent)}
-.hnav{display:flex;gap:2px;align-items:center}
-.nb{background:transparent;border:none;color:var(--muted);padding:6px 14px;font-family:'Archivo Narrow',sans-serif;font-size:.82rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;border-radius:var(--radius);transition:all .15s}
+.hnav{display:flex;gap:2px;align-items:center;flex-wrap:wrap;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.nb{background:transparent;border:none;color:var(--muted);padding:6px 10px;white-space:nowrap;font-family:'Archivo Narrow',sans-serif;font-size:.82rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;border-radius:var(--radius);transition:all .15s}
 .nb:hover{color:var(--text);background:var(--surface)}
 .nb.active{color:var(--accent);background:var(--surface)}
+@media(max-width:640px){.hnav{flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px}.nb{padding:5px 8px;font-size:.72rem}.season-sel{max-width:90px;font-size:.72rem}}
 .season-sel{background:var(--surface);border:1px solid var(--border);color:var(--gold);padding:5px 10px;font-family:'Roboto Mono',monospace;font-size:.78rem;cursor:pointer;border-radius:var(--radius);letter-spacing:.04em;outline:none}
 .season-sel:focus{border-color:var(--accent2)}
 #mnav{background:#161820;border-bottom:1px solid #2a2d38;padding:0 20px;display:flex;align-items:center;gap:2px;overflow-x:auto;scrollbar-width:none;height:36px}
@@ -463,11 +464,13 @@ body{font-family:'Archivo Narrow',sans-serif;background:var(--bg);color:var(--te
     <div class="bxhdr">
       <button class="bbk" id="bkbtn" onclick="goBack()">&#8592; Back</button>
       <button class="bbk" id="lc-btn" onclick="showLineupCard(curGid)" style="display:none">&#128196; Lineup Card</button>
+      <button class="bbk" id="def-btn" onclick="showDefenseTab(curGid)" style="display:none">🛡 Defense</button>
       <div><div class="btitle" id="btitle"></div><div class="bsub" id="bsub"></div></div>
     </div>
     <div class="lsw"><table class="ls" id="lst"></table></div>
     <div class="bteams" id="bteams"></div>
     <div id="bpbp" style="max-width:900px;margin:16px auto 0"></div>
+    <div id="bdef" style="display:none;max-width:900px;margin:16px auto 0"></div>
   </div>
 
   <div id="vst" class="view">
@@ -1036,6 +1039,8 @@ function openBox(gid,from){
   document.getElementById('vbox').classList.add('active');
   renderBox(gid);
   const _lcb=document.getElementById('lc-btn');if(_lcb)_lcb.style.display='';
+  const _dfb=document.getElementById('def-btn');if(_dfb)_dfb.style.display='';
+  const _bdef=document.getElementById('bdef');if(_bdef){_bdef.style.display='none';_bdef.innerHTML='';}  
 }
 
 function goBackFromPP(){
@@ -3739,6 +3744,296 @@ async function openPsBox(gid) {
   renderPBP(box);
   renderPBP(box);
   showView('box', true);
+}
+
+// ── STB Defense ───────────────────────────────────────────────────────────────
+let _stbCache = {};
+
+async function loadSTB(year){
+  if(_stbCache[year]) return _stbCache[year];
+  try{
+    const r = await fetch(`data/stb/${year}.json`);
+    if(!r.ok) return null;
+    const d = await r.json();
+    _stbCache[year] = d;
+    return d;
+  }catch(e){ return null; }
+}
+
+function stbLookup(stb, name, team){
+  if(!stb) return null;
+  // Try exact key first
+  if(stb[`${name}|${team}`]) return stb[`${name}|${team}`];
+  // Normalize name for comparison: collapse spaced initials "J. J." -> "J.J."
+  const normName = name.replace(/\b([A-Z])\. ([A-Z])\./g, '$1.$2.');
+  if(stb[`${normName}|${team}`]) return stb[`${normName}|${team}`];
+  // Case-insensitive scan
+  const nameUp = normName.toUpperCase();
+  return Object.values(stb).find(p=>{
+    if(!p.name) return false;
+    const pUp = p.name.toUpperCase().replace(/\b([A-Z])\. ([A-Z])\./g,'$1.$2.');
+    return pUp === nameUp || p.name_upper === nameUp;
+  }) || null;
+}
+
+// Look up player's defense ratings at a given position
+// STB CSVs only store PRIMARY position ratings. Secondary position ratings
+// on physical cards may differ but aren't in the CSV data.
+function stbDefRatings(player, pos){
+  if(!player) return null;
+
+  const normPos     = pos.split('/')[0].trim();
+  const normPrimary = (player.pos||'').split('/')[0].trim();
+  const def = player.def || {};
+
+  // 1. Position-specific data from CSV (if available - position files have it)
+  if(def[normPos]){
+    const d = def[normPos];
+    return {arm:d.arm||0, rng:d.rng||0, fld:d.fld||5, ump:d.ump||0, pb:d.pb||0};
+  }
+
+  // 2. Primary position match - use stored ratings directly
+  if(normPrimary === normPos){
+    return {arm:player.arm||0, rng:player.rng||0, fld:player.fld||5,
+            ump:player.ump||0, pb:player.pb||0};
+  }
+
+  // 3. Check if position is listed anywhere on the card
+  //    (in sec[] array built from Pos field like "DH/1B/LF")
+  // Check listed[] (all positions from CSV files) and sec[] from Pos field
+  const allPos = [...new Set([(player.pos||''), ...(player.sec||[]), ...(player.listed||[])].map(p=>p.split('/')[0].trim()))];
+  const isListed = allPos.includes(normPos) || !!(player.def||{})[normPos];
+
+  if(isListed){
+    // Listed secondary position - CSVs don't store position-specific secondary ratings
+    // Use primary ratings as best approximation, mark as estimated (~)
+    return {arm:player.arm||0, rng:player.rng||0, fld:player.fld||5,
+            ump:player.ump||0, pb:player.pb||0, est:true};
+  }
+
+  // 4. Apply penalty rules (page 13-14) for nearby unlisted positions
+  const P3 = {C:['P'],'1B':['P'],'2B':['P'],'3B':['P','1B'],
+              SS:['P'],'LF':['RF'],CF:['LF','RF'],RF:['LF']};
+  const P5 = {'2B':['1B','3B','SS'],SS:['1B','2B','3B'],LF:['CF'],RF:['CF']};
+  const p3 = P3[normPrimary]||[], p5 = P5[normPrimary]||[];
+  if(p5.includes(normPos)||p3.includes(normPos)){
+    const penalty = p5.includes(normPos)?5:3;
+    return {arm:Math.max(0,(player.arm||0)-penalty),
+            rng:Math.max(0,(player.rng||0)-penalty),
+            fld:Math.max(5,(player.fld||5)-penalty),
+            ump:0, pb:0, penalty};
+  }
+
+  // 5. Truly out of position
+  return {arm:0, rng:0, fld:5, ump:0, pb:0, oop:true};
+}
+
+// Defense table for a position given arm/rng/fld
+function stbDefTable(pos, arm, rng, fld){
+  const p = pos.toUpperCase();
+  if(['LF','CF','RF'].includes(p)){
+    const fn = p==='LF'?'F7':p==='CF'?'F8':'F9';
+    const dn = p==='LF'?'Deep LF':p==='CF'?'Deep CF':'Deep RF';
+    const rows = [];
+    rows.push({range:`${10+rng*0|0}0-${10+rng*0|0}${rng}`, lo:'', hi:rng, result:`${fn}/R3?! (Arm ≤${arm}) / ${fn}++`});
+    // Simplified: just show key thresholds
+    return [
+      {label:'Fly Out (Arm ≤)', val: arm, result:`${fn}/R3?!`},
+      {label:'Fly Out (Arm >)', val:'', result:`${fn}++`},
+      {label:'Double (roll ≤7)', val:'', result:'2B'},
+      {label:'Single (roll >7)', val:'', result:'1B'},
+    ];
+  }
+  if(p==='C'){
+    return [
+      {label:'K (Ump ≤)', val: player?.ump||0, result:'K'},
+      {label:'F2 (Rng ≤)', val: rng, result:'F2'},
+      {label:'BB/PB (PB ≤)', val: player?.pb||0, result:'BB/PB'},
+    ];
+  }
+  // Infielder
+  const pos_map = {P:'163 DP / 1-3',  '1B':'363 DP / 3U',
+                   '2B':'463 DP / 4-3','3B':'543 DP / 5-3','SS':'643 DP / 6-3'};
+  const dp_str = pos_map[p] || '—';
+  return [
+    {label:`≤ Arm → DP`, val: arm, result: dp_str.split('/')[0].trim()},
+    {label:`≤ Rng → Out`, val: rng, result: dp_str.split('/')[1]?.trim()||'Out'},
+    {label:`≤ Fld → 1B`, val: fld, result:'1B (error if > Fld)'},
+    {label:`> Fld → Error`, val:'', result:'Error'},
+  ];
+}
+
+const POS_NAMES = {'1':'P','2':'C','3':'1B','4':'2B','5':'3B','6':'SS','7':'LF','8':'CF','9':'RF','10':'DH'};
+
+
+// ── STB Defense Table Builder ─────────────────────────────────────────────────
+const _POS_NUM = {P:'1',C:'2','1B':'3','2B':'4','3B':'5',SS:'6',LF:'7',CF:'8',RF:'9'};
+const _DP_RES  = {P:'163 DP','1B':'363 DP','2B':'463 DP','3B':'543 DP',SS:'643 DP'};
+const _OUT_RES = {P:'1-3','1B':'3U','2B':'4-3','3B':'5-3',SS:'6-3'};
+const _HIT_RES = {P:'1B(CF)','1B':'1B(RF)','2B':'1B(RF)','3B':'1B(LF)',SS:'1B(LF)'};
+const _ERR_RES = {P:'E1','1B':'E3','2B':'E4','3B':'E5',SS:'E6'};
+const _FLY_RES = {LF:'F7',CF:'F8',RF:'F9'};
+const _SGL_ARM = ['1B++','1B++','1B++','1B+/R1?','1B+/R1?','1B+','1B/R2?','1B/R2?','1B/R2?','1B/R2?'];
+const _DBL_ARM = ['2B+/B?','2B+/B?','2B+/B?','2B+','2B+','2B/R1?','2B','2B','2B','2B'];
+
+function stbFmtR(pnum,lo,hi){const p='5'+pnum;return lo===hi?p+lo:p+lo+'-'+p+hi;}
+
+function stbBuildTable(pos,arm,rng,fld,ump,pb){
+  const pnum=_POS_NUM[pos]||'';
+  arm=Math.min(+(arm||0),9); rng=Math.min(+(rng||0),9);
+  fld=Math.min(+(fld||5),9); ump=Math.min(+(ump||0),9); pb=Math.min(+(pb||0),9);
+  const rows=[];
+  if(pos==='LF'||pos==='CF'||pos==='RF'){
+    const fn=_FLY_RES[pos];
+    rows.push({r:stbFmtR(pnum,0,arm),                         res:fn+'/R3?!'});
+    rows.push({r:rng>arm?stbFmtR(pnum,arm+1,rng):'—',         res:fn+'++'});
+    rows.push({r:rng<7?stbFmtR(pnum,rng+1,7):'—',             res:_DBL_ARM[arm]});
+    const slo=Math.max(rng+1,8);
+    rows.push({r:slo<=9?stbFmtR(pnum,slo,9):'—',              res:_SGL_ARM[arm]});
+  } else if(pos==='C'){
+    rows.push({r:stbFmtR(pnum,0,ump),                       res:'K'});
+    rows.push({r:rng>ump?stbFmtR(pnum,ump+1,rng):'—',       res:'F2'});
+    rows.push({r:pb>rng?stbFmtR(pnum,rng+1,pb):'—',         res:'BB'});
+    rows.push({r:pb<9?stbFmtR(pnum,pb+1,9):'—',             res:'PB'});
+  } else if(_DP_RES[pos]){
+    const topOut=Math.max(arm,rng);
+    rows.push({r:stbFmtR(pnum,0,arm),                              res:_DP_RES[pos]});
+    rows.push({r:rng>arm?stbFmtR(pnum,arm+1,rng):'—',             res:_OUT_RES[pos]});
+    rows.push({r:fld>topOut?stbFmtR(pnum,topOut+1,fld):'—',       res:_HIT_RES[pos]});
+    rows.push({r:fld<9?stbFmtR(pnum,fld+1,9):'—',                 res:_ERR_RES[pos]});
+  }
+  return rows;
+}
+
+async function showDefenseTab(gid){
+  const defEl = document.getElementById('bdef');
+  const pbpEl = document.getElementById('bpbp');
+  if(!defEl) return;
+
+  // Toggle
+  if(defEl.style.display !== 'none'){
+    defEl.style.display='none';
+    if(pbpEl) pbpEl.style.display='';
+    return;
+  }
+  if(pbpEl) pbpEl.style.display='none';
+  defEl.style.display='';
+  defEl.innerHTML='<div style="padding:16px;color:var(--muted)">Loading defense ratings...</div>';
+
+  const box = D.box_scores[gid];
+  if(!box){ defEl.innerHTML='<div style="padding:16px;color:var(--muted)">No box score data.</div>'; return; }
+
+  const stb = await loadSTB(curSeason);
+  if(!stb){
+    defEl.innerHTML=`<div style="padding:16px;color:var(--muted)">No STB ratings found for ${curSeason}.<br><small>Run <code>python build_stb_ratings.py ${curSeason}</code> to generate.</small></div>`;
+    return;
+  }
+
+  function teamDefPanel(code, tb, color){
+    const lineup = tb.l || [];
+    const rows = lineup.map((p,i) => {
+      const pos = p.pos || POS_NAMES[String(i+1)] || '?';
+      const player = stbLookup(stb, p.n, code);
+      const def = player ? stbDefRatings(player, pos) : null;
+      const arm = def?.arm ?? '—';
+      const rng = def?.rng ?? '—';
+      const fld = def?.fld ?? '—';
+      const ump = def?.ump ?? 0;
+      const pb  = def?.pb  ?? 0;
+      const oopLabel = def?.oop ? ' <span style="color:var(--muted);font-size:.65rem">OOP</span>' : def?.est ? ' <span style="color:var(--muted);font-size:.65rem" title="Estimated - check card for actual secondary ratings">~est</span>' : def?.penalty ? ` <span style="color:var(--muted);font-size:.65rem">-${def.penalty}</span>` : '';
+      const nodata = !player ? ' <span style="color:var(--muted);font-size:.65rem">no card</span>' : '';
+      // Build defense table rows
+      let tableRows = '';
+      if(def && (arm!=='—'||rng!=='—')){
+        const tbl = stbBuildTable(pos, arm, rng, fld, ump, pb);
+        tableRows = tbl.map(row=>`<div style="display:flex;justify-content:space-between;font-family:'Roboto Mono',monospace;font-size:.68rem;padding:1px 0;border-bottom:1px solid var(--border)">
+          <span style="color:var(--dim)">${row.r}</span>
+          <span style="color:var(--text);font-weight:500">${row.res}</span>
+        </div>`).join('');
+      }
+      return `<tr>
+        <td style="font-family:'Roboto Mono',monospace;font-size:.7rem;color:var(--dim);vertical-align:top;padding-top:6px">${p.lp||i+1}</td>
+        <td style="font-weight:500;vertical-align:top;padding-top:6px">${p.n}</td>
+        <td style="font-family:'Roboto Mono',monospace;font-size:.75rem;color:${color};vertical-align:top;padding-top:6px">${pos}${oopLabel}${nodata}</td>
+        <td style="vertical-align:top;padding-top:6px" class="st">${arm}</td>
+        <td style="vertical-align:top;padding-top:6px" class="st">${rng}</td>
+        <td style="vertical-align:top;padding-top:6px" class="st">${fld}</td>
+        <td style="padding:4px 8px;min-width:160px">${tableRows}</td>
+      </tr>`;
+    }).join('');
+
+    // Bench players
+    const bench = tb.b || [];
+    const benchRowsHtml = bench.map(p => {
+      if(!p.n) return '';
+      const player = stbLookup(stb, p.n, code);
+      const primary = player ? (player.pos||'').split('/')[0].trim() : '?';
+      const def = player ? stbDefRatings(player, primary) : null;
+      const arm = def?.arm ?? '—';
+      const rng = def?.rng ?? '—';
+      const fld = def?.fld ?? '—';
+      const ump = def?.ump ?? 0;
+      const pb  = def?.pb  ?? 0;
+      const nodata = !player ? ' <span style="color:var(--muted);font-size:.65rem">no card</span>' : '';
+      let tableRows = '';
+      if(def && arm!=='—'){
+        const tbl = stbBuildTable(primary, arm, rng, fld, ump, pb);
+        tableRows = tbl.map(row=>`<div style="display:flex;justify-content:space-between;font-family:'Roboto Mono',monospace;font-size:.68rem;padding:1px 0;border-bottom:1px solid var(--border)">
+          <span style="color:var(--dim)">${row.r}</span>
+          <span style="color:var(--text);font-weight:500">${row.res}</span>
+        </div>`).join('');
+      }
+      const dimStyle = 'color:var(--muted)';
+      return `<tr style="opacity:0.75">
+        <td style="font-family:'Roboto Mono',monospace;font-size:.7rem;${dimStyle};vertical-align:top;padding-top:6px">—</td>
+        <td style="vertical-align:top;padding-top:6px;${dimStyle}">${p.n}</td>
+        <td style="font-family:'Roboto Mono',monospace;font-size:.75rem;color:${color};vertical-align:top;padding-top:6px">${primary}${nodata}</td>
+        <td style="vertical-align:top;padding-top:6px" class="st">${arm}</td>
+        <td style="vertical-align:top;padding-top:6px" class="st">${rng}</td>
+        <td style="vertical-align:top;padding-top:6px" class="st">${fld}</td>
+        <td style="padding:4px 8px;min-width:160px">${tableRows}</td>
+      </tr>`;
+    }).filter(Boolean).join('');
+
+    const benchRows = benchRowsHtml ? `
+      <div class="sec-label" style="border-left-color:${color};margin-top:8px">Bench</div>
+      <table style="width:100%;font-size:.78rem;border-collapse:collapse">
+        <tr style="background:var(--surface2)">
+          <th style="padding:4px 8px;text-align:left;font-size:.68rem;color:var(--dim)">#</th>
+          <th style="padding:4px 8px;text-align:left;font-size:.68rem;color:var(--dim)">Player</th>
+          <th style="padding:4px 8px;text-align:left;font-size:.68rem;color:var(--dim)">Pos</th>
+          <th style="padding:4px 8px;text-align:center;font-size:.68rem;color:var(--dim)">Arm</th>
+          <th style="padding:4px 8px;text-align:center;font-size:.68rem;color:var(--dim)">Rng</th>
+          <th style="padding:4px 8px;text-align:center;font-size:.68rem;color:var(--dim)">Fld</th>
+          <th style="padding:4px 8px;text-align:left;font-size:.68rem;color:var(--dim)">Defense Table</th>
+        </tr>
+        ${benchRowsHtml}
+      </table>` : '';
+
+    return `<div class="tp" style="margin-bottom:12px">
+      <div class="tph" style="background:${color}" onclick="openTeamSchedule('${code}','box')">
+        <div class="tph-left"><div class="tph-name">${tf(code)}</div></div>
+      </div>
+      <div class="sec-label" style="border-left-color:${color}">Defense</div>
+      <table style="width:100%;font-size:.78rem;border-collapse:collapse">
+        <tr style="background:var(--surface2)">
+          <th style="padding:4px 8px;text-align:left;font-size:.68rem;color:var(--dim)">#</th>
+          <th style="padding:4px 8px;text-align:left;font-size:.68rem;color:var(--dim)">Player</th>
+          <th style="padding:4px 8px;text-align:left;font-size:.68rem;color:var(--dim)">Pos</th>
+          <th style="padding:4px 8px;text-align:center;font-size:.68rem;color:var(--dim)">Arm</th>
+          <th style="padding:4px 8px;text-align:center;font-size:.68rem;color:var(--dim)">Rng</th>
+          <th style="padding:4px 8px;text-align:center;font-size:.68rem;color:var(--dim)">Fld</th>
+          <th style="padding:4px 8px;text-align:left;font-size:.68rem;color:var(--dim)">Defense Table</th>
+        </tr>
+        ${rows}
+      </table>
+      ${benchRows}
+    </div>`;
+  }
+
+  const vb = box.vb, hb = box.hb;
+  const vc = tc(box.v), hc = tc(box.h);
+  defEl.innerHTML = teamDefPanel(box.v, vb, vc) + teamDefPanel(box.h, hb, hc);
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
