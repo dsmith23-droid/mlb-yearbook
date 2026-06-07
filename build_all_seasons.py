@@ -313,6 +313,62 @@ def _build_pbp(plays, bio=None):
     return result
 
 # ── Core builder ─────────────────────────────────────────────────────────────
+def _parse_ev_subs(data_dir, y):
+    """Parse substitution data from Retrosheet EVA/EVN files."""
+    POS = {0:'',1:'P',2:'C',3:'1B',4:'2B',5:'3B',6:'SS',
+           7:'LF',8:'CF',9:'RF',10:'DH',11:'PH',12:'PR'}
+    result = {}
+    for fname in os.listdir(data_dir):
+        if not (fname.upper().endswith('.EVA') or fname.upper().endswith('.EVN')):
+            continue
+        try:
+            fpath = os.path.join(data_dir, fname)
+            with open(fpath, encoding='utf-8', errors='replace') as fh:
+                lines = fh.readlines()
+            cur_gid = None
+            lineup = {0:{}, 1:{}}
+            subs = {0:[], 1:[]}
+            cur_inn, cur_half = 1, 0
+            for raw in lines:
+                line = raw.strip().rstrip('\r')
+                if line.startswith('id,'):
+                    if cur_gid:
+                        result[cur_gid] = {'v': subs[0], 'h': subs[1]}
+                    cur_gid = line[3:].strip()
+                    lineup = {0:{}, 1:{}}
+                    subs = {0:[], 1:[]}
+                    cur_inn, cur_half = 1, 0
+                elif line.startswith('start,'):
+                    p = line.split(',')
+                    if len(p) >= 6:
+                        try: lineup[int(p[3])][int(p[4])] = p[2].strip('"')
+                        except: pass
+                elif line.startswith('play,'):
+                    p = line.split(',')
+                    if len(p) >= 3:
+                        try: cur_inn=int(p[1]); cur_half=int(p[2])
+                        except: pass
+                elif line.startswith('sub,'):
+                    p = line.split(',')
+                    if len(p) < 6: continue
+                    try:
+                        team=int(p[3]); bat_order=int(p[4])
+                        fpos=int(p[5].strip()) if p[5].strip().isdigit() else 0
+                        name=p[2].strip('"')
+                        replaced=lineup[team].get(bat_order,'')
+                        subs[team].append({
+                            'n': name, 'pid': p[1], 'for': replaced,
+                            'inn': cur_inn, 'half': 'bot' if team==1 else 'top',
+                            'pos': POS.get(fpos,''), 'fpos': fpos,
+                        })
+                        lineup[team][bat_order] = name
+                    except: pass
+            if cur_gid:
+                result[cur_gid] = {'v': subs[0], 'h': subs[1]}
+        except Exception:
+            pass
+    return result
+
 def build_season(year):
     y = str(year)
     data_dir  = os.path.join(SEASONS_DIR, y)
@@ -504,6 +560,9 @@ def build_season(year):
 
     # ── substitution chains from plays.csv ──
     gid_subs = {}
+    # Parse substitution data from EVA/EVN files
+    subs_by_game = _parse_ev_subs(data_dir, y)
+
     plays_path = os.path.join(data_dir, f'{y}plays.csv')
     if os.path.exists(plays_path):
         plays_by_game = defaultdict(list)
@@ -702,6 +761,7 @@ def build_season(year):
             if _s.get('h'): _bx_hb['subs'] = _s['h']
         _pbp = _build_pbp(plays_by_game.get(gid, []), _BIO_HAND) if plays_by_game.get(gid) else []
         _tp = sum(pitch_counts.get(gid,{}).values())
+        _gsubs = subs_by_game.get(gid, {'v':[], 'h':[]})
         box_scores[gid] = {
             'gid': gid, 'v': vis, 'h': home, 'd': date_str,
             'vb': _bx_vb,
@@ -710,6 +770,8 @@ def build_season(year):
             'st': g.get('starttime','').strip(),
             'dn': g.get('daynight','').strip(),
             'tp': _tp if _tp else 0,
+            'subs_v': _gsubs['v'],
+            'subs_h': _gsubs['h'],
             'pbp': _pbp,
         }
 
