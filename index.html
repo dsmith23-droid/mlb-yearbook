@@ -110,7 +110,7 @@ body{font-family:'Archivo Narrow',sans-serif;background:var(--bg);color:var(--te
 .bbk{background:transparent;border:1px solid var(--border);color:var(--muted);padding:6px 14px;font-size:.75rem;font-family:'Roboto Mono',monospace;cursor:pointer;border-radius:var(--radius);transition:all .12s;white-space:nowrap;flex-shrink:0;letter-spacing:.04em}
 .bbk:hover{border-color:var(--accent);color:var(--accent)}
 .btitle{font-family:'Archivo',sans-serif;font-size:1.5rem;font-weight:900;letter-spacing:-.02em;line-height:1.1}
-.bsub{font-family:'Roboto Mono',monospace;font-size:.7rem;color:var(--muted);letter-spacing:.04em;margin-top:4px}
+.bsub{font-family:'Roboto Mono',monospace;font-size:.8rem;color:var(--muted);letter-spacing:.04em;margin-top:4px}
 
 /* Linescore */
 .lsw{overflow-x:auto;margin-bottom:20px;border:1px solid var(--border);border-radius:var(--radius2);background:var(--surface)}
@@ -134,8 +134,8 @@ body{font-family:'Archivo Narrow',sans-serif;background:var(--bg);color:var(--te
 .tph-name{font-family:'Archivo',sans-serif;font-size:1rem;font-weight:800;letter-spacing:-.01em;color:#fff}
 .tph-rec{font-family:'Roboto Mono',monospace;font-size:.68rem;color:rgba(255,255,255,.7);letter-spacing:.04em}
 .tph-score{font-family:'Archivo',sans-serif;font-size:2rem;font-weight:900;color:#fff;letter-spacing:-.03em;position:relative;z-index:1;text-shadow:0 1px 3px rgba(0,0,0,.3)}
-.sec-label{padding:5px 16px;font-family:'Roboto Mono',monospace;font-size:.62rem;letter-spacing:.12em;font-weight:600;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--surface2);color:var(--dim);text-transform:uppercase;border-left:3px solid transparent}
-.lt{width:100%;border-collapse:collapse;font-size:.82rem}
+.sec-label{padding:5px 16px;font-family:'Roboto Mono',monospace;font-size:.72rem;letter-spacing:.12em;font-weight:600;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--surface2);color:var(--dim);text-transform:uppercase;border-left:3px solid transparent}
+.lt{width:100%;border-collapse:collapse;font-size:.92rem}
 .lt th{font-family:'Roboto Mono',monospace;font-size:.62rem;color:var(--dim);padding:5px 10px 5px 16px;text-align:right;font-weight:500;letter-spacing:.06em;border-bottom:1px solid var(--border)}
 .lt th:nth-child(2){text-align:left}
 .lt td{padding:6px 10px 6px 16px;border-bottom:1px solid var(--border);font-family:'Archivo Narrow',sans-serif;vertical-align:middle}
@@ -149,14 +149,14 @@ body{font-family:'Archivo Narrow',sans-serif;background:var(--bg);color:var(--te
 
 /* Bench/Bullpen roster list */
 .rl{padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;flex-wrap:wrap;gap:4px;align-items:center;min-height:40px}
-.ri{display:inline-flex;align-items:center;gap:4px;font-size:.78rem;cursor:pointer;padding:3px 8px;border-radius:4px;transition:background .1s;font-family:'Archivo Narrow',sans-serif;background:var(--surface2);border:1px solid var(--border)}
+.ri{display:inline-flex;align-items:center;gap:4px;font-size:.88rem;cursor:pointer;padding:3px 8px;border-radius:4px;transition:background .1s;font-family:'Archivo Narrow',sans-serif;background:var(--surface2);border:1px solid var(--border)}
 .ri:hover{border-color:var(--border2);background:var(--bg2)}
 .ri.app{border-color:var(--accent2);color:var(--accent2)}.ri.app:hover{background:rgba(74,158,255,.08)}
 .ri-stats{font-family:'Roboto Mono',monospace;font-size:.6rem;color:var(--dim);margin-left:2px}
 .ri.app .ri-stats{color:rgba(74,158,255,.6)}
 
 /* Pitching table */
-.ptbl{width:100%;border-collapse:collapse;font-size:.82rem}
+.ptbl{width:100%;border-collapse:collapse;font-size:.92rem}
 .ptbl th{font-family:'Roboto Mono',monospace;font-size:.62rem;color:var(--dim);padding:5px 10px 5px 16px;text-align:right;font-weight:500;letter-spacing:.06em;border-bottom:1px solid var(--border);background:var(--surface2)}
 .ptbl th:first-child{text-align:left}
 .ptbl td{padding:6px 10px 6px 16px;border-bottom:1px solid var(--border);font-family:'Archivo Narrow',sans-serif}
@@ -1221,7 +1221,17 @@ function renderBox(gid){
       ${inC(hb.i,true)}<td class="lsrhe" style="font-weight:700;color:var(--text)">${hb.r}</td><td class="lsrhe">${hb.h}</td><td class="lsrhe">${hb.e}</td>
     </tr>`;
 
-  document.getElementById('bteams').innerHTML=buildTP(box.v,vb,vc,vRec,box.d,null,box.subs_v||[])+buildTP(box.h,hb,hc,hRec,box.d,null,box.subs_h||[]);
+  document.getElementById('bteams').innerHTML=buildTP(box.v,vb,vc,vRec,box.d,null,box.subs_v||[],null)+buildTP(box.h,hb,hc,hRec,box.d,null,box.subs_h||[],null);
+
+  // Async: load season PH splits and refresh bench sections once available
+  loadPHSplits(curSeason).then(ph=>{
+    if(!ph) return;
+    const cur = D.box_scores[gid];
+    if(!cur) return;
+    document.getElementById('bteams').innerHTML =
+      buildTP(cur.v,cur.vb,vc,vRec,cur.d,null,cur.subs_v||[],ph)+
+      buildTP(cur.h,cur.hb,hc,hRec,cur.d,null,cur.subs_h||[],ph);
+  });
   renderPBP(box);
 }
 
@@ -1275,10 +1285,10 @@ function renderPBP(box){
   let html=`<div class="pbp-wrap">
     <div class="pbp-toggle" onclick="this.nextElementSibling.classList.toggle('open');this.querySelector('.pbp-arr').textContent=this.nextElementSibling.classList.contains('open')?'▲':'▼'">
       <span class="pbp-toggle-label">Play by Play</span>
-      <span class="pbp-arr" style="font-size:.7rem;color:var(--muted)">▼</span>
+      <span class="pbp-arr" style="font-size:.78rem;color:var(--muted)">▼</span>
     </div>
     <div class="pbp-body">
-    <div class="pbp-row" style="background:var(--surface2);font-weight:700;font-size:.68rem;color:var(--dim);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--border)">
+    <div class="pbp-row" style="background:var(--surface2);font-weight:700;font-size:.75rem;color:var(--dim);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--border)">
       <span>Score</span><span>Batter</span><span>Out</span><span>ROB</span><span>Cnt</span><span>Result</span>
     </div>`;
 
@@ -1292,10 +1302,10 @@ function renderPBP(box){
       html+=`<div class="pbp-row${isRun?' run':''}">
         <span class="pbp-score">${p.sv}-${p.sh}</span>
         <span class="pbp-desc" style="font-weight:500">${batter}</span>
-        <span style="font-family:'Roboto Mono',monospace;font-size:.65rem;color:var(--dim)">${p.o}</span>
+        <span style="font-family:'Roboto Mono',monospace;font-size:.72rem;color:var(--dim)">${p.o}</span>
         <span class="pbp-rob">${p.rob}</span>
         <span class="pbp-cnt">${p.cnt}</span>
-        <span class="pbp-desc">${isRun?'<b>'+p.desc+'</b>':p.desc} <span style="color:var(--muted);font-size:.7rem">vs ${pitcher}</span></span>
+        <span class="pbp-desc">${isRun?'<b>'+p.desc+'</b>':p.desc} <span style="color:var(--muted);font-size:.78rem">vs ${pitcher}</span></span>
       </div>`;
     }
   }
@@ -1333,7 +1343,7 @@ async function openPlayerFromPostseason(name, team, year) {
   renderPP(p);
 }
 
-function buildTP(code,tb,color,rec,date,psYear,gameSubs){
+function buildTP(code,tb,color,rec,date,psYear,gameSubs,phSplits){
   const sec=ts(code);
   const lrows=(tb.l||[]).map((p,i)=>{
     const isPit=p.p;
@@ -1354,36 +1364,45 @@ function buildTP(code,tb,color,rec,date,psYear,gameSubs){
     const ab=p.ab??'—',h=p.h??'—';
     const stats=`<td class="st${p.h?' val':''}">${h}-${ab}</td><td class="st${p.d?' val':''}">${p.d||''}</td><td class="st${p.t?' val':''}">${p.t||''}</td><td class="st${p.bb?' val':''}">${p.bb||''}</td><td class="st${p.k?' val':''}">${p.k||''}</td><td class="st${p.hr?' val':''}">${p.hr||''}</td><td class="st${p.rbi?' val':''}">${p.rbi||''}</td><td class="st">${p.sb||''}</td>`;
     return `<tr style="opacity:.8;background:var(--surface2)">
-      <td style="color:var(--dim);font-size:.7rem">PH</td>
-      <td>${plink(p.n,code,psYear)}<span class="pb" style="background:var(--surface2);color:var(--dim);font-size:.6rem">PH</span>${btBadge2}</td>
+      <td style="color:var(--muted);font-size:.78rem">PH</td>
+      <td>${plink(p.n,code,psYear)}<span class="pb" style="background:var(--surface2);color:var(--muted);font-size:.6rem">PH</span>${btBadge2}</td>
       ${stats}
     </tr>`;
   }).join('');
 
-  function rlBench(items,subs){
-    if(!items||!items.length)return '<span style="color:var(--dim);font-size:.75rem">—</span>';
+  function rlBench(items,subs,phSplits,bioByName){
+    if(!items||!items.length)return '<span style="color:var(--muted);font-size:.85rem">—</span>';
     return '<div style="display:flex;flex-direction:column;gap:2px;padding:2px 0">'+items.map(p=>{
       const sub=(subs||[]).find(s=>s.n===p.n);
-      const subInfo=sub?`<span style="color:var(--dim);font-size:.68rem"> for ${sub.for} · ${sub.inn}${sub.half==='bot'?'▼':'▲'}</span>`:'';
+      const subInfo=sub?`<span style="color:var(--muted);font-size:.75rem"> for ${sub.for} · ${sub.inn}${sub.half==='bot'?'▼':'▲'}</span>`:'';
+      // Season PH appearance counts vs L/R
+      let phInfo='';
+      if(phSplits && p.id && phSplits[p.id]){
+        const s=phSplits[p.id];
+        const L=s.L||0, R=s.R||0;
+        if(L||R){
+          phInfo=`<div style="color:var(--muted);font-size:.72rem;margin-top:1px">PH: ${L} vs L · ${R} vs R</div>`;
+        }
+      }
       if(p.a){
         const stats=`${p.h}-${p.ab}${p.hr?' HR':''} ${p.bb?p.bb+'BB':''} ${p.k?p.k+'K':''}`.trim();
-        return `<div style="display:flex;justify-content:space-between;align-items:baseline;font-size:.75rem"><span><span class="ri app" style="padding:0" onclick="openPPfromBox('${esc(p.n)}','${code}')">${p.n}<span style="font-size:.65rem;vertical-align:super">*</span></span>${subInfo}</span><span style="color:var(--dim);font-family:'Roboto Mono',monospace;font-size:.72rem">${stats}</span></div>`;
+        return `<div style="display:flex;flex-direction:column;font-size:.85rem"><div style="display:flex;justify-content:space-between;align-items:baseline"><span><span class="ri app" style="padding:0" onclick="openPPfromBox('${esc(p.n)}','${code}')">${p.n}<span style="font-size:.72rem;vertical-align:super">*</span></span>${subInfo}</span><span style="color:var(--muted);font-family:'Roboto Mono',monospace;font-size:.8rem">${stats}</span></div>${phInfo}</div>`;
       }
-      return `<div style="font-size:.75rem"><span class="ri" style="padding:0" onclick="openPPfromBox('${esc(p.n)}','${code}')">${p.n}</span>${subInfo}</div>`;
+      return `<div style="font-size:.85rem"><span class="ri" style="padding:0" onclick="openPPfromBox('${esc(p.n)}','${code}')">${p.n}</span>${subInfo}${phInfo}</div>`;
     }).join('')+'</div>';
   }
 
   function rlBP(items,subs){
-    if(!items||!items.length)return '<span style="color:var(--dim);font-size:.75rem">—</span>';
+    if(!items||!items.length)return '<span style="color:var(--muted);font-size:.85rem">—</span>';
     return '<div style="display:flex;flex-direction:column;gap:2px;padding:2px 0">'+items.map(p=>{
       const bsub=(subs||[]).find(s=>s.n===p.n&&s.fpos===1);
-      const bsubInfo=bsub?`<span style="color:var(--dim);font-size:.68rem"> for ${bsub.for} · ${bsub.inn}${bsub.half==='bot'?'▼':'▲'}</span>`:'';
+      const bsubInfo=bsub?`<span style="color:var(--muted);font-size:.75rem"> for ${bsub.for} · ${bsub.inn}${bsub.half==='bot'?'▼':'▲'}</span>`:'';
       if(p.a){
         const dec=p.dec?`<span class="db d${p.dec}" style="margin-right:2px">${p.dec}</span>`:'';
         const stats=`${p.ip} IP${p.h?' '+p.h+'H':''}${p.er!==undefined?' '+p.er+' ER':''}${p.bb?' '+p.bb+'BB':''}${p.k?' '+p.k+'K':''}${p.np?' '+p.np+'P':''}`;
-        return `<div style="display:flex;justify-content:space-between;align-items:baseline;font-size:.75rem"><span>${dec}<span class="ri app" style="padding:0" onclick="openPPfromBox('${esc(p.n)}','${code}')">${p.n}<span style="font-size:.65rem;vertical-align:super">*</span></span>${bsubInfo}</span><span style="color:var(--dim);font-family:'Roboto Mono',monospace;font-size:.72rem">${stats}</span></div>`;
+        return `<div style="display:flex;justify-content:space-between;align-items:baseline;font-size:.85rem"><span>${dec}<span class="ri app" style="padding:0" onclick="openPPfromBox('${esc(p.n)}','${code}')">${p.n}<span style="font-size:.72rem;vertical-align:super">*</span></span>${bsubInfo}</span><span style="color:var(--muted);font-family:'Roboto Mono',monospace;font-size:.8rem">${stats}</span></div>`;
       }
-      return `<div style="font-size:.75rem"><span class="ri" style="padding:0" onclick="openPPfromBox('${esc(p.n)}','${code}')">${p.n}</span>${bsubInfo}</div>`;
+      return `<div style="font-size:.85rem"><span class="ri" style="padding:0" onclick="openPPfromBox('${esc(p.n)}','${code}')">${p.n}</span>${bsubInfo}</div>`;
     }).join('')+'</div>';
   }
 
@@ -1408,7 +1427,7 @@ function buildTP(code,tb,color,rec,date,psYear,gameSubs){
       <tr style="background:${sec}30"><th>#</th><th>Player</th><th>H-AB</th><th>2B</th><th>3B</th><th>BB</th><th>K</th><th>HR</th><th>RBI</th><th>SB</th></tr>
       ${lrows||benchRows ? lrows+benchRows : '<tr><td colspan="11" style="color:var(--muted);padding:8px;font-style:italic">No batting data available for this game</td></tr>'}
     </table>
-    <div class="sec-label" style="border-left-color:${color}">Bench</div><div class="rl" style="background:${sec}10">${rlBench(tb.b||[],gameSubs||[])}</div>
+    <div class="sec-label" style="border-left-color:${color}">Bench</div><div class="rl" style="background:${sec}10">${rlBench(tb.b||[],gameSubs||[],phSplits)}</div>
     <div class="sec-label" style="border-left-color:${color}">Bullpen</div><div class="rl" style="background:${sec}10">${rlBP(tb.bp||[],gameSubs||[])}</div>
     <div class="sec-label" style="border-left-color:${color}">Pitching</div>
     <table class="ptbl">
@@ -3753,6 +3772,18 @@ async function openPsBox(gid) {
 
 // ── STB Defense ───────────────────────────────────────────────────────────────
 let _stbCache = {};
+let _phSplitsCache = {};
+
+async function loadPHSplits(year){
+  if(_phSplitsCache[year]) return _phSplitsCache[year];
+  try{
+    const r = await fetch(`data/ph_splits/${year}.json`);
+    if(!r.ok){ _phSplitsCache[year] = null; return null; }
+    const d = await r.json();
+    _phSplitsCache[year] = d;
+    return d;
+  }catch(e){ _phSplitsCache[year] = null; return null; }
+}
 
 async function loadSTB(year){
   if(_stbCache[year]) return _stbCache[year];
@@ -3980,13 +4011,13 @@ async function showDefenseTab(gid){
       const fld = def?.fld ?? '—';
       const ump = def?.ump ?? 0;
       const pb  = def?.pb  ?? 0;
-      const oopLabel = def?.oop ? ' <span style="color:var(--muted);font-size:.65rem">OOP</span>' : def?.est ? ' <span style="color:var(--muted);font-size:.65rem" title="Estimated - check card for actual secondary ratings">~est</span>' : def?.penalty ? ` <span style="color:var(--muted);font-size:.65rem">-${def.penalty}</span>` : '';
-      const nodata = !player ? ' <span style="color:var(--muted);font-size:.65rem">no card</span>' : '';
+      const oopLabel = def?.oop ? ' <span style="color:var(--muted);font-size:.72rem">OOP</span>' : def?.est ? ' <span style="color:var(--muted);font-size:.72rem" title="Estimated - check card for actual secondary ratings">~est</span>' : def?.penalty ? ` <span style="color:var(--muted);font-size:.72rem">-${def.penalty}</span>` : '';
+      const nodata = !player ? ' <span style="color:var(--muted);font-size:.72rem">no card</span>' : '';
       // Build defense table rows
       let tableRows = '';
       if(def && (arm!=='—'||rng!=='—')){
         const tbl = stbBuildTable(pos, arm, rng, fld, ump, pb);
-        tableRows = tbl.map(row=>`<div style="display:flex;justify-content:space-between;font-family:'Roboto Mono',monospace;font-size:.68rem;padding:1px 0;border-bottom:1px solid var(--border)">
+        tableRows = tbl.map(row=>`<div style="display:flex;justify-content:space-between;font-family:'Roboto Mono',monospace;font-size:.75rem;padding:1px 0;border-bottom:1px solid var(--border)">
           <span style="color:var(--dim)">${row.r}</span>
           <span style="color:var(--text);font-weight:500">${row.res}</span>
         </div>`).join('');
@@ -4001,13 +4032,13 @@ async function showDefenseTab(gid){
       }
       const posButtons = allDefPos.length > 1 ? allDefPos.map(dpos => {
         const isActive = dpos === pos ? 'style="background:'+color+';color:#fff"' : '';
-        return `<button onclick="stbSwitchPos('${rowId}','${dpos}','${color}')" class="bbk" ${isActive} style="padding:2px 7px;font-size:.68rem;margin:1px">${dpos}</button>`;
+        return `<button onclick="stbSwitchPos('${rowId}','${dpos}','${color}')" class="bbk" ${isActive} style="padding:2px 7px;font-size:.75rem;margin:1px">${dpos}</button>`;
       }).join('') : '';
 
       return `<tr id="${rowId}" style="cursor:${allDefPos.length>1?'default':'default'}">
-        <td style="font-family:'Roboto Mono',monospace;font-size:.7rem;color:var(--dim);vertical-align:top;padding-top:6px">${p.lp||i+1}</td>
+        <td style="font-family:'Roboto Mono',monospace;font-size:.78rem;color:var(--dim);vertical-align:top;padding-top:6px">${p.lp||i+1}</td>
         <td style="font-weight:500;vertical-align:top;padding-top:6px">${p.n}</td>
-        <td style="font-family:'Roboto Mono',monospace;font-size:.75rem;color:${color};vertical-align:top;padding-top:6px">
+        <td style="font-family:'Roboto Mono',monospace;font-size:.85rem;color:${color};vertical-align:top;padding-top:6px">
           <div>${pos}${oopLabel}${nodata}</div>
           <div style="margin-top:3px">${posButtons}</div>
         </td>
@@ -4030,11 +4061,11 @@ async function showDefenseTab(gid){
       const fld = def?.fld ?? '—';
       const ump = def?.ump ?? 0;
       const pb  = def?.pb  ?? 0;
-      const nodata = !player ? ' <span style="color:var(--muted);font-size:.65rem">no card</span>' : '';
+      const nodata = !player ? ' <span style="color:var(--muted);font-size:.72rem">no card</span>' : '';
       let tableRows = '';
       if(def && arm!=='—'){
         const tbl = stbBuildTable(primary, arm, rng, fld, ump, pb);
-        tableRows = tbl.map(row=>`<div style="display:flex;justify-content:space-between;font-family:'Roboto Mono',monospace;font-size:.68rem;padding:1px 0;border-bottom:1px solid var(--border)">
+        tableRows = tbl.map(row=>`<div style="display:flex;justify-content:space-between;font-family:'Roboto Mono',monospace;font-size:.75rem;padding:1px 0;border-bottom:1px solid var(--border)">
           <span style="color:var(--dim)">${row.r}</span>
           <span style="color:var(--text);font-weight:500">${row.res}</span>
         </div>`).join('');
@@ -4047,12 +4078,12 @@ async function showDefenseTab(gid){
       }
       const benchPosButtons = benchAllPos.length > 1 ? benchAllPos.map(dpos => {
         const isActive = dpos === primary ? 'style="background:'+color+';color:#fff"' : '';
-        return `<button onclick="stbSwitchPos('${benchRowId}','${dpos}','${color}')" class="bbk" ${isActive} style="padding:2px 7px;font-size:.68rem;margin:1px">${dpos}</button>`;
+        return `<button onclick="stbSwitchPos('${benchRowId}','${dpos}','${color}')" class="bbk" ${isActive} style="padding:2px 7px;font-size:.75rem;margin:1px">${dpos}</button>`;
       }).join('') : '';
       return `<tr id="${benchRowId}" style="opacity:0.75">
-        <td style="font-family:'Roboto Mono',monospace;font-size:.7rem;${dimStyle};vertical-align:top;padding-top:6px">—</td>
+        <td style="font-family:'Roboto Mono',monospace;font-size:.78rem;${dimStyle};vertical-align:top;padding-top:6px">—</td>
         <td style="vertical-align:top;padding-top:6px;${dimStyle}">${p.n}</td>
-        <td style="font-family:'Roboto Mono',monospace;font-size:.75rem;color:${color};vertical-align:top;padding-top:6px">
+        <td style="font-family:'Roboto Mono',monospace;font-size:.85rem;color:${color};vertical-align:top;padding-top:6px">
           <div>${primary}${nodata}</div>
           <div style="margin-top:3px">${benchPosButtons}</div>
         </td>
@@ -4065,15 +4096,15 @@ async function showDefenseTab(gid){
 
     const benchRows = benchRowsHtml ? `
       <div class="sec-label" style="border-left-color:${color};margin-top:8px">Bench</div>
-      <table style="width:100%;font-size:.78rem;border-collapse:collapse">
+      <table style="width:100%;font-size:.88rem;border-collapse:collapse">
         <tr style="background:var(--surface2)">
-          <th style="padding:4px 8px;text-align:left;font-size:.68rem;color:var(--dim)">#</th>
-          <th style="padding:4px 8px;text-align:left;font-size:.68rem;color:var(--dim)">Player</th>
-          <th style="padding:4px 8px;text-align:left;font-size:.68rem;color:var(--dim)">Pos</th>
-          <th style="padding:4px 8px;text-align:center;font-size:.68rem;color:var(--dim)">Arm</th>
-          <th style="padding:4px 8px;text-align:center;font-size:.68rem;color:var(--dim)">Rng</th>
-          <th style="padding:4px 8px;text-align:center;font-size:.68rem;color:var(--dim)">Fld</th>
-          <th style="padding:4px 8px;text-align:left;font-size:.68rem;color:var(--dim)">Defense Table</th>
+          <th style="padding:4px 8px;text-align:left;font-size:.75rem;color:var(--dim)">#</th>
+          <th style="padding:4px 8px;text-align:left;font-size:.75rem;color:var(--dim)">Player</th>
+          <th style="padding:4px 8px;text-align:left;font-size:.75rem;color:var(--dim)">Pos</th>
+          <th style="padding:4px 8px;text-align:center;font-size:.75rem;color:var(--dim)">Arm</th>
+          <th style="padding:4px 8px;text-align:center;font-size:.75rem;color:var(--dim)">Rng</th>
+          <th style="padding:4px 8px;text-align:center;font-size:.75rem;color:var(--dim)">Fld</th>
+          <th style="padding:4px 8px;text-align:left;font-size:.75rem;color:var(--dim)">Defense Table</th>
         </tr>
         ${benchRowsHtml}
       </table>` : '';
@@ -4083,15 +4114,15 @@ async function showDefenseTab(gid){
         <div class="tph-left"><div class="tph-name">${tf(code)}</div></div>
       </div>
       <div class="sec-label" style="border-left-color:${color}">Defense</div>
-      <table style="width:100%;font-size:.78rem;border-collapse:collapse">
+      <table style="width:100%;font-size:.88rem;border-collapse:collapse">
         <tr style="background:var(--surface2)">
-          <th style="padding:4px 8px;text-align:left;font-size:.68rem;color:var(--dim)">#</th>
-          <th style="padding:4px 8px;text-align:left;font-size:.68rem;color:var(--dim)">Player</th>
-          <th style="padding:4px 8px;text-align:left;font-size:.68rem;color:var(--dim)">Pos</th>
-          <th style="padding:4px 8px;text-align:center;font-size:.68rem;color:var(--dim)">Arm</th>
-          <th style="padding:4px 8px;text-align:center;font-size:.68rem;color:var(--dim)">Rng</th>
-          <th style="padding:4px 8px;text-align:center;font-size:.68rem;color:var(--dim)">Fld</th>
-          <th style="padding:4px 8px;text-align:left;font-size:.68rem;color:var(--dim)">Defense Table</th>
+          <th style="padding:4px 8px;text-align:left;font-size:.75rem;color:var(--dim)">#</th>
+          <th style="padding:4px 8px;text-align:left;font-size:.75rem;color:var(--dim)">Player</th>
+          <th style="padding:4px 8px;text-align:left;font-size:.75rem;color:var(--dim)">Pos</th>
+          <th style="padding:4px 8px;text-align:center;font-size:.75rem;color:var(--dim)">Arm</th>
+          <th style="padding:4px 8px;text-align:center;font-size:.75rem;color:var(--dim)">Rng</th>
+          <th style="padding:4px 8px;text-align:center;font-size:.75rem;color:var(--dim)">Fld</th>
+          <th style="padding:4px 8px;text-align:left;font-size:.75rem;color:var(--dim)">Defense Table</th>
         </tr>
         ${rows}
       </table>

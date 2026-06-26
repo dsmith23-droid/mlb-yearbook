@@ -395,6 +395,12 @@ def build_season(year):
                     if name not in ros_pos: ros_pos[name] = pos
                     if pid  not in roster:  roster[pid]  = {'name': name, 'pos': pos}
 
+    # Reverse lookup: name -> pid (for bench players who never appeared in a game)
+    name_to_pid = {}
+    for pid, info in roster.items():
+        if info['name'] not in name_to_pid:
+            name_to_pid[info['name']] = pid
+
     # ── teams ──
     teams = {}
     team_file = os.path.join(data_dir, f'TEAM{y}')
@@ -677,7 +683,8 @@ def build_season(year):
             if ros_pos.get(nm, '?') == 'P': continue
             ap    = nm in appeared_batters
             pid_b = sub_bat[nm]['id'] if ap and nm in sub_bat else ''
-            entry = {'n': nm, 'id': pid_b, 'born': _BIO_HAND.get(pid_b,{}).get('born',''), 'a': ap}
+            _bench_id = pid_b or name_to_pid.get(nm,'')
+            entry = {'n': nm, 'id': _bench_id, 'born': _BIO_HAND.get(_bench_id,{}).get('born',''), 'a': ap}
             if ap and nm in sub_bat:
                 r = sub_bat[nm]
                 entry.update({'ph': gid_starter_hand.get(r['gid'], {}).get(r.get('opp',''), ''), 'ab': safe_int(r['b_ab']), 'h': safe_int(r['b_h']),
@@ -693,7 +700,8 @@ def build_season(year):
             ap    = nm in appeared_relievers
             pe_bp = next((p for p in pitchers if p['n'] == nm and not p['gs']), None)
             pid_b = pe_bp['id'] if pe_bp else (next((p for p in pitchers if p['n']==nm),{'id':''}).get('id',''))
-            entry = {'n': nm, 'id': pid_b, 'born': _BIO_HAND.get(pid_b,{}).get('born',''), 'a': ap}
+            _bench_id = pid_b or name_to_pid.get(nm,'')
+            entry = {'n': nm, 'id': _bench_id, 'born': _BIO_HAND.get(_bench_id,{}).get('born',''), 'a': ap}
             if ap:
                 pe = pe_bp
                 if pe:
