@@ -377,10 +377,13 @@ def build_season(year):
     out_path  = os.path.join(OUT_DIR,  f"{y}.json")
 
     # ── validation ──
-    missing = [p for p in [data_dir, od_file, txn_file] if not os.path.exists(p)]
-    if missing:
-        print(f"  SKIP {y}: missing {', '.join(missing)}")
+    if not os.path.exists(data_dir):
+        print(f"  SKIP {y}: data folder not found")
         return False
+    has_od  = os.path.exists(od_file)
+    has_txn = os.path.exists(txn_file)
+    if not has_od or not has_txn:
+        print(f"  NOTE {y}: no OD/transaction files — bench/roster limited")
 
     # ── rosters ──
     ros_pos, roster = {}, {}
@@ -444,33 +447,35 @@ def build_season(year):
 
     # ── opening day rosters ──
     opening_day = defaultdict(set)
-    with open(od_file, encoding='utf-8', errors='replace') as f:
-        next(f)
-        for line in f:
-            parts = [p.strip() for p in line.strip().split(',')]
-            if len(parts) >= 4 and parts[0] == 'Opening Day':
-                raw_t, player = parts[2].strip(), parts[3].strip()
-                team = get_alias(raw_t, y)
-                if team in ML_TEAMS:
-                    opening_day[team].add(player)
+    if has_od:
+        with open(od_file, encoding='utf-8', errors='replace') as f:
+            next(f)
+            for line in f:
+                parts = [p.strip() for p in line.strip().split(',')]
+                if len(parts) >= 4 and parts[0] == 'Opening Day':
+                    raw_t, player = parts[2].strip(), parts[3].strip()
+                    team = get_alias(raw_t, y)
+                    if team in ML_TEAMS:
+                        opening_day[team].add(player)
     # ── transactions ──
     transactions, seen = [], set()
-    with open(txn_file, encoding='utf-8', errors='replace') as f:
-        next(f)
-        for line in f:
-            parts = [p.strip().strip('"') for p in line.strip().split(',')]
-            if len(parts) < 5: continue
-            try:   date = datetime.strptime(parts[0].strip(), '%m/%d/%Y')
-            except: continue
-            txn_type, player = parts[1].strip(), parts[2].strip()
-            from_team = get_alias(parts[3].strip(), y)
-            to_team   = get_alias(parts[4].strip(), y)
-            key = (date, txn_type, player, from_team, to_team)
-            if key not in seen:
-                seen.add(key)
-                transactions.append({'date': date, 'type': txn_type,
-                                     'player': player, 'from': from_team, 'to': to_team})
-    transactions.sort(key=lambda x: x['date'])
+    if has_txn:
+        with open(txn_file, encoding='utf-8', errors='replace') as f:
+            next(f)
+            for line in f:
+                parts = [p.strip().strip('"') for p in line.strip().split(',')]
+                if len(parts) < 5: continue
+                try:   date = datetime.strptime(parts[0].strip(), '%m/%d/%Y')
+                except: continue
+                txn_type, player = parts[1].strip(), parts[2].strip()
+                from_team = get_alias(parts[3].strip(), y)
+                to_team   = get_alias(parts[4].strip(), y)
+                key = (date, txn_type, player, from_team, to_team)
+                if key not in seen:
+                    seen.add(key)
+                    transactions.append({'date': date, 'type': txn_type,
+                                         'player': player, 'from': from_team, 'to': to_team})
+        transactions.sort(key=lambda x: x['date'])
 
     # ── game dates ──
     gameinfo_path = os.path.join(data_dir, f'{y}gameinfo.csv')
