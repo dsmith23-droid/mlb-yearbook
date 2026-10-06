@@ -923,7 +923,7 @@ async function loadSeason(year,silent=false){
   document.getElementById('load-text').textContent=`Loading ${year}...`;
   document.getElementById('load-text').style.color='var(--muted)';
   try{
-    const resp=await fetch(`data_v2/${year}.json?v=${Date.now()}`);
+    const resp=await fetch(`data/${year}.json?v=${Date.now()}`);
     if(!resp.ok)throw new Error(`HTTP ${resp.status}`);
     D=await resp.json()
   if(!D.box_scores) D.box_scores = {};
@@ -1033,7 +1033,7 @@ async function openBox(gid,from){
     document.getElementById('btitle').textContent = 'Loading...';
     document.getElementById('bsub').textContent = gid;
     try{
-      const r = await fetch(`data_v2/boxes/${season}/${gid}.json`);
+      const r = await fetch(`data/boxes/${season}/${gid}.json`);
       if(r.ok){
         const box = await r.json();
         box.gid = box.gid || gid;
@@ -1050,7 +1050,7 @@ async function openBox(gid,from){
         D.box_scores[gid] = box;
       } else {
         document.getElementById('btitle').textContent = 'Error loading box score';
-        document.getElementById('bsub').textContent = `Could not load data_v2/boxes/${season}/${gid}.json (${r.status})`;
+        document.getElementById('bsub').textContent = `Could not load data/boxes/${season}/${gid}.json (${r.status})`;
         return;
       }
     }catch(e){
@@ -1296,7 +1296,7 @@ async function loadAndRenderPBP(gid,toggleEl){
   bodyEl.classList.add('open');
   toggleEl.querySelector('.pbp-arr').textContent='▲';
   try{
-    const resp=await fetch(`data_v2/pbp/${curSeason}/${gid}.json`);
+    const resp=await fetch(`data/pbp/${curSeason}/${gid}.json`);
     if(!resp.ok)throw new Error('no pbp');
     const arrays=await resp.json();
     const pbp=decodePBPArrays(arrays);
@@ -1938,7 +1938,7 @@ async function loadCsIndex(){
   if(csLoading)return false;
   csLoading=true;
   try{
-    const r=await fetch('data_v2/player_index.json?v='+Date.now());
+    const r=await fetch('data/player_index.json?v='+Date.now());
     if(!r.ok)throw new Error('player_index.json not found');
     const raw=await r.json();
     // Build searchable map: name_lower -> [entries]
@@ -2127,7 +2127,7 @@ async function csLoadSeasonData(name,year,birthYear,allowedTeams,pid){
   try{
     let d=_csCache[year];
     if(!d){
-      const r=await fetch('data_v2/'+year+'.json?v='+Date.now());
+      const r=await fetch('data/'+year+'.json?v='+Date.now());
       if(!r.ok)return null;
       d=await r.json();
       _csCache[year]=d;
@@ -2257,7 +2257,7 @@ async function csLoadSeason(name,year){
   try{
     let d=_csCache[year];
     if(!d){
-      const r=await fetch('data_v2/'+year+'.json?v='+Date.now());
+      const r=await fetch('data/'+year+'.json?v='+Date.now());
       if(!r.ok)throw new Error(year+' not found');
       d=await r.json();
       _csCache[year]=d;
@@ -2577,7 +2577,7 @@ async function renderCompare(){
   const allYears=[...new Set([...s1,...s2])].sort();
 
   // Load all needed seasons
-  await Promise.all(allYears.map(yr=>_csCache[yr]?Promise.resolve():fetch('data_v2/'+yr+'.json?v='+Date.now()).then(r=>r.ok?r.json():null).then(d=>{if(d)_csCache[yr]=d;})));
+  await Promise.all(allYears.map(yr=>_csCache[yr]?Promise.resolve():fetch('data/'+yr+'.json?v='+Date.now()).then(r=>r.ok?r.json():null).then(d=>{if(d)_csCache[yr]=d;})));
 
   // Compute career stats for each player
   const getStats=(name,seasons)=>{
@@ -2988,7 +2988,7 @@ async function loadTeamBoxes(teamCode,panel){
     while(i<gids.length){
       const gid=gids[i++];
       try{
-        const r=await fetch(`data_v2/boxes/${season}/${gid}.json`);
+        const r=await fetch(`data/boxes/${season}/${gid}.json`);
         if(r.ok){
           const box=await r.json();
           box.gid=box.gid||gid;
@@ -3425,7 +3425,7 @@ async function findCareerMilestone(sid,name,birth){
 // ── Postseason ───────────────────────────────────────────────────────────────
 let _psData = null;
 let _psYear = null;
-const PS_DATA_PATH = 'data_v2/postseason/';
+const PS_DATA_PATH = 'data/postseason/';
 
 // Build year selector from available postseason JSONs
 // We probe by trying to load a manifest or just show years with data
@@ -3463,7 +3463,7 @@ async function buildPsHome() {
 
   // Try to load a lightweight manifest first
   try {
-    const mResp = await fetch('data_v2/postseason/manifest.json');
+    const mResp = await fetch('data/postseason/manifest.json');
     if (mResp.ok) {
       const manifest = await mResp.json();
       for (const [yr, info] of Object.entries(manifest).sort((a,b)=>+b[0]-+a[0])) {
@@ -3479,7 +3479,7 @@ async function buildPsHome() {
   // Fallback: probe recent years
   for (const yr of years) {
     try {
-      const resp = await fetch(`data_v2/postseason/${yr}.json`);
+      const resp = await fetch(`data/postseason/${yr}.json`);
       if (!resp.ok) continue;
       const d = await resp.json();
       const champName = d.champion ? tf(d.champion) : '—';
