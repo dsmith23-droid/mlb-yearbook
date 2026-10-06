@@ -789,6 +789,24 @@ def build_season(year):
         }
 
 
+    # Season lineup spots: team -> batting slot -> every player who STARTED there
+    # (regular season only, no repeats, ordered by games started at that slot)
+    _lu_counts = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
+    for g in games_raw:
+        if g.get('gametype') != 'regular':
+            continue
+        bx = box_scores.get(g['gid'])
+        if not bx: continue
+        for side_key, tm in (('vb', g['visteam']), ('hb', g['hometeam'])):
+            for e in bx[side_key]['l']:
+                _lu_counts[tm][e['lp']][e['n']] += 1
+    lineups = {
+        tm: {str(slot): [{'n': n, 'g': c}
+                         for n, c in sorted(pl.items(), key=lambda kv: (-kv[1], kv[0]))]
+             for slot, pl in sorted(slots.items())}
+        for tm, slots in _lu_counts.items()
+    }
+
     # Build births lookup for all players in this season
     all_player_names = set()
     for bx in box_scores.values():
@@ -810,6 +828,7 @@ def build_season(year):
         'records':      dict(records),
         'pitchers':    sorted(pitchers_set),
         'births':      births,
+        'lineups':     lineups,
     }
     with open(out_path, 'w', encoding='utf-8') as f:
         json.dump(output, f, separators=(',', ':'))

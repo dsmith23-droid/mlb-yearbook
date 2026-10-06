@@ -30,11 +30,10 @@ body{font-family:'Archivo Narrow',sans-serif;background:var(--bg);color:var(--te
 .stitle{font-family:'Archivo',sans-serif;font-size:1.1rem;font-weight:900;color:var(--text);letter-spacing:-.02em;cursor:pointer;display:flex;align-items:center;gap:8px;white-space:nowrap}
 .stitle-diamond{width:18px;height:18px;background:var(--accent);transform:rotate(45deg);flex-shrink:0}
 .stitle span{color:var(--accent)}
-.hnav{display:flex;gap:2px;align-items:center;flex-wrap:wrap;overflow-x:auto;-webkit-overflow-scrolling:touch}
-.nb{background:transparent;border:none;color:var(--muted);padding:6px 10px;white-space:nowrap;font-family:'Archivo Narrow',sans-serif;font-size:.82rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;border-radius:var(--radius);transition:all .15s}
+.hnav{display:flex;gap:2px;align-items:center}
+.nb{background:transparent;border:none;color:var(--muted);padding:6px 14px;font-family:'Archivo Narrow',sans-serif;font-size:.82rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;border-radius:var(--radius);transition:all .15s}
 .nb:hover{color:var(--text);background:var(--surface)}
 .nb.active{color:var(--accent);background:var(--surface)}
-@media(max-width:640px){.hnav{flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px}.nb{padding:5px 8px;font-size:.72rem}.season-sel{max-width:90px;font-size:.72rem}}
 .season-sel{background:var(--surface);border:1px solid var(--border);color:var(--gold);padding:5px 10px;font-family:'Roboto Mono',monospace;font-size:.78rem;cursor:pointer;border-radius:var(--radius);letter-spacing:.04em;outline:none}
 .season-sel:focus{border-color:var(--accent2)}
 #mnav{background:#161820;border-bottom:1px solid #2a2d38;padding:0 20px;display:flex;align-items:center;gap:2px;overflow-x:auto;scrollbar-width:none;height:36px}
@@ -110,7 +109,7 @@ body{font-family:'Archivo Narrow',sans-serif;background:var(--bg);color:var(--te
 .bbk{background:transparent;border:1px solid var(--border);color:var(--muted);padding:6px 14px;font-size:.75rem;font-family:'Roboto Mono',monospace;cursor:pointer;border-radius:var(--radius);transition:all .12s;white-space:nowrap;flex-shrink:0;letter-spacing:.04em}
 .bbk:hover{border-color:var(--accent);color:var(--accent)}
 .btitle{font-family:'Archivo',sans-serif;font-size:1.5rem;font-weight:900;letter-spacing:-.02em;line-height:1.1}
-.bsub{font-family:'Roboto Mono',monospace;font-size:.8rem;color:var(--muted);letter-spacing:.04em;margin-top:4px}
+.bsub{font-family:'Roboto Mono',monospace;font-size:.7rem;color:var(--muted);letter-spacing:.04em;margin-top:4px}
 
 /* Linescore */
 .lsw{overflow-x:auto;margin-bottom:20px;border:1px solid var(--border);border-radius:var(--radius2);background:var(--surface)}
@@ -134,8 +133,8 @@ body{font-family:'Archivo Narrow',sans-serif;background:var(--bg);color:var(--te
 .tph-name{font-family:'Archivo',sans-serif;font-size:1rem;font-weight:800;letter-spacing:-.01em;color:#fff}
 .tph-rec{font-family:'Roboto Mono',monospace;font-size:.68rem;color:rgba(255,255,255,.7);letter-spacing:.04em}
 .tph-score{font-family:'Archivo',sans-serif;font-size:2rem;font-weight:900;color:#fff;letter-spacing:-.03em;position:relative;z-index:1;text-shadow:0 1px 3px rgba(0,0,0,.3)}
-.sec-label{padding:5px 16px;font-family:'Roboto Mono',monospace;font-size:.72rem;letter-spacing:.12em;font-weight:600;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--surface2);color:var(--dim);text-transform:uppercase;border-left:3px solid transparent}
-.lt{width:100%;border-collapse:collapse;font-size:.92rem}
+.sec-label{padding:5px 16px;font-family:'Roboto Mono',monospace;font-size:.62rem;letter-spacing:.12em;font-weight:600;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--surface2);color:var(--dim);text-transform:uppercase;border-left:3px solid transparent}
+.lt{width:100%;border-collapse:collapse;font-size:.82rem}
 .lt th{font-family:'Roboto Mono',monospace;font-size:.62rem;color:var(--dim);padding:5px 10px 5px 16px;text-align:right;font-weight:500;letter-spacing:.06em;border-bottom:1px solid var(--border)}
 .lt th:nth-child(2){text-align:left}
 .lt td{padding:6px 10px 6px 16px;border-bottom:1px solid var(--border);font-family:'Archivo Narrow',sans-serif;vertical-align:middle}
@@ -149,14 +148,14 @@ body{font-family:'Archivo Narrow',sans-serif;background:var(--bg);color:var(--te
 
 /* Bench/Bullpen roster list */
 .rl{padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;flex-wrap:wrap;gap:4px;align-items:center;min-height:40px}
-.ri{display:inline-flex;align-items:center;gap:4px;font-size:.88rem;cursor:pointer;padding:3px 8px;border-radius:4px;transition:background .1s;font-family:'Archivo Narrow',sans-serif;background:var(--surface2);border:1px solid var(--border)}
+.ri{display:inline-flex;align-items:center;gap:4px;font-size:.78rem;cursor:pointer;padding:3px 8px;border-radius:4px;transition:background .1s;font-family:'Archivo Narrow',sans-serif;background:var(--surface2);border:1px solid var(--border)}
 .ri:hover{border-color:var(--border2);background:var(--bg2)}
 .ri.app{border-color:var(--accent2);color:var(--accent2)}.ri.app:hover{background:rgba(74,158,255,.08)}
 .ri-stats{font-family:'Roboto Mono',monospace;font-size:.6rem;color:var(--dim);margin-left:2px}
 .ri.app .ri-stats{color:rgba(74,158,255,.6)}
 
 /* Pitching table */
-.ptbl{width:100%;border-collapse:collapse;font-size:.92rem}
+.ptbl{width:100%;border-collapse:collapse;font-size:.82rem}
 .ptbl th{font-family:'Roboto Mono',monospace;font-size:.62rem;color:var(--dim);padding:5px 10px 5px 16px;text-align:right;font-weight:500;letter-spacing:.06em;border-bottom:1px solid var(--border);background:var(--surface2)}
 .ptbl th:first-child{text-align:left}
 .ptbl td{padding:6px 10px 6px 16px;border-bottom:1px solid var(--border);font-family:'Archivo Narrow',sans-serif}
@@ -464,13 +463,12 @@ body{font-family:'Archivo Narrow',sans-serif;background:var(--bg);color:var(--te
     <div class="bxhdr">
       <button class="bbk" id="bkbtn" onclick="goBack()">&#8592; Back</button>
       <button class="bbk" id="lc-btn" onclick="showLineupCard(curGid)" style="display:none">&#128196; Lineup Card</button>
-      <button class="bbk" id="def-btn" onclick="showDefenseTab(curGid)" style="display:none">🛡 Defense</button>
+      <button class="bbk" id="sc-btn" onclick="openScorecard(curGid)" style="display:none">&#9918; Scorecard</button>
       <div><div class="btitle" id="btitle"></div><div class="bsub" id="bsub"></div></div>
     </div>
     <div class="lsw"><table class="ls" id="lst"></table></div>
     <div class="bteams" id="bteams"></div>
     <div id="bpbp" style="max-width:900px;margin:16px auto 0"></div>
-    <div id="bdef" style="display:none;max-width:900px;margin:16px auto 0"></div>
   </div>
 
   <div id="vst" class="view">
@@ -595,7 +593,7 @@ body{font-family:'Archivo Narrow',sans-serif;background:var(--bg);color:var(--te
   <div id="vpp" class="view">
     <div class="bxhdr">
       <button class="bbk" id="pp-back-btn" onclick="goBackFromPP()">&#8592; Players</button>
-      <div style="flex:1;min-width:0"><div class="btitle ppn" id="ppname"></div><div class="bsub" id="ppmeta"></div><div id="pp-twoway-tabs" style="display:none;margin-top:6px;gap:6px"></div></div>
+      <div style="flex:1;min-width:0"><div class="btitle ppn" id="ppname"></div><div class="bsub" id="ppmeta"></div></div>
       <button class="bbk" id="pp-career-btn" onclick="goToCareerFromPP()" style="flex-shrink:0;white-space:nowrap">Career &#8599;</button>
     </div>
     <div id="ppcontent"></div>
@@ -672,11 +670,6 @@ const AB={
 };
 
 const SEASONS_AVAILABLE = [
-  {year:'1910',file:'1910.json',champs:{AL:'Philadelphia Athletics',NL:'Chicago Cubs'}},
-  {year:'1911',file:'1911.json',champs:{AL:'Philadelphia Athletics',NL:'New York Giants'}},
-  {year:'1912',file:'1912.json',champs:{AL:'Boston Red Sox',NL:'New York Giants'}},
-  {year:'1913',file:'1913.json',champs:{AL:'Philadelphia Athletics',NL:'New York Giants'}},
-  {year:'1914',file:'1914.json',champs:{AL:'Boston Braves',NL:'Boston Braves'}},
   {year:'1915',file:'1915.json',champs:{AL:'Boston Red Sox',NL:'Philadelphia Phillies'}},
   {year:'1916',file:'1916.json',champs:{AL:'Boston Red Sox',NL:'Brooklyn Robins'}},
   {year:'1917',file:'1917.json',champs:{AL:'Chicago White Sox',NL:'New York Giants'}},
@@ -799,20 +792,7 @@ let runningRecords=null; // computed once per season load
 const MO=['','January','February','March','April','May','June','July','August','September','October','November','December'];
 const MS=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-function dp(pos){if(!pos||pos==="undefined")return "";const m={"?":"DH","PP":"P","PH":"PH","PR":"PR"};return m[pos]||pos;}
-function fmtST(t){
-  if(!t) return '';
-  t=t.trim();
-  // "2:13PM" -> "2:13 PM"
-  const m1=t.match(/^(\d+:\d+)(AM|PM)$/i);
-  if(m1) return m1[1]+' '+m1[2].toUpperCase();
-  // "1905" -> "7:05 PM"
-  if(/^\d{4}$/.test(t)){
-    const h=+t.slice(0,2), m=t.slice(2);
-    return (h%12||12)+':'+m+' '+(h<12?'AM':'PM');
-  }
-  return t;
-}
+function dp(pos){if(!pos)return "";return pos==="?"?"DH":pos;}
 function fd(d){return MO[+d.slice(4,6)]+' '+parseInt(d.slice(6,8))+', '+d.slice(0,4)}
 function fds(d){return MS[+d.slice(4,6)]+' '+parseInt(d.slice(6,8))}
 function tc(code){
@@ -930,6 +910,7 @@ function goHome(){
   document.getElementById('mnav').innerHTML='';
   ['nb-schedule','nb-standings','nb-players','nb-mtp'].forEach(id=>document.getElementById(id).style.display='none');
   const _lcbh=document.getElementById('lc-btn');if(_lcbh)_lcbh.style.display='none';
+  const _scbh=document.getElementById('sc-btn');if(_scbh)_scbh.style.display='none';
   document.getElementById('season-sel').value='';
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
 }
@@ -942,9 +923,10 @@ async function loadSeason(year,silent=false){
   document.getElementById('load-text').textContent=`Loading ${year}...`;
   document.getElementById('load-text').style.color='var(--muted)';
   try{
-    const resp=await fetch(`data/${year}.json?v=${Date.now()}`);
+    const resp=await fetch(`data_v2/${year}.json?v=${Date.now()}`);
     if(!resp.ok)throw new Error(`HTTP ${resp.status}`);
-    D=await resp.json();
+    D=await resp.json()
+  if(!D.box_scores) D.box_scores = {};
     curSeason=year;
     runningRecords=null;pidxBuilt=false;pidx={};
     document.getElementById('season-sel').value=year;
@@ -1035,17 +1017,49 @@ function showView(name,skipRender){
 }
 
 let curGid=null;
-function openBox(gid,from){
+async function openBox(gid,from){
   curGid=gid;
   prevView=from||'calendar';
   document.getElementById('bkbtn').textContent=prevView==='pp'?'\u2190 Player':prevView==='team'?'\u2190 Schedule':'\u2190 Back';
   document.getElementById('vhome').classList.remove('active');
   document.querySelectorAll('#mc .view').forEach(v=>v.classList.remove('active'));
   document.getElementById('vbox').classList.add('active');
-  renderBox(gid);
   const _lcb=document.getElementById('lc-btn');if(_lcb)_lcb.style.display='';
-  const _dfb=document.getElementById('def-btn');if(_dfb)_dfb.style.display='';
-  const _bdef=document.getElementById('bdef');if(_bdef){_bdef.style.display='none';_bdef.innerHTML='';}  
+  const _scb=document.getElementById('sc-btn');if(_scb)_scb.style.display='';
+  // v2: fetch box score on demand
+  if(!D.box_scores[gid]){
+    const yr = gid.length >= 11 ? gid.slice(3,7) : curSeason;
+    const season = curSeason || yr;
+    document.getElementById('btitle').textContent = 'Loading...';
+    document.getElementById('bsub').textContent = gid;
+    try{
+      const r = await fetch(`data_v2/boxes/${season}/${gid}.json`);
+      if(r.ok){
+        const box = await r.json();
+        box.gid = box.gid || gid;
+        // Restore stripped zero fields so display code works normally
+        const normP = p => ({ab:0,h:0,d:0,t:0,bb:0,k:0,hr:0,rbi:0,sb:0,cs:0,...p});
+        const normPit = p => ({h:0,r:0,er:0,bb:0,k:0,ipouts:0,...p});
+        for(const side of ['vb','hb']){
+          const tb = box[side]||{};
+          if(tb.l) tb.l = tb.l.map(normP);
+          if(tb.b) tb.b = tb.b.map(normP);
+          if(tb.p) tb.p = tb.p.map(normPit);
+          if(tb.bp) tb.bp = tb.bp.map(normPit);
+        }
+        D.box_scores[gid] = box;
+      } else {
+        document.getElementById('btitle').textContent = 'Error loading box score';
+        document.getElementById('bsub').textContent = `Could not load data_v2/boxes/${season}/${gid}.json (${r.status})`;
+        return;
+      }
+    }catch(e){
+      document.getElementById('btitle').textContent = 'Error loading box score';
+      document.getElementById('bsub').textContent = String(e);
+      return;
+    }
+  }
+  renderBox(gid);
 }
 
 function goBackFromPP(){
@@ -1078,7 +1092,7 @@ function goBack(){
   else showView('calendar');
 }
 
-function openPP(name,team,fromView,mode){
+function openPP(name,team,fromView){
   buildIdx();
   // Try team-specific key first for disambiguation, then plain name
   const player=(team?pidx[name+'|'+team]:null)||pidx[name]||(team?pidx[name+'|'+team]:null);
@@ -1089,7 +1103,7 @@ function openPP(name,team,fromView,mode){
   document.getElementById('pp-back-btn').textContent=labels[src]||'\u2190 Back';
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById('vpp').classList.add('active');
-  renderPP(player, mode||'');
+  renderPP(player);
 }
 
 function openPPfromBox(name,team){
@@ -1177,7 +1191,7 @@ function openPanel(ds){
       <div class="dp-foot">
         ${g.v}: <span class="dp-sp" onclick="event.stopPropagation();openPP('${esc(g.vsp)}','${g.v}')">${g.vsp}</span> · <span style="color:var(--dim)">${vRec.w}-${vRec.l}</span><br>
         ${g.h}: <span class="dp-sp" onclick="event.stopPropagation();openPP('${esc(g.hsp)}','${g.h}')">${g.hsp}</span> · <span style="color:var(--dim)">${hRec.w}-${hRec.l}</span>
-        ${(g.att?'<br>Att: '+parseInt(g.att).toLocaleString():'')}
+        ${g.att?'<br>Att: '+parseInt(g.att).toLocaleString():''}
       </div>
     </div>`;
   }).join('');
@@ -1192,6 +1206,20 @@ function closePanel(){
   selectedDate=null;
 }
 
+// ── Scorecard hand-off ────────────────────────────────────────────────────────
+function openScorecard(gid){
+  const box=D.box_scores[gid];
+  if(!box){alert('Box score is still loading — try again in a second.');return;}
+  const mapLineup=(tb)=>(tb.l||[]).map(p=>({name:p.n||'',pos:p.p?(p.pos||'P'):(p.pos||'')}));
+  const dateStr=(box.d&&box.d.length===8)?`${box.d.slice(0,4)}-${box.d.slice(4,6)}-${box.d.slice(6,8)}`:'';
+  const payload={
+    away:tf(box.v), home:tf(box.h), date:dateStr, loc:'',
+    awayLineup:mapLineup(box.vb), homeLineup:mapLineup(box.hb)
+  };
+  const encoded=btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  window.open('scorecard.html?game='+encoded,'_blank');
+}
+
 // ── Box Score ─────────────────────────────────────────────────────────────────
 function renderBox(gid){
   const box=D.box_scores[gid];if(!box)return;
@@ -1199,7 +1227,7 @@ function renderBox(gid){
   const vRec=getRecordAsOf(box.v,box.d),hRec=getRecordAsOf(box.h,box.d);
 
   document.getElementById('btitle').textContent=tf(box.v)+' at '+tf(box.h);
-  document.getElementById('bsub').textContent=fd(box.d)+(box.st?' · '+fmtST(box.st):box.dn?' · '+box.dn[0].toUpperCase()+box.dn.slice(1):'')+(box.att?' · Att: '+parseInt(box.att).toLocaleString():'');
+  document.getElementById('bsub').textContent=fd(box.d)+(box.att?' · Att: '+parseInt(box.att).toLocaleString():'');
 
   const maxI=Math.max(vb.i.length,hb.i.length);
   const inH=Array.from({length:maxI},(_,i)=>`<th>${i+1}</th>`).join('');
@@ -1226,26 +1254,68 @@ function renderBox(gid){
       ${inC(hb.i,true)}<td class="lsrhe" style="font-weight:700;color:var(--text)">${hb.r}</td><td class="lsrhe">${hb.h}</td><td class="lsrhe">${hb.e}</td>
     </tr>`;
 
-  document.getElementById('bteams').innerHTML=buildTP(box.v,vb,vc,vRec,box.d,null,box.subs_v||[],null)+buildTP(box.h,hb,hc,hRec,box.d,null,box.subs_h||[],null);
-
-  // Async: load season PH splits and refresh bench sections once available
-  loadPHSplits(curSeason).then(ph=>{
-    if(!ph) return;
-    const cur = D.box_scores[gid];
-    if(!cur) return;
-    document.getElementById('bteams').innerHTML =
-      buildTP(cur.v,cur.vb,vc,vRec,cur.d,null,cur.subs_v||[],ph)+
-      buildTP(cur.h,cur.hb,hc,hRec,cur.d,null,cur.subs_h||[],ph);
-  });
+  document.getElementById('bteams').innerHTML=buildTP(box.v,vb,vc,vRec,box.d)+buildTP(box.h,hb,hc,hRec,box.d);
   renderPBP(box);
 }
 
 function renderPBP(box){
   const el=document.getElementById('bpbp');
   if(!el)return;
-  const pbp=box.pbp||[];
-  if(!pbp.length){el.innerHTML='';return;}
+  el.innerHTML=`<div class="pbp-wrap">
+    <div class="pbp-toggle" onclick="loadAndRenderPBP('${box.gid}',this)">
+      <span class="pbp-toggle-label">Play by Play</span>
+      <span class="pbp-arr" style="font-size:.7rem;color:var(--muted)">▼</span>
+    </div>
+    <div class="pbp-body" id="pbp-body-${box.gid}"></div>
+  </div>`;
+}
 
+function decodePBPArrays(arrays){
+  return arrays.map(a=>({
+    i:a[0]||'',tb:a[1]||'0',o:a[2]||'0',
+    sv:a[3]||0,sh:a[4]||0,rob:a[5]||'---',
+    bat:a[6]||'',pit:a[7]||'',cnt:a[8]||'',
+    runs:a[9]||0,desc:a[10]||'',
+  }));
+}
+
+async function loadAndRenderPBP(gid,toggleEl){
+  const bodyEl=document.getElementById('pbp-body-'+gid);
+  if(!bodyEl)return;
+  if(bodyEl.classList.contains('open')){
+    bodyEl.classList.remove('open');
+    toggleEl.querySelector('.pbp-arr').textContent='▼';
+    return;
+  }
+  if(bodyEl.dataset.loaded){
+    bodyEl.classList.add('open');
+    toggleEl.querySelector('.pbp-arr').textContent='▲';
+    return;
+  }
+  bodyEl.innerHTML='<div style="padding:8px 12px;color:var(--muted);font-size:.75rem">Loading...</div>';
+  bodyEl.classList.add('open');
+  toggleEl.querySelector('.pbp-arr').textContent='▲';
+  try{
+    const resp=await fetch(`data_v2/pbp/${curSeason}/${gid}.json`);
+    if(!resp.ok)throw new Error('no pbp');
+    const arrays=await resp.json();
+    const pbp=decodePBPArrays(arrays);
+    const box=D.box_scores[gid];
+    renderPBPBody(bodyEl,pbp,box);
+    bodyEl.dataset.loaded='1';
+  }catch(e){
+    // Fallback: use embedded pbp if available (old-format boxes)
+    const box2 = D.box_scores[gid];
+    if(box2 && box2.pbp && box2.pbp.length){
+      renderPBPBody(bodyEl, box2.pbp, box2);
+      bodyEl.dataset.loaded='1';
+    } else {
+      bodyEl.innerHTML='<div style="padding:8px 12px;color:var(--muted);font-size:.75rem">No play by play available.</div>';
+    }
+  }
+}
+
+function renderPBPBody(el,pbp,box){
   // Build name lookup from box score lineups
   const names={};
   for(const [side,ck] of [['vb','v'],['hb','h']]){
@@ -1286,14 +1356,8 @@ function renderPBP(box){
     const s3=d[2]==='3'?'⬤':'○';
     return `<span style="font-size:.6rem;letter-spacing:1px">${s2}${s3}<br>${s1}</span>`;
   };
-
-  let html=`<div class="pbp-wrap">
-    <div class="pbp-toggle" onclick="this.nextElementSibling.classList.toggle('open');this.querySelector('.pbp-arr').textContent=this.nextElementSibling.classList.contains('open')?'▲':'▼'">
-      <span class="pbp-toggle-label">Play by Play</span>
-      <span class="pbp-arr" style="font-size:.78rem;color:var(--muted)">▼</span>
-    </div>
-    <div class="pbp-body">
-    <div class="pbp-row" style="background:var(--surface2);font-weight:700;font-size:.75rem;color:var(--dim);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--border)">
+  let html=`
+    <div class="pbp-row" style="background:var(--surface2);font-weight:700;font-size:.68rem;color:var(--dim);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--border)">
       <span>Score</span><span>Batter</span><span>Out</span><span>ROB</span><span>Cnt</span><span>Result</span>
     </div>`;
 
@@ -1307,17 +1371,18 @@ function renderPBP(box){
       html+=`<div class="pbp-row${isRun?' run':''}">
         <span class="pbp-score">${p.sv}-${p.sh}</span>
         <span class="pbp-desc" style="font-weight:500">${batter}</span>
-        <span style="font-family:'Roboto Mono',monospace;font-size:.72rem;color:var(--dim)">${p.o}</span>
+        <span style="font-family:'Roboto Mono',monospace;font-size:.65rem;color:var(--dim)">${p.o}</span>
         <span class="pbp-rob">${p.rob}</span>
         <span class="pbp-cnt">${p.cnt}</span>
-        <span class="pbp-desc">${isRun?'<b>'+p.desc+'</b>':p.desc} <span style="color:var(--muted);font-size:.78rem">vs ${pitcher}</span></span>
+        <span class="pbp-desc">${isRun?'<b>'+p.desc+'</b>':p.desc} <span style="color:var(--muted);font-size:.7rem">vs ${pitcher}</span></span>
       </div>`;
     }
   }
 
-  html+=`</div></div>`;
   el.innerHTML=html;
 }
+
+
 
 function plink(name,team,year){
   if(year){
@@ -1348,13 +1413,13 @@ async function openPlayerFromPostseason(name, team, year) {
   renderPP(p);
 }
 
-function buildTP(code,tb,color,rec,date,psYear,gameSubs,phSplits){
+function buildTP(code,tb,color,rec,date,psYear){
   const sec=ts(code);
   const lrows=(tb.l||[]).map((p,i)=>{
     const isPit=p.p;
     const pbadge=isPit?`<span class="pb pitcher">P</span>`:`<span class="pb">${dp(p.pos)}</span>`;
     const btBadge=p.bt?`<span class="pb" style="background:var(--surface2);color:var(--muted);font-size:.6rem">${p.bt==='B'?'S':p.bt}</span>`:'';
-    const ab=p.ab??'—',h=p.h??'—';
+    const ab=p.ab??0,h=p.h??0;
     const stats=`<td class="st${p.h?' val':''}">${h}-${ab}</td><td class="st${p.d?' val':''}">${p.d||''}</td><td class="st${p.t?' val':''}">${p.t||''}</td><td class="st${p.bb?' val':''}">${p.bb||''}</td><td class="st${p.k?' val':''}">${p.k||''}</td><td class="st${p.hr?' val':''}">${p.hr||''}</td><td class="st${p.rbi?' val':''}">${p.rbi||''}</td><td class="st${p.sb?' val':''}">${p.sb||''}</td>`;
     return `<tr>
       <td>${i+1}</td>
@@ -1366,56 +1431,42 @@ function buildTP(code,tb,color,rec,date,psYear,gameSubs,phSplits){
   // Add pinch batters as PH rows after lineup
   const benchRows=(tb.b||[]).filter(p=>p.a&&(p.ab||p.bb)).map(p=>{
     const btBadge2=p.bt?`<span class="pb" style="background:var(--surface2);color:var(--muted);font-size:.6rem">${p.bt==='B'?'S':p.bt}</span>`:'';
-    const ab=p.ab??'—',h=p.h??'—';
+    const ab=p.ab??0,h=p.h??0;
     const stats=`<td class="st${p.h?' val':''}">${h}-${ab}</td><td class="st${p.d?' val':''}">${p.d||''}</td><td class="st${p.t?' val':''}">${p.t||''}</td><td class="st${p.bb?' val':''}">${p.bb||''}</td><td class="st${p.k?' val':''}">${p.k||''}</td><td class="st${p.hr?' val':''}">${p.hr||''}</td><td class="st${p.rbi?' val':''}">${p.rbi||''}</td><td class="st">${p.sb||''}</td>`;
     return `<tr style="opacity:.8;background:var(--surface2)">
-      <td style="color:var(--muted);font-size:.78rem">PH</td>
-      <td>${plink(p.n,code,psYear)}<span class="pb" style="background:var(--surface2);color:var(--muted);font-size:.6rem">PH</span>${btBadge2}</td>
+      <td style="color:var(--dim);font-size:.7rem">PH</td>
+      <td>${plink(p.n,code,psYear)}<span class="pb" style="background:var(--surface2);color:var(--dim);font-size:.6rem">PH</span>${btBadge2}</td>
       ${stats}
     </tr>`;
   }).join('');
 
-  function rlBench(items,subs,phSplits,bioByName){
-    if(!items||!items.length)return '<span style="color:var(--muted);font-size:.85rem">—</span>';
-    return '<div style="display:flex;flex-direction:column;gap:2px;padding:2px 0">'+items.map(p=>{
-      const sub=(subs||[]).find(s=>s.n===p.n);
-      const subInfo=sub?`<span style="color:var(--muted);font-size:.75rem"> for ${sub.for} · ${sub.inn}${sub.half==='bot'?'▼':'▲'}</span>`:'';
-      // Season PH appearance counts vs L/R
-      let phInfo='';
-      if(phSplits && p.id && phSplits[p.id]){
-        const s=phSplits[p.id];
-        const L=s.L||0, R=s.R||0;
-        if(L||R){
-          phInfo=`<div style="color:var(--muted);font-size:.72rem;margin-top:1px">PH: ${L} vs L · ${R} vs R</div>`;
-        }
-      }
+  function rlBench(items){
+    if(!items||!items.length)return '<span style="color:var(--dim);font-size:.75rem;padding:2px 0">—</span>';
+    return items.map(p=>{
       if(p.a){
-        const stats=`${p.h}-${p.ab}${p.hr?' HR':''} ${p.bb?p.bb+'BB':''} ${p.k?p.k+'K':''}`.trim();
-        return `<div style="display:flex;flex-direction:column;font-size:.85rem"><div style="display:flex;justify-content:space-between;align-items:baseline"><span><span class="ri app" style="padding:0" onclick="openPPfromBox('${esc(p.n)}','${code}')">${p.n}<span style="font-size:.72rem;vertical-align:super">*</span></span>${subInfo}</span><span style="color:var(--muted);font-family:'Roboto Mono',monospace;font-size:.8rem">${stats}</span></div>${phInfo}</div>`;
+        const stats=`${p.h||0}-${p.ab||0}${p.bb?' BB:'+p.bb:''}${p.k?' K:'+p.k:''}${p.hr?' HR:'+p.hr:''}`;
+        return `<span class="ri app" onclick="openPPfromBox('${esc(p.n)}','${code}')">${p.n}<span class="ri-stats">${stats}</span></span>`;
       }
-      return `<div style="font-size:.85rem"><span class="ri" style="padding:0" onclick="openPPfromBox('${esc(p.n)}','${code}')">${p.n}</span>${subInfo}${phInfo}</div>`;
-    }).join('')+'</div>';
+      return `<span class="ri" onclick="openPPfromBox('${esc(p.n)}','${code}')">${p.n}</span>`;
+    }).join('');
   }
 
-  function rlBP(items,subs){
-    if(!items||!items.length)return '<span style="color:var(--muted);font-size:.85rem">—</span>';
-    return '<div style="display:flex;flex-direction:column;gap:2px;padding:2px 0">'+items.map(p=>{
-      const bsub=(subs||[]).find(s=>s.n===p.n&&s.fpos===1);
-      const bsubInfo=bsub?`<span style="color:var(--muted);font-size:.75rem"> for ${bsub.for} · ${bsub.inn}${bsub.half==='bot'?'▼':'▲'}</span>`:'';
+  function rlBP(items){
+    if(!items||!items.length)return '<span style="color:var(--dim);font-size:.75rem;padding:2px 0">—</span>';
+    return items.map(p=>{
       if(p.a){
-        const dec=p.dec?`<span class="db d${p.dec}" style="margin-right:2px">${p.dec}</span>`:'';
-        const stats=`${p.ip} IP${p.h?' '+p.h+'H':''}${p.er!==undefined?' '+p.er+' ER':''}${p.bb?' '+p.bb+'BB':''}${p.k?' '+p.k+'K':''}${p.np?' '+p.np+'P':''}`;
-        return `<div style="display:flex;justify-content:space-between;align-items:baseline;font-size:.85rem"><span>${dec}<span class="ri app" style="padding:0" onclick="openPPfromBox('${esc(p.n)}','${code}')">${p.n}<span style="font-size:.72rem;vertical-align:super">*</span></span>${bsubInfo}</span><span style="color:var(--muted);font-family:'Roboto Mono',monospace;font-size:.8rem">${stats}</span></div>`;
+        const dec=p.dec?`<span class="db d${p.dec}">${p.dec}</span>`:'';
+        return `<span class="ri app" onclick="openPPfromBox('${esc(p.n)}','${code}')">${p.n}${dec}<span class="ri-stats">${p.ip||''} ${p.h||0}H ${p.r||0}R</span></span>`;
       }
-      return `<div style="font-size:.85rem"><span class="ri" style="padding:0" onclick="openPPfromBox('${esc(p.n)}','${code}')">${p.n}</span>${bsubInfo}</div>`;
-    }).join('')+'</div>';
+      return `<span class="ri" onclick="openPPfromBox('${esc(p.n)}','${code}')">${p.n}</span>`;
+    }).join('');
   }
 
   const prows=(tb.p||[]).map(p=>`<tr>
     <td>${plink(p.n,code,psYear)}${p.dec?`<span class="db d${p.dec}">${p.dec}</span>`:''}</td>
-    <td class="st">${p.ip}</td><td class="st${p.h?'':''}">${p.h}</td>
-    <td class="st">${p.r}</td><td class="st">${p.er}</td>
-    <td class="st">${p.bb||0}</td><td class="st">${p.k||0}</td><td class="st${p.np?' val':''}">${p.np||''}</td>
+    <td class="st">${p.ip||''}</td><td class="st${p.h?'':''}">${p.h||0}</td>
+    <td class="st">${p.r||0}</td><td class="st">${p.er||0}</td>
+    <td class="st">${p.bb||0}</td><td class="st">${p.k||0}</td>
   </tr>`).join('');
 
   const activeCount=(tb.l||[]).length+(tb.b||[]).length+(tb.bp||[]).length;
@@ -1432,11 +1483,11 @@ function buildTP(code,tb,color,rec,date,psYear,gameSubs,phSplits){
       <tr style="background:${sec}30"><th>#</th><th>Player</th><th>H-AB</th><th>2B</th><th>3B</th><th>BB</th><th>K</th><th>HR</th><th>RBI</th><th>SB</th></tr>
       ${lrows||benchRows ? lrows+benchRows : '<tr><td colspan="11" style="color:var(--muted);padding:8px;font-style:italic">No batting data available for this game</td></tr>'}
     </table>
-    <div class="sec-label" style="border-left-color:${color}">Bench</div><div class="rl" style="background:${sec}10">${rlBench(tb.b||[],gameSubs||[],phSplits)}</div>
-    <div class="sec-label" style="border-left-color:${color}">Bullpen</div><div class="rl" style="background:${sec}10">${rlBP(tb.bp||[],gameSubs||[])}</div>
+    <div class="sec-label" style="border-left-color:${color}">Bench</div><div class="rl" style="background:${sec}10">${rlBench(tb.b||[])}</div>
+    <div class="sec-label" style="border-left-color:${color}">Bullpen</div><div class="rl" style="background:${sec}10">${rlBP(tb.bp||[])}</div>
     <div class="sec-label" style="border-left-color:${color}">Pitching</div>
     <table class="ptbl">
-      <tr><th>Pitcher</th><th>IP</th><th>H</th><th>R</th><th>ER</th><th>BB</th><th>K</th><th>NP</th></tr>
+      <tr><th>Pitcher</th><th>IP</th><th>H</th><th>R</th><th>ER</th><th>BB</th><th>K</th></tr>
       ${prows}
     </table>
   </div>`;
@@ -1464,7 +1515,7 @@ function renderTeamSchedule(teamCode){
         const oppR=isHome?parseInt(g.vr||0):parseInt(g.hr||0);
         const res=g.w===teamCode?'W':g.w?'L':'';
         const rec=getRecordAsOf(teamCode,date);
-        games.push({date,gid:g.gid,opp,isHome,tmR,oppR,res,sp:isHome?g.hsp:g.vsp,rec,n:g.n,tp:g.tp||0});
+        games.push({date,gid:g.gid,opp,isHome,tmR,oppR,res,sp:isHome?g.hsp:g.vsp,rec,n:g.n});
       }
     }
   }
@@ -1595,8 +1646,8 @@ function buildIdx(){
         const ex=pl.games.find(g=>g.gid===gid);
         const ipouts=ipToOuts(p.ip);
         const role=p.gs?'S':'BP';
-        if(!ex)pl.games.push({date:box.d,gid,team:code,opp,side,role,appeared:true,ip:p.ip,ipouts,ph:p.h,pr:p.r,per:p.er,pbb:p.bb,pk:p.k,dec:p.dec,np:p.np||0,tr:tr2,or:or2});
-        else{ex.role=role;ex.appeared=true;ex.ip=p.ip;ex.ipouts=ipouts;ex.ph=p.h;ex.pr=p.r;ex.per=p.er;ex.pbb=p.bb;ex.pk=p.k;ex.dec=p.dec;ex.np=p.np||0;}
+        if(!ex)pl.games.push({date:box.d,gid,team:code,opp,side,role,appeared:true,ip:p.ip,ipouts,ph:p.h,pr:p.r,per:p.er,pbb:p.bb,pk:p.k,dec:p.dec,tr:tr2,or:or2});
+        else{ex.role=role;ex.appeared=true;ex.ip=p.ip;ex.ipouts=ipouts;ex.ph=p.h;ex.pr=p.r;ex.per=p.er;ex.pbb=p.bb;ex.pk=p.k;ex.dec=p.dec;}
       });
     });
   });
@@ -1655,10 +1706,6 @@ function buildIdx(){
       const hasPosStart=pl.games.some(g=>g.role==='S'&&g.pos&&g.pos!=='P'&&g.pos!=='?');
       pl.isPitcher=hasIP&&!hasPosStart;
     }
-    // Two-way detection: significant batting AND pitching
-    const sigIP  = pl.games.reduce((s,g)=>s+(g.ipouts||0),0) >= 20*3; // 20+ IP
-    const sigAB  = pl.games.reduce((s,g)=>s+(g.ab||0),0) >= 50;
-    pl.isTwoWay  = sigIP && sigAB;
   });
 }
 
@@ -1708,20 +1755,14 @@ function filterPlayers(q){
   }).join('');
 }
 
-function renderPP(player, mode){
+function renderPP(player){
   _ppPlayer=player;
-  const isTwoWay = player.isTwoWay||false;
-  if(!mode && isTwoWay) mode='bat';
-  if(mode) _ppMode=mode;
   const teams=player.teams||[];
   const color=tc(teams[0]);
-  const isPitcher = isTwoWay ? (mode==='pit') : player.isPitcher;
-  // For two-way pitching mode: only show games where he actually pitched
-  const starts=isPitcher
-    ? player.games.filter(g=>g.role==='S'&&(g.ipouts||0)>0)
-    : player.games.filter(g=>g.role==='S');
+  const isPitcher=player.isPitcher;
+  const starts=player.games.filter(g=>g.role==='S');
   const bench=player.games.filter(g=>g.role==='B'&&g.appeared);
-  const relief=player.games.filter(g=>(g.role==='BP'||g.role==='S')&&g.appeared&&!g.gs&&(g.ipouts||0)>0);
+  const relief=player.games.filter(g=>(g.role==='BP'||g.role==='S')&&g.appeared&&!g.gs);
   const positions=[...new Set(starts.map(g=>g.pos).filter(Boolean))].join(' / ')||'—';
   document.getElementById('ppname').textContent=player.name;
   const teamStr=teams.map(t=>`<span class='pl' style='cursor:pointer' onclick="openTeamSchedule('${t}','pp')">${D.teams[t]?D.teams[t].full:t}</span>`).join(' → ');
@@ -1739,19 +1780,6 @@ function renderPP(player, mode){
   const btHand=player.games.find(g=>g.bt)?player.games.find(g=>g.bt).bt:'';
   const handStr=btHand?(' · Bats '+(btHand==='B'?'Switch':btHand)):'';
   document.getElementById('ppmeta').innerHTML=teamStr+' · '+curSeason+ageStr+' · '+player.games.filter(g=>g.role==='S'||g.appeared).length+' G · '+positions+handStr;
-  // Two-way tab buttons
-  const twEl=document.getElementById('pp-twoway-tabs');
-  if(twEl){
-    if(isTwoWay){
-      twEl.style.display='';
-      twEl.innerHTML=`
-        <button class="bbk" onclick="renderPP(_ppPlayer,'bat')" style="font-size:.75rem;${mode==='bat'||!mode?'border-color:var(--accent);color:var(--accent)':''}">⚾ Batting</button>
-        <button class="bbk" onclick="renderPP(_ppPlayer,'pit')" style="font-size:.75rem;${mode==='pit'?'border-color:var(--accent);color:var(--accent)':''}">⚾ Pitching</button>`;
-    } else {
-      twEl.style.display='none';
-      twEl.innerHTML='';
-    }
-  }
 
   const ab=starts.reduce((s,g)=>s+(g.ab||0),0),h=starts.reduce((s,g)=>s+(g.h||0),0);
   const bb=starts.reduce((s,g)=>s+(g.bb||0),0),k=starts.reduce((s,g)=>s+(g.k||0),0);
@@ -1763,15 +1791,14 @@ function renderPP(player, mode){
   const totIpouts=allP.reduce((s,g)=>s+(g.ipouts||0),0);
   const totPh=allP.reduce((s,g)=>s+(g.ph||0),0),totPer=allP.reduce((s,g)=>s+(g.per||0),0);
   const totPbb=allP.reduce((s,g)=>s+(g.pbb||0),0),totPk=allP.reduce((s,g)=>s+(g.pk||0),0);
-  const pitGames=player.games.filter(g=>(g.ipouts||0)>0);
-  const totW=pitGames.filter(g=>g.dec==='W').length;
-  const totL=pitGames.filter(g=>g.dec==='L').length;
-  const totSv=pitGames.filter(g=>g.dec==='S').length;
+  const totW=player.games.filter(g=>g.dec==='W').length;
+  const totL=player.games.filter(g=>g.dec==='L').length;
+  const totSv=player.games.filter(g=>g.dec==='S').length;
   const era=totIpouts>0?(totPer/(totIpouts/27)).toFixed(2):'—';
   const ipDisp=Math.floor(totIpouts/3)+'.'+(totIpouts%3);
   const ipToOuts=ip=>{if(!ip)return 0;const p=ip.split('.');return parseInt(p[0])*3+(parseInt(p[1])||0);};
 
-  const sorted=[...player.games].filter(g=>isPitcher ? (g.ipouts||0)>0 : (g.role==='S'||g.appeared)).sort((a,b)=>a.date.localeCompare(b.date));
+  const sorted=[...player.games].filter(g=>g.role==='S'||g.appeared).sort((a,b)=>a.date.localeCompare(b.date));
 
   const _sRows=[],_bRows=[];
   const rows=sorted.map(g=>{
@@ -1789,18 +1816,18 @@ function renderPP(player, mode){
         <td>${g.role==='S'?'GS':'RP'}</td><td style="${prcol}">${score}</td>
         <td>${g.ip||'—'}</td><td>${g.ph!=null?g.ph:'—'}</td>
         <td>${g.per!=null?g.per:'—'}</td><td>${g.pbb!=null?g.pbb:'—'}</td>
-        <td>${g.pk!=null?g.pk:'—'}</td><td>${dec}</td><td>${g.np||''}</td>
+        <td>${g.pk!=null?g.pk:'—'}</td><td>${dec}</td>
       </tr>`;
     }
     const odotB=`<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${tc(g.opp)};margin-right:4px;vertical-align:middle"></span>`;
     const bcol=res==='W'?'color:#166534;font-weight:700':res==='L'?'color:#991b1b;font-weight:700':'color:var(--muted)';
     if(g.role==='B')return `<tr onclick="openBox('${g.gid}','pp')">
       <td>${fds(g.date)}</td><td>${tdot}${tname}</td><td>${odotB}${opp}</td><td>PH/PR</td><td style="${bcol}">${score}</td>
-      <td>${g.ab??0}</td><td>${g.h??0}</td><td>${g.d||''}</td><td>${g.t||''}</td><td>${g.bb??0}</td><td>${g.k??0}</td><td>${g.hr||''}</td><td>${g.rbi||''}</td><td>${g.sb||''}</td><td>${g.cs||''}</td>
+      <td>${g.ab}</td><td>${g.h}</td><td>${g.d||''}</td><td>${g.t||''}</td><td>${g.bb}</td><td>${g.k}</td><td>${g.hr||''}</td><td>${g.rbi||''}</td><td>${g.sb||''}</td><td>${g.cs||''}</td>
     </tr>`;
     return `<tr onclick="openBox('${g.gid}','pp')">
       <td>${fds(g.date)}</td><td>${tdot}${tname}</td><td>${odotB}${opp}${g.ph?`<span style='font-size:.6rem;color:var(--muted);margin-left:3px'>${g.ph}P</span>`:''}</td><td>${dp(g.pos)||'\u2014'}</td><td style="${bcol}">${score}</td>
-      <td>${g.ab??0}</td><td>${g.h??0}</td><td>${g.d||''}</td><td>${g.t||''}</td><td>${g.bb??0}</td><td>${g.k??0}</td><td>${g.hr||''}</td><td>${g.rbi||''}</td><td>${g.sb||''}</td><td>${g.cs||''}</td>
+      <td>${g.ab}</td><td>${g.h}</td><td>${g.d||''}</td><td>${g.t||''}</td><td>${g.bb}</td><td>${g.k}</td><td>${g.hr||''}</td><td>${g.rbi||''}</td><td>${g.sb||''}</td><td>${g.cs||''}</td>
     </tr>`;
   });
   // Split rows into starts and bench/relief
@@ -1818,12 +1845,11 @@ function renderPP(player, mode){
   const rowsJoined=rows.join('');
   document.getElementById('ppcontent').innerHTML=`
     <div class="stat-bar" style="border-left:4px solid ${color};border-top:3px solid ${color};padding-top:11px">
-      <span><b>G</b>${isPitcher ? starts.length + relief.length : player.games.filter(g=>g.role==='S'||g.appeared).length}</span>
+      <span><b>G</b>${player.games.filter(g=>g.role==='S'||g.appeared).length}</span>
       <span><b>GS</b>${starts.length}</span>
       ${isPitcher&&player.games.filter(g=>g.role==='BP'&&g.appeared).length>0?`<span><b>RP</b>${player.games.filter(g=>g.role==='BP'&&g.appeared).length}</span>`:''}
       ${isPitcher
-        ?`<span><b>W</b>${totW}</span><span><b>L</b>${totL}</span><span><b>SV</b>${totSv}</span><span><b>IP</b>${ipDisp}</span><span><b>ERA</b>${era}</span><span><b>H</b>${totPh}</span><span><b>BB</b>${totPbb}</span><span><b>K</b>${totPk}</span>
-      <span><b>NP</b>${allP.reduce((s,g)=>s+(g.np||0),0)||'—'}</span>`
+        ?`<span><b>W</b>${totW}</span><span><b>L</b>${totL}</span><span><b>SV</b>${totSv}</span><span><b>IP</b>${ipDisp}</span><span><b>ERA</b>${era}</span><span><b>H</b>${totPh}</span><span><b>BB</b>${totPbb}</span><span><b>K</b>${totPk}</span>`
         :`<span><b>AB</b>${ab}</span><span><b>H</b>${h}</span><span><b>AVG</b>${avg}</span><span><b>2B</b>${d}</span><span><b>3B</b>${t2}</span><span><b>HR</b>${hr}</span><span><b>RBI</b>${rbi}</span><span><b>BB</b>${bb}</span><span><b>K</b>${k}</span><span><b>SB</b>${sb}</span><span><b>CS</b>${cs}</span>`
       }
     </div>
@@ -1875,7 +1901,7 @@ function renderPP(player, mode){
       return pp?'<div class="splits-bar" style="gap:12px">'+pp+'</div>':'';
     })()}
     ${(()=>{
-      const pitHdr='<th>Date</th><th>Team</th><th>Opp</th><th>Role</th><th>Result</th><th>IP</th><th>H</th><th>ER</th><th>BB</th><th>K</th><th>Dec</th><th>NP</th>';
+      const pitHdr='<th>Date</th><th>Team</th><th>Opp</th><th>Role</th><th>Result</th><th>IP</th><th>H</th><th>ER</th><th>BB</th><th>K</th><th>Dec</th>';
       const batHdr='<th>Date</th><th>Team</th><th>Opp</th><th>Pos</th><th>Result</th><th>AB</th><th>H</th><th>2B</th><th>3B</th><th>BB</th><th>K</th><th>HR</th><th>RBI</th><th>SB</th><th>CS</th>';
       const hdr=isPitcher?pitHdr:batHdr;
       function mkTbl(rws,label){
@@ -1912,7 +1938,7 @@ async function loadCsIndex(){
   if(csLoading)return false;
   csLoading=true;
   try{
-    const r=await fetch('data/player_index.json?v='+Date.now());
+    const r=await fetch('data_v2/player_index.json?v='+Date.now());
     if(!r.ok)throw new Error('player_index.json not found');
     const raw=await r.json();
     // Build searchable map: name_lower -> [entries]
@@ -2000,122 +2026,91 @@ async function csLoadAll(name,sid,birth){
   const results=await Promise.all(seasons.map(yr=>csLoadSeasonData(name,yr,birth,teamsMap?teamsMap[yr]:null,entry&&entry.pid?entry.pid:null)));
   // Determine if pitcher from any season
   const isPitcher=results.some(r=>r&&r.isPitcher);
-  const batHdr='<th>Year</th><th>Age</th><th>Team</th><th>G</th><th>GS</th><th>AB</th><th>H</th><th>AVG</th><th>2B</th><th>3B</th><th>HR</th><th>RBI</th><th>BB</th><th>K</th>';
-  const pitHdr='<th>Year</th><th>Age</th><th>Team</th><th>G</th><th>GS</th><th>W</th><th>L</th><th>SV</th><th>IP</th><th>ERA</th><th>H</th><th>BB</th><th>K</th>';
-
-  // Helper to build one season row
-  function mkBatRow(r, yr, ageDisp, col){
-    const avg=r.ab>0?('.'+Math.round(r.h/r.ab*1000).toString().padStart(3,'0')):'—';
-    return `<tr onclick="loadSeason('${yr}').then(()=>openPP('${esc(name)}','','','pit'))">
-      <td>${yr}</td><td>${ageDisp}</td><td style="${col}">${r.teamName}</td>
-      <td class="${r.pg?'cs-val':''}">${r.pg||0}</td><td class="${r.gs?'cs-val':''}">${r.gs||0}</td>
-      <td class="${r.ab?'cs-val':''}">${r.ab||0}</td><td class="${r.h?'cs-val':''}">${r.h||0}</td>
-      <td class="${r.ab?'cs-val':''}">${r.ab>0?avg:'—'}</td>
-      <td class="${r.d?'cs-val':''}">${r.d||0}</td><td class="${r.t?'cs-val':''}">${r.t||0}</td>
-      <td class="${r.hr?'cs-val':''}">${r.hr||0}</td><td class="${r.rbi?'cs-val':''}">${r.rbi||0}</td>
-      <td class="${r.bb?'cs-val':''}">${r.bb||0}</td><td class="${r.k?'cs-val':''}">${r.k||0}</td>
-    </tr>`;
-  }
-  function mkPitRow(r, yr, ageDisp, col){
-    const era=r.ipouts>0?(r.per/(r.ipouts/27)).toFixed(2):'—';
-    const ip=Math.floor(r.ipouts/3)+'.'+(r.ipouts%3);
-    return `<tr onclick="loadSeason('${yr}').then(()=>openPP('${esc(name)}','','','pit'))">
-      <td>${yr}</td><td>${ageDisp}</td><td style="${col}">${r.teamName}</td>
-      <td class="${r.pg?'cs-val':''}">${r.pg||0}</td><td class="${r.gs?'cs-val':''}">${r.gs||0}</td>
-      <td class="${r.w?'cs-val':''}">${r.w||0}</td><td class="${r.l?'cs-val':''}">${r.l||0}</td>
-      <td class="${r.sv?'cs-val':''}">${r.sv||0}</td>
-      <td class="${r.ipouts?'cs-val':''}">${r.ipouts?ip:'—'}</td>
-      <td class="${r.ipouts?'cs-val':''}">${era}</td>
-      <td class="${r.ph?'cs-val':''}">${r.ph||0}</td>
-      <td class="${r.pbb?'cs-val':''}">${r.pbb||0}</td>
-      <td class="${r.pk?'cs-val':''}">${r.pk||0}</td>
-    </tr>`;
-  }
-
-  function getAge(r, yr, birth){
-    const knownBirthYr = birth ? +birth : 0;
-    if(knownBirthYr>1800) return String(+yr-knownBirthYr);
-    if(r.birth&&r.birth.length===8){
+  const headers=isPitcher
+    ?'<th>Year</th><th>Age</th><th>Team</th><th>G</th><th>GS</th><th>W</th><th>L</th><th>SV</th><th>IP</th><th>ERA</th><th>H</th><th>BB</th><th>K</th>'
+    :'<th>Year</th><th>Age</th><th>Team</th><th>G</th><th>GS</th><th>AB</th><th>H</th><th>AVG</th><th>2B</th><th>3B</th><th>HR</th><th>RBI</th><th>BB</th><th>K</th>';
+  const rows=results.filter(Boolean).map(r=>{
+    const yr=r.year;
+    const col=r.teamCode?`color:${r.teamColor}`:'';
+    let ageDisp='—';
+    // Use birth year from career index (reliable) not d.births (may be wrong player)
+    const knownBirthYr=birth?+birth:0;
+    if(knownBirthYr>1800){
+      ageDisp=String(+yr-knownBirthYr);
+    } else if(r.birth&&r.birth.length===8){
       const by=+r.birth.slice(0,4),bm=+r.birth.slice(4,6),bd=+r.birth.slice(6,8);
-      let age=+yr-by; if(bm>4||(bm===4&&bd>1))age--; return String(age);
+      let age=+yr-by;
+      if(bm>4||(bm===4&&bd>1))age--;
+      ageDisp=String(age);
     }
-    return '—';
-  }
-
-  // Build batting and pitching rows separately
-  const batRows = results.filter(Boolean)
-    .filter(r=>r.ab>=10)
-    .map(r=>mkBatRow(r, r.year, getAge(r,r.year,birth), r.teamCode?`color:${r.teamColor}`:''));
-  const pitRows = results.filter(Boolean)
-    .filter(r=>r.ipouts>=9)
-    .map(r=>mkPitRow(r, r.year, getAge(r,r.year,birth), r.teamCode?`color:${r.teamCode?r.teamColor:''}`:'')); 
-
-  const hasSigPitching = results.filter(Boolean).some(r=>r.ipouts>=20);
-  const hasSigBatting  = results.filter(Boolean).some(r=>r.ab>=50);
-  const isTwoWay = hasSigPitching && hasSigBatting;
-  const isPitcherOnly = isPitcher && !isTwoWay;
-
-  // Career totals rows
-  const mkBatTotals = () => {
-    const ab=results.filter(Boolean).reduce((s,r)=>s+(r.ab||0),0);
-    const h=results.filter(Boolean).reduce((s,r)=>s+(r.h||0),0);
-    const avg=ab>0?('.'+Math.round(h/ab*1000).toString().padStart(3,'0')):'—';
-    return `<tr style="border-top:2px solid var(--border);font-weight:700;background:var(--surface2)">
-      <td colspan="2" style="font-style:italic">Career</td><td></td>
-      <td style="color:var(--accent)">${results.filter(Boolean).reduce((s,r)=>s+(r.g||0),0)}</td>
-      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.gs||0),0)}</td>
-      <td>${ab}</td><td>${h}</td><td>${avg}</td>
+    if(isPitcher){
+      const era=r.ipouts>0?(r.per/(r.ipouts/27)).toFixed(2):'—';
+      const ip=Math.floor(r.ipouts/3)+'.'+(r.ipouts%3);
+      return `<tr onclick="loadSeason('${yr}').then(()=>openPP('${esc(name)}'))">
+        <td>${yr}</td>
+        <td>${ageDisp}</td>
+        <td style="${col}">${r.teamName}</td>
+        <td class="${r.g?'cs-val':''}">${r.g||0}</td>
+        <td class="${r.gs?'cs-val':''}">${r.gs||0}</td>
+        <td class="${r.w?'cs-val':''}">${r.w||0}</td>
+        <td class="${r.l?'cs-val':''}">${r.l||0}</td>
+        <td class="${r.sv?'cs-val':''}">${r.sv||0}</td>
+        <td class="${r.ipouts?'cs-val':''}">${r.ipouts?ip:'—'}</td>
+        <td class="${r.ipouts?'cs-val':''}">${era}</td>
+        <td class="${r.ph?'cs-val':''}">${r.ph||0}</td>
+        <td class="${r.pbb?'cs-val':''}">${r.pbb||0}</td>
+        <td class="${r.pk?'cs-val':''}">${r.pk||0}</td>
+      </tr>`;
+    } else {
+      const avg=r.ab>0?('.'+Math.round(r.h/r.ab*1000).toString().padStart(3,'0')):'—';
+      return `<tr onclick="loadSeason('${yr}').then(()=>openPP('${esc(name)}'))">
+        <td>${yr}</td>
+        <td>${ageDisp}</td>
+        <td style="${col}">${r.teamName}</td>
+        <td class="${r.g?'cs-val':''}">${r.g||0}</td>
+        <td class="${r.gs?'cs-val':''}">${r.gs||0}</td>
+        <td class="${r.ab?'cs-val':''}">${r.ab||0}</td>
+        <td class="${r.h?'cs-val':''}">${r.h||0}</td>
+        <td class="${r.ab?'cs-val':''}">${r.ab>0?avg:'—'}</td>
+        <td class="${r.d?'cs-val':''}">${r.d||0}</td>
+        <td class="${r.t?'cs-val':''}">${r.t||0}</td>
+        <td class="${r.hr?'cs-val':''}">${r.hr||0}</td>
+        <td class="${r.rbi?'cs-val':''}">${r.rbi||0}</td>
+        <td class="${r.bb?'cs-val':''}">${r.bb||0}</td>
+        <td class="${r.k?'cs-val':''}">${r.k||0}</td>
+      </tr>`;
+    }
+  }).join('');
+  statsDiv.innerHTML=`<table class="cs-tbl"><tr>${headers}</tr>${rows}
+  <tr style="border-top:2px solid var(--border);font-weight:700;background:var(--surface2)">
+    <td colspan="2" style="font-style:italic">Career</td><td></td><td style="color:var(--accent)">${results.filter(Boolean).reduce((s,r)=>s+(r.g||0),0)}</td>
+    <td>${results.filter(Boolean).reduce((s,r)=>s+(r.gs||0),0)}</td>
+    ${isPitcher?`
+      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.w||0),0)}</td>
+      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.l||0),0)}</td>
+      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.sv||0),0)}</td>
+      <td>${(()=>{const o=results.filter(Boolean).reduce((s,r)=>s+(r.ipouts||0),0);return Math.floor(o/3)+'.'+o%3;})()}</td>
+      <td>${(()=>{const o=results.filter(Boolean).reduce((s,r)=>s+(r.ipouts||0),0),e=results.filter(Boolean).reduce((s,r)=>s+(r.per||0),0);return o>0?(e/(o/27)).toFixed(2):'—';})()}</td>
+      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.ph||0),0)}</td>
+      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.pbb||0),0)}</td>
+      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.pk||0),0)}</td>`
+    :`
+      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.ab||0),0)}</td>
+      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.h||0),0)}</td>
+      <td>${(()=>{const ab=results.filter(Boolean).reduce((s,r)=>s+(r.ab||0),0),h=results.filter(Boolean).reduce((s,r)=>s+(r.h||0),0);return ab>0?('.'+Math.round(h/ab*1000).toString().padStart(3,'0')):'—';})()}</td>
       <td>${results.filter(Boolean).reduce((s,r)=>s+(r.d||0),0)}</td>
       <td>${results.filter(Boolean).reduce((s,r)=>s+(r.t||0),0)}</td>
       <td>${results.filter(Boolean).reduce((s,r)=>s+(r.hr||0),0)}</td>
       <td>${results.filter(Boolean).reduce((s,r)=>s+(r.rbi||0),0)}</td>
       <td>${results.filter(Boolean).reduce((s,r)=>s+(r.bb||0),0)}</td>
-      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.k||0),0)}</td>
-    </tr>`;
-  };
-  const mkPitTotals = () => {
-    const ip=results.filter(Boolean).reduce((s,r)=>s+(r.ipouts||0),0);
-    const er=results.filter(Boolean).reduce((s,r)=>s+(r.per||0),0);
-    const era=ip>0?(er/(ip/27)).toFixed(2):'—';
-    return `<tr style="border-top:2px solid var(--border);font-weight:700;background:var(--surface2)">
-      <td colspan="2" style="font-style:italic">Career</td><td></td>
-      <td style="color:var(--accent)">${results.filter(Boolean).filter(r=>r.ipouts>=9).reduce((s,r)=>s+(r.pg||0),0)}</td>
-      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.gs||0),0)}</td>
-      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.w||0),0)}</td>
-      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.l||0),0)}</td>
-      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.sv||0),0)}</td>
-      <td>${(()=>{const o=results.filter(Boolean).reduce((s,r)=>s+(r.ipouts||0),0);return Math.floor(o/3)+'.'+o%3;})()}</td>
-      <td>${era}</td>
-      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.ph||0),0)}</td>
-      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.pbb||0),0)}</td>
-      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.pk||0),0)}</td>
-    </tr>`;
-  };
-
-  // Build the HTML
-  let tableHTML = '';
-  if(isTwoWay){
-    // Two separate tables
-    if(batRows.length){
-      tableHTML += `<div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin:8px 0 4px">Batting</div>
-        <table class="cs-tbl"><tr>${batHdr}</tr>${batRows.join('')}${mkBatTotals()}</table>`;
-    }
-    if(pitRows.length){
-      tableHTML += `<div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin:14px 0 4px">Pitching</div>
-        <table class="cs-tbl"><tr>${pitHdr}</tr>${pitRows.join('')}${mkPitTotals()}</table>`;
-    }
-  } else if(isPitcherOnly){
-    tableHTML = `<table class="cs-tbl"><tr>${pitHdr}</tr>${pitRows.join('')}${mkPitTotals()}</table>`;
-  } else {
-    tableHTML = `<table class="cs-tbl"><tr>${batHdr}</tr>${batRows.join('')}${mkBatTotals()}</table>`;
-  }
-
-  statsDiv.innerHTML=`${tableHTML}
+      <td>${results.filter(Boolean).reduce((s,r)=>s+(r.k||0),0)}</td>`}
+  </tr>
+</table>
 <div style="margin-top:12px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2)">
-  <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin-bottom:8px">Career Milestone Finder</div>
+  <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:.04em;color:var(--dim);text-transform:uppercase;margin-bottom:8px">Career Milestone Finder</div>
   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
     <select id="ms-stat-career-${sid}" class="season-sel" style="color:var(--text);font-size:.78rem">
-      ${isPitcherOnly
+      ${isPitcher
         ?'<option value="k_pit">Strikeouts (P)</option><option value="w">Wins</option><option value="sv">Saves</option>'
         :'<option value="h">Hits</option><option value="hr">Home Runs</option><option value="rbi">RBI</option><option value="k_bat">Strikeouts (B)</option><option value="sb">Stolen Bases</option>'}
     </select>
@@ -2132,7 +2127,7 @@ async function csLoadSeasonData(name,year,birthYear,allowedTeams,pid){
   try{
     let d=_csCache[year];
     if(!d){
-      const r=await fetch('data/'+year+'.json?v='+Date.now());
+      const r=await fetch('data_v2/'+year+'.json?v='+Date.now());
       if(!r.ok)return null;
       d=await r.json();
       _csCache[year]=d;
@@ -2224,11 +2219,9 @@ async function csLoadSeasonData(name,year,birthYear,allowedTeams,pid){
     }
     } // end interleave detection
     // Determine isPitcher from actual pitching appearances in game log
-    const totalIP=filteredLog.reduce((s,gl)=>s+(gl.stats.ip||0),0);
-    const totalAB=filteredLog.reduce((s,gl)=>s+(gl.stats.ab||0),0);
-    const isPitcher=totalIP>9&&totalIP>totalAB;
+    const isPitcher=filteredLog.some(gl=>gl.stats.ip>0);
     // Sum stats from filtered game log
-    let g=filteredLog.length,pg=0,gs=0,w=0,l=0,sv=0,ipouts=0,per=0,pbb=0,pk=0,ph=0;
+    let g=filteredLog.length,gs=0,w=0,l=0,sv=0,ipouts=0,per=0,pbb=0,pk=0,ph=0;
     let ab=0,h=0,dbl=0,tpl=0,bb=0,k=0,hr=0,rbi=0;
     const teams=new Set();
     for(const gl of filteredLog){
@@ -2237,14 +2230,13 @@ async function csLoadSeasonData(name,year,birthYear,allowedTeams,pid){
       ab+=s.ab;h+=s.h;dbl+=(s.d||0);tpl+=(s.t||0);hr+=s.hr;rbi+=s.rbi;bb+=s.bb;k+=s.k;
       ipouts+=s.ip;per+=s.er;pbb+=s.pbb;pk+=s.pk;ph+=s.ph;
       if(s.gs)gs++;if(s.w)w++;if(s.l)l++;if(s.sv)sv++;
-      if((s.ip||0)>0)pg++;
     }
     const teamArr=[...teams];
     const teamCode=teamArr[0]||null;
     const teamColor=teamCode?(()=>{const e=COLORS[teamCode];if(!e)return'#888';const yr=+year;let p=e[0][1];for(const [y,c] of e){if(yr>=y)p=c;}return p;})():'#888';
     const teamName=teamArr.map(t=>d.teams[t]?d.teams[t].name:t).join('/');
     const birth=d.births&&d.births[name]?d.births[name]:null;
-    return {year,isPitcher,teams:teamArr,teamCode,teamColor,teamName,g,pg,gs,w,l,sv,ipouts,per,pbb,pk,ph,ab,h,d:dbl,t:tpl,bb,k,hr,rbi,birth};
+    return {year,isPitcher,teams:teamArr,teamCode,teamColor,teamName,g,gs,w,l,sv,ipouts,per,pbb,pk,ph,ab,h,d:dbl,t:tpl,bb,k,hr,rbi,birth};
   }catch(e){return null;}
 }
 async function csLoadSeason(name,year){
@@ -2265,7 +2257,7 @@ async function csLoadSeason(name,year){
   try{
     let d=_csCache[year];
     if(!d){
-      const r=await fetch('data/'+year+'.json?v='+Date.now());
+      const r=await fetch('data_v2/'+year+'.json?v='+Date.now());
       if(!r.ok)throw new Error(year+' not found');
       d=await r.json();
       _csCache[year]=d;
@@ -2473,57 +2465,6 @@ function buildRgYearSel(){
 }
 
 // ── Head-to-Head Records ──────────────────────────────────────────────────────
-function showH2HGames(oppCode){
-  // Filter current team's schedule to games vs oppCode only
-  const teamCode = _rosterTeam;
-  const games = [];
-  for(const date of D.dates){
-    for(const g of (D.games_by_date[date]||[])){
-      if((g.v===teamCode||g.h===teamCode)){
-        const isHome = g.h===teamCode;
-        const opp = isHome?g.v:g.h;
-        if(opp !== oppCode) continue;
-        const tmR=isHome?parseInt(g.hr||0):parseInt(g.vr||0);
-        const oppR=isHome?parseInt(g.vr||0):parseInt(g.hr||0);
-        const res=g.w===teamCode?'W':g.w?'L':'';
-        const rec=getRecordAsOf(teamCode,date);
-        games.push({date,gid:g.gid,opp,isHome,tmR,oppR,res,sp:isHome?g.hsp:g.vsp,rec,n:g.n,tp:g.tp||0});
-      }
-    }
-  }
-  const oppColor = tc(oppCode);
-  const oppName = tf(oppCode);
-  const w = games.filter(g=>g.res==='W').length;
-  const l = games.filter(g=>g.res==='L').length;
-  // Update subtitle to show filter
-  document.getElementById('team-sub').textContent =
-    curSeason+' · vs '+oppName+' · '+w+'-'+l+' · Click ← to go back';
-  document.getElementById('team-back-btn').textContent = '← Back';
-  document.getElementById('team-back-btn').onclick = function(){
-    renderTeamSchedule(teamCode);
-    document.getElementById('team-back-btn').onclick = null;
-  };
-  // Render filtered games
-  const oppColor2 = tc(oppCode);
-  document.getElementById('sched-grid').innerHTML = games.map(g=>{
-    const gn=g.n?` G${g.n}`:'';
-    const ha=g.isHome?'vs':'@';
-    return `<div class="sg-card" onclick="openBox('${g.gid}','team')">
-      <div class="sg-date">${fds(g.date)}${gn}</div>
-      <div class="sg-matchup">
-        <span class="sg-team" style="color:${oppColor2}">${ha} ${oppName}</span>
-        <span class="sg-score sg-${g.res}">${g.tmR}-${g.oppR}</span>
-      </div>
-      <div class="sg-result">
-        <span class="sg-${g.res}" style="font-weight:700;min-width:14px">${g.res}</span>
-        <span style="color:var(--dim)">${g.rec.w}-${g.rec.l}</span>
-        <span style="color:var(--dim);margin-left:auto">${g.sp}</span>
-      </div>
-    </div>`;
-  }).join('');
-  showTeamTab('sched');
-}
-
 function buildH2H(teamCode,games){
   const h2h={};
   games.forEach(g=>{
@@ -2542,7 +2483,7 @@ function buildH2H(teamCode,games){
   grid.innerHTML=sorted.map(([opp,r])=>{
     const pct=r.w+r.l>0?(r.w/(r.w+r.l)*100).toFixed(0):'—';
     const col=tc(opp);
-    return `<div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid ${col};border-radius:var(--radius2);padding:10px 12px;cursor:pointer" onclick="showH2HGames('${opp}')">
+    return `<div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid ${col};border-radius:var(--radius2);padding:10px 12px;cursor:pointer" onclick="openTeamSchedule('${opp}','h2h')">
       <div style="font-family:'Archivo Narrow',sans-serif;font-weight:700;color:${col};font-size:.85rem">${tf(opp)}</div>
       <div style="font-family:'Roboto Mono',monospace;font-size:.72rem;color:var(--muted);margin-top:4px">
         <span style="color:var(--green)">${r.w}W</span> · <span style="color:var(--red)">${r.l}L</span>${r.t?` · ${r.t}T`:''} · <span style="color:var(--text)">${pct}%</span>
@@ -2636,7 +2577,7 @@ async function renderCompare(){
   const allYears=[...new Set([...s1,...s2])].sort();
 
   // Load all needed seasons
-  await Promise.all(allYears.map(yr=>_csCache[yr]?Promise.resolve():fetch('data/'+yr+'.json?v='+Date.now()).then(r=>r.ok?r.json():null).then(d=>{if(d)_csCache[yr]=d;})));
+  await Promise.all(allYears.map(yr=>_csCache[yr]?Promise.resolve():fetch('data_v2/'+yr+'.json?v='+Date.now()).then(r=>r.ok?r.json():null).then(d=>{if(d)_csCache[yr]=d;})));
 
   // Compute career stats for each player
   const getStats=(name,seasons)=>{
@@ -3032,12 +2973,51 @@ function showTeamTab(tab){
   }
 }
 
+async function loadTeamBoxes(teamCode,panel){
+  const season=curSeason;
+  const gids=[];
+  for(const d of D.dates)for(const g of (D.games_by_date[d]||[]))
+    if((g.v===teamCode||g.h===teamCode)&&g.gid&&!D.box_scores[g.gid])gids.push(g.gid);
+  if(!gids.length)return;
+  const normP=p=>({ab:0,h:0,d:0,t:0,bb:0,k:0,hr:0,rbi:0,sb:0,cs:0,...p});
+  const normPit=p=>({h:0,r:0,er:0,bb:0,k:0,ipouts:0,...p});
+  let done=0,i=0;
+  const show=()=>{panel.innerHTML=`<div style="padding:20px;color:var(--muted);font-family:'Roboto Mono',monospace;font-size:.8rem">Loading box scores\u2026 ${done}/${gids.length}</div>`;};
+  show();
+  async function worker(){
+    while(i<gids.length){
+      const gid=gids[i++];
+      try{
+        const r=await fetch(`data_v2/boxes/${season}/${gid}.json`);
+        if(r.ok){
+          const box=await r.json();
+          box.gid=box.gid||gid;
+          for(const side of ['vb','hb']){
+            const tb=box[side]||{};
+            if(tb.l)tb.l=tb.l.map(normP);
+            if(tb.b)tb.b=tb.b.map(normP);
+            if(tb.p)tb.p=tb.p.map(normPit);
+            if(tb.bp)tb.bp=tb.bp.map(normPit);
+          }
+          if(curSeason===season)D.box_scores[gid]=box;
+        }
+      }catch(e){}
+      done++;
+      if(done%8===0)show();
+    }
+  }
+  await Promise.all(Array.from({length:8},worker));
+}
+
 async function buildRoster(teamCode){
   _rosterTeam=teamCode;
   const panel=document.getElementById('team-roster-panel');
   if(!panel||!D)return;
   // Ensure career index is loaded for accurate birth year / age lookups
   await loadCsIndex();
+  // Box scores are fetched on demand, so pull in any this team hasn't loaded yet
+  await loadTeamBoxes(teamCode,panel);
+  if(_rosterTeam!==teamCode)return;
   const color=tc(teamCode);
 
   // Populate date selector with all dates this team played
@@ -3054,7 +3034,7 @@ async function buildRoster(teamCode){
   const cutoffDate=dateSel&&dateSel.value?dateSel.value:'';
 
   // Aggregate stats from all box scores for this team (up to cutoff date)
-  const batters={}, pitchers={};
+  const batters={}, pitchers={}, lineupSlots={};
   Object.values(D.box_scores).forEach(box=>{
     if(cutoffDate&&box.d>cutoffDate)return;
     ['vb','hb'].forEach(side=>{
@@ -3064,6 +3044,7 @@ async function buildRoster(teamCode){
       // Batters - lineup
       (tb.l||[]).forEach(p=>{
         if(!p.n)return;
+        if(p.lp){const _s=lineupSlots[p.lp]||(lineupSlots[p.lp]={});_s[p.n]=(_s[p.n]||0)+1;}
         if(!batters[p.n])batters[p.n]={n:p.n,id:p.id||'',born:p.born||'',g:0,gs:0,ab:0,h:0,d:0,t:0,bb:0,k:0,hr:0,rbi:0,sb:0,cs:0};
         const b=batters[p.n]; b.g++; b.gs++;
         b.ab+=p.ab||0; b.h+=p.h||0; b.d+=p.d||0; b.t+=p.t||0; b.bb+=p.bb||0; b.k+=p.k||0;
@@ -3152,6 +3133,7 @@ async function buildRoster(teamCode){
   // Store data for re-sorting
   panel._batData=batList;
   panel._pitData=pitList;
+  panel._lineups=lineupSlots;
   panel._color=color;
   panel._team=teamCode;
   panel._batSort={col:'ab',dir:-1};
@@ -3252,6 +3234,13 @@ function renderRosterTables(panel){
     </tr>`;
   }).join('');
 
+  const _lu=panel._lineups||{};
+  let lineupRows='';
+  for(let slot=1;slot<=9;slot++){
+    const names=Object.entries(_lu[slot]||{}).sort((x,y)=>y[1]-x[1]||(x[0]<y[0]?-1:1));
+    lineupRows+=`<tr><td class="st">${slot}</td><td>${names.map(([n,c])=>`${plink(n,teamCode)} <span style="color:var(--dim);font-size:.7rem">(${c})</span>`).join(', ')||'—'}</td></tr>`;
+  }
+
   panel.innerHTML=`
     <div class="sec-label" style="border-left-color:${color}">Batters</div>
     <div class="glt-wrap"><table class="glt">
@@ -3262,6 +3251,11 @@ function renderRosterTables(panel){
     <div class="glt-wrap"><table class="glt">
       <tr>${mkTh(pitCols,pitHdrs,ps,'pit')}</tr>
       ${pitRows}
+    </table></div>
+    <div class="sec-label" style="border-left-color:${color};margin-top:16px">Lineups &mdash; players who started at each spot</div>
+    <div class="glt-wrap"><table class="glt">
+      <tr><th style="width:40px">#</th><th>Players (most starts first)</th></tr>
+      ${lineupRows}
     </table></div>`;
 }
 
@@ -3431,7 +3425,7 @@ async function findCareerMilestone(sid,name,birth){
 // ── Postseason ───────────────────────────────────────────────────────────────
 let _psData = null;
 let _psYear = null;
-const PS_DATA_PATH = 'data/postseason/';
+const PS_DATA_PATH = 'data_v2/postseason/';
 
 // Build year selector from available postseason JSONs
 // We probe by trying to load a manifest or just show years with data
@@ -3469,7 +3463,7 @@ async function buildPsHome() {
 
   // Try to load a lightweight manifest first
   try {
-    const mResp = await fetch('data/postseason/manifest.json');
+    const mResp = await fetch('data_v2/postseason/manifest.json');
     if (mResp.ok) {
       const manifest = await mResp.json();
       for (const [yr, info] of Object.entries(manifest).sort((a,b)=>+b[0]-+a[0])) {
@@ -3485,7 +3479,7 @@ async function buildPsHome() {
   // Fallback: probe recent years
   for (const yr of years) {
     try {
-      const resp = await fetch(`data/postseason/${yr}.json`);
+      const resp = await fetch(`data_v2/postseason/${yr}.json`);
       if (!resp.ok) continue;
       const d = await resp.json();
       const champName = d.champion ? tf(d.champion) : '—';
@@ -3728,7 +3722,7 @@ async function openPsBox(gid) {
 
   // Inject into the existing vbox DOM so it looks exactly like regular season
   document.getElementById('btitle').textContent = tf(box.v) + ' at ' + tf(box.h);
-  document.getElementById('bsub').textContent = dateStr + ' · ' + gt + (box.st?' · '+fmtST(box.st):box.dn?' · '+box.dn[0].toUpperCase()+box.dn.slice(1):'') + (box.att?' · Att: '+parseInt(box.att).toLocaleString():'');
+  document.getElementById('bsub').textContent = dateStr + ' · ' + gt;
 
   const vb = box.vb, hb = box.hb;
   const vc = tc(box.v), hc = tc(box.h);
@@ -3758,7 +3752,7 @@ async function openPsBox(gid) {
 
   // Use buildTP but pass dummy rec since postseason has no W-L record
   const psYr = _psYear||'';
-  document.getElementById('bteams').innerHTML = buildTP(box.v,vb,vc,null,box.d,psYr,[]) + buildTP(box.h,hb,hc,null,box.d,psYr,[]);
+  document.getElementById('bteams').innerHTML = buildTP(box.v,vb,vc,null,box.d,psYr) + buildTP(box.h,hb,hc,null,box.d,psYr);
 
   // Add back button at top of box
   const backHtml = `<button class="bbk" style="margin:8px 16px 0;font-size:.75rem" onclick="showPsSeries('${rnd}','${sw}','${sl}');showView('postseason',true)">← Back to series</button>`;
@@ -3771,373 +3765,7 @@ async function openPsBox(gid) {
   boxEl.insertBefore(btn, firstChild);
 
   renderPBP(box);
-  renderPBP(box);
   showView('box', true);
-}
-
-// ── STB Defense ───────────────────────────────────────────────────────────────
-let _stbCache = {};
-let _phSplitsCache = {};
-
-async function loadPHSplits(year){
-  if(_phSplitsCache[year]) return _phSplitsCache[year];
-  try{
-    const r = await fetch(`data/ph_splits/${year}.json`);
-    if(!r.ok){ _phSplitsCache[year] = null; return null; }
-    const d = await r.json();
-    _phSplitsCache[year] = d;
-    return d;
-  }catch(e){ _phSplitsCache[year] = null; return null; }
-}
-
-async function loadSTB(year){
-  if(_stbCache[year]) return _stbCache[year];
-  try{
-    const r = await fetch(`data/stb/${year}.json`);
-    if(!r.ok) return null;
-    const d = await r.json();
-    _stbCache[year] = d;
-    return d;
-  }catch(e){ return null; }
-}
-
-function stbLookup(stb, name, team){
-  if(!stb) return null;
-  // Try exact key first
-  if(stb[`${name}|${team}`]) return stb[`${name}|${team}`];
-  // Normalize name for comparison: collapse spaced initials "J. J." -> "J.J."
-  const normName = name.replace(/\b([A-Z])\. ([A-Z])\./g, '$1.$2.');
-  if(stb[`${normName}|${team}`]) return stb[`${normName}|${team}`];
-  // Case-insensitive scan
-  const nameUp = normName.toUpperCase();
-  return Object.values(stb).find(p=>{
-    if(!p.name) return false;
-    const pUp = p.name.toUpperCase().replace(/\b([A-Z])\. ([A-Z])\./g,'$1.$2.');
-    return pUp === nameUp || p.name_upper === nameUp;
-  }) || null;
-}
-
-// Look up player's defense ratings at a given position
-// STB CSVs only store PRIMARY position ratings. Secondary position ratings
-// on physical cards may differ but aren't in the CSV data.
-function stbDefRatings(player, pos){
-  if(!player) return null;
-
-  const normPos     = pos.split('/')[0].trim();
-  const normPrimary = (player.pos||'').split('/')[0].trim();
-  const def = player.def || {};
-
-  // 1. Position-specific data from CSV (if available - position files have it)
-  if(def[normPos]){
-    const d = def[normPos];
-    return {arm:d.arm||0, rng:d.rng||0, fld:d.fld||5, ump:d.ump||0, pb:d.pb||0};
-  }
-
-  // 2. Primary position match - use stored ratings directly
-  if(normPrimary === normPos){
-    return {arm:player.arm||0, rng:player.rng||0, fld:player.fld||5,
-            ump:player.ump||0, pb:player.pb||0};
-  }
-
-  // 3. Check if position is listed anywhere on the card
-  //    (in sec[] array built from Pos field like "DH/1B/LF")
-  // Check listed[] (all positions from CSV files) and sec[] from Pos field
-  const allPos = [...new Set([(player.pos||''), ...(player.sec||[]), ...(player.listed||[])].map(p=>p.split('/')[0].trim()))];
-  const isListed = allPos.includes(normPos) || !!(player.def||{})[normPos];
-
-  if(isListed){
-    // Listed secondary position - CSVs don't store position-specific secondary ratings
-    // Use primary ratings as best approximation, mark as estimated (~)
-    return {arm:player.arm||0, rng:player.rng||0, fld:player.fld||5,
-            ump:player.ump||0, pb:player.pb||0, est:true};
-  }
-
-  // 4. Apply penalty rules (page 13-14) for nearby unlisted positions
-  const P3 = {C:['P'],'1B':['P'],'2B':['P'],'3B':['P','1B'],
-              SS:['P'],'LF':['RF'],CF:['LF','RF'],RF:['LF']};
-  const P5 = {'2B':['1B','3B','SS'],SS:['1B','2B','3B'],LF:['CF'],RF:['CF']};
-  const p3 = P3[normPrimary]||[], p5 = P5[normPrimary]||[];
-  if(p5.includes(normPos)||p3.includes(normPos)){
-    const penalty = p5.includes(normPos)?5:3;
-    return {arm:Math.max(0,(player.arm||0)-penalty),
-            rng:Math.max(0,(player.rng||0)-penalty),
-            fld:Math.max(5,(player.fld||5)-penalty),
-            ump:0, pb:0, penalty};
-  }
-
-  // 5. Truly out of position
-  return {arm:0, rng:0, fld:5, ump:0, pb:0, oop:true};
-}
-
-// Defense table for a position given arm/rng/fld
-function stbDefTable(pos, arm, rng, fld){
-  const p = pos.toUpperCase();
-  if(['LF','CF','RF'].includes(p)){
-    const fn = p==='LF'?'F7':p==='CF'?'F8':'F9';
-    const dn = p==='LF'?'Deep LF':p==='CF'?'Deep CF':'Deep RF';
-    const rows = [];
-    rows.push({range:`${10+rng*0|0}0-${10+rng*0|0}${rng}`, lo:'', hi:rng, result:`${fn}/R3?! (Arm ≤${arm}) / ${fn}++`});
-    // Simplified: just show key thresholds
-    return [
-      {label:'Fly Out (Arm ≤)', val: arm, result:`${fn}/R3?!`},
-      {label:'Fly Out (Arm >)', val:'', result:`${fn}++`},
-      {label:'Double (roll ≤7)', val:'', result:'2B'},
-      {label:'Single (roll >7)', val:'', result:'1B'},
-    ];
-  }
-  if(p==='C'){
-    return [
-      {label:'K (Ump ≤)', val: player?.ump||0, result:'K'},
-      {label:'F2 (Rng ≤)', val: rng, result:'F2'},
-      {label:'BB/PB (PB ≤)', val: player?.pb||0, result:'BB/PB'},
-    ];
-  }
-  // Infielder
-  const pos_map = {P:'163 DP / 1-3',  '1B':'363 DP / 3U',
-                   '2B':'463 DP / 4-3','3B':'543 DP / 5-3','SS':'643 DP / 6-3'};
-  const dp_str = pos_map[p] || '—';
-  return [
-    {label:`≤ Arm → DP`, val: arm, result: dp_str.split('/')[0].trim()},
-    {label:`≤ Rng → Out`, val: rng, result: dp_str.split('/')[1]?.trim()||'Out'},
-    {label:`≤ Fld → 1B`, val: fld, result:'1B (error if > Fld)'},
-    {label:`> Fld → Error`, val:'', result:'Error'},
-  ];
-}
-
-const POS_NAMES = {'1':'P','2':'C','3':'1B','4':'2B','5':'3B','6':'SS','7':'LF','8':'CF','9':'RF','10':'DH'};
-
-
-// ── STB Defense Table Builder ─────────────────────────────────────────────────
-const _POS_NUM = {P:'1',C:'2','1B':'3','2B':'4','3B':'5',SS:'6',LF:'7',CF:'8',RF:'9'};
-const _DP_RES  = {P:'163 DP','1B':'363 DP','2B':'463 DP','3B':'543 DP',SS:'643 DP'};
-const _OUT_RES = {P:'1-3','1B':'3U','2B':'4-3','3B':'5-3',SS:'6-3'};
-const _HIT_RES = {P:'1B(CF)','1B':'1B(RF)','2B':'1B(RF)','3B':'1B(LF)',SS:'1B(LF)'};
-const _ERR_RES = {P:'E1','1B':'E3','2B':'E4','3B':'E5',SS:'E6'};
-const _FLY_RES = {LF:'F7',CF:'F8',RF:'F9'};
-const _SGL_ARM = ['1B++','1B++','1B++','1B+/R1?','1B+/R1?','1B+','1B/R2?','1B/R2?','1B/R2?','1B/R2?'];
-const _DBL_ARM = ['2B+/B?','2B+/B?','2B+/B?','2B+','2B+','2B/R1?','2B','2B','2B','2B'];
-
-function stbFmtR(pnum,lo,hi){const p='5'+pnum;return lo===hi?p+lo:p+lo+'-'+p+hi;}
-
-function stbBuildTable(pos,arm,rng,fld,ump,pb){
-  const pnum=_POS_NUM[pos]||'';
-  arm=Math.min(+(arm||0),9); rng=Math.min(+(rng||0),9);
-  fld=Math.min(+(fld||5),9); ump=Math.min(+(ump||0),9); pb=Math.min(+(pb||0),9);
-  const rows=[];
-  if(pos==='LF'||pos==='CF'||pos==='RF'){
-    const fn=_FLY_RES[pos];
-    rows.push({r:stbFmtR(pnum,0,arm),                         res:fn+'/R3?!'});
-    rows.push({r:rng>arm?stbFmtR(pnum,arm+1,rng):'—',         res:fn+'++'});
-    rows.push({r:rng<7?stbFmtR(pnum,rng+1,7):'—',             res:_DBL_ARM[arm]});
-    const slo=Math.max(rng+1,8);
-    rows.push({r:slo<=9?stbFmtR(pnum,slo,9):'—',              res:_SGL_ARM[arm]});
-  } else if(pos==='C'){
-    rows.push({r:stbFmtR(pnum,0,ump),                       res:'K'});
-    rows.push({r:rng>ump?stbFmtR(pnum,ump+1,rng):'—',       res:'F2'});
-    rows.push({r:pb>rng?stbFmtR(pnum,rng+1,pb):'—',         res:'BB'});
-    rows.push({r:pb<9?stbFmtR(pnum,pb+1,9):'—',             res:'PB'});
-  } else if(_DP_RES[pos]){
-    const topOut=Math.max(arm,rng);
-    rows.push({r:stbFmtR(pnum,0,arm),                              res:_DP_RES[pos]});
-    rows.push({r:rng>arm?stbFmtR(pnum,arm+1,rng):'—',             res:_OUT_RES[pos]});
-    rows.push({r:fld>topOut?stbFmtR(pnum,topOut+1,fld):'—',       res:_HIT_RES[pos]});
-    rows.push({r:fld<9?stbFmtR(pnum,fld+1,9):'—',                 res:_ERR_RES[pos]});
-  }
-  return rows;
-}
-
-const _stbDefRegistry = {};
-
-function stbSwitchPos(rowId, pos, color){
-  const entry = _stbDefRegistry[rowId];
-  if(!entry) return;
-  const d = entry.def[pos] || {};
-  const arm = d.arm||0, rng = d.rng||0, fld = d.fld||5;
-  const ump = d.ump !== undefined ? d.ump : (entry.ump||0);
-  const pb  = d.pb  !== undefined ? d.pb  : (entry.pb||0);
-  // Update ratings cells
-  const armEl = document.getElementById(rowId+'-arm');
-  const rngEl = document.getElementById(rowId+'-rng');
-  const fldEl = document.getElementById(rowId+'-fld');
-  const tblEl = document.getElementById(rowId+'-tbl');
-  if(armEl) armEl.textContent = arm;
-  if(rngEl) rngEl.textContent = rng;
-  if(fldEl) fldEl.textContent = fld;
-  if(tblEl){
-    const tbl = stbBuildTable(pos, arm, rng, fld, ump, pb);
-    tblEl.innerHTML = tbl.map(row=>`<div style="display:flex;justify-content:space-between;font-family:'Roboto Mono',monospace;font-size:.68rem;padding:1px 0;border-bottom:1px solid var(--border)">
-      <span style="color:var(--dim)">${row.r}</span>
-      <span style="color:var(--text);font-weight:500">${row.res}</span>
-    </div>`).join('');
-  }
-  // Update active button styling
-  const row = document.getElementById(rowId);
-  if(row) row.querySelectorAll('button').forEach(btn => {
-    if(btn.textContent.trim()===pos){
-      btn.style.background=color; btn.style.color='#fff';
-    } else {
-      btn.style.background=''; btn.style.color='';
-    }
-  });
-}
-
-async function showDefenseTab(gid){
-  const defEl = document.getElementById('bdef');
-  const pbpEl = document.getElementById('bpbp');
-  if(!defEl) return;
-
-  // Toggle
-  if(defEl.style.display !== 'none'){
-    defEl.style.display='none';
-    if(pbpEl) pbpEl.style.display='';
-    return;
-  }
-  if(pbpEl) pbpEl.style.display='none';
-  defEl.style.display='';
-  defEl.innerHTML='<div style="padding:16px;color:var(--muted)">Loading defense ratings...</div>';
-
-  const box = D.box_scores[gid];
-  if(!box){ defEl.innerHTML='<div style="padding:16px;color:var(--muted)">No box score data.</div>'; return; }
-
-  const stb = await loadSTB(curSeason);
-  if(!stb){
-    defEl.innerHTML=`<div style="padding:16px;color:var(--muted)">No STB ratings found for ${curSeason}.<br><small>Run <code>python build_stb_ratings.py ${curSeason}</code> to generate.</small></div>`;
-    return;
-  }
-
-  function teamDefPanel(code, tb, color){
-    const lineup = tb.l || [];
-    const rows = lineup.map((p,i) => {
-      const pos = p.pos || POS_NAMES[String(i+1)] || '?';
-      const player = stbLookup(stb, p.n, code);
-      const def = player ? stbDefRatings(player, pos) : null;
-      const arm = def?.arm ?? '—';
-      const rng = def?.rng ?? '—';
-      const fld = def?.fld ?? '—';
-      const ump = def?.ump ?? 0;
-      const pb  = def?.pb  ?? 0;
-      const oopLabel = def?.oop ? ' <span style="color:var(--muted);font-size:.72rem">OOP</span>' : def?.est ? ' <span style="color:var(--muted);font-size:.72rem" title="Estimated - check card for actual secondary ratings">~est</span>' : def?.penalty ? ` <span style="color:var(--muted);font-size:.72rem">-${def.penalty}</span>` : '';
-      const nodata = !player ? ' <span style="color:var(--muted);font-size:.72rem">no card</span>' : '';
-      // Build defense table rows
-      let tableRows = '';
-      if(def && (arm!=='—'||rng!=='—')){
-        const tbl = stbBuildTable(pos, arm, rng, fld, ump, pb);
-        tableRows = tbl.map(row=>`<div style="display:flex;justify-content:space-between;font-family:'Roboto Mono',monospace;font-size:.75rem;padding:1px 0;border-bottom:1px solid var(--border)">
-          <span style="color:var(--dim)">${row.r}</span>
-          <span style="color:var(--text);font-weight:500">${row.res}</span>
-        </div>`).join('');
-      }
-      
-      // Build position buttons for all listed positions
-      const allDefPos = player ? Object.keys(player.def||{}) : [];
-      const rowId = `def-row-${code}-${i}`;
-      // Register player def data for this row (avoids JSON in onclick)
-      if(player && allDefPos.length > 1){
-        _stbDefRegistry[rowId] = {def: player.def||{}, ump: player.ump||0, pb: player.pb||0};
-      }
-      const posButtons = allDefPos.length > 1 ? allDefPos.map(dpos => {
-        const isActive = dpos === pos ? 'style="background:'+color+';color:#fff"' : '';
-        return `<button onclick="stbSwitchPos('${rowId}','${dpos}','${color}')" class="bbk" ${isActive} style="padding:2px 7px;font-size:.75rem;margin:1px">${dpos}</button>`;
-      }).join('') : '';
-
-      return `<tr id="${rowId}" style="cursor:${allDefPos.length>1?'default':'default'}">
-        <td style="font-family:'Roboto Mono',monospace;font-size:.78rem;color:var(--dim);vertical-align:top;padding-top:6px">${p.lp||i+1}</td>
-        <td style="font-weight:500;vertical-align:top;padding-top:6px">${p.n}</td>
-        <td style="font-family:'Roboto Mono',monospace;font-size:.85rem;color:${color};vertical-align:top;padding-top:6px">
-          <div>${pos}${oopLabel}${nodata}</div>
-          <div style="margin-top:3px">${posButtons}</div>
-        </td>
-        <td id="${rowId}-arm" style="vertical-align:top;padding-top:6px" class="st">${arm}</td>
-        <td id="${rowId}-rng" style="vertical-align:top;padding-top:6px" class="st">${rng}</td>
-        <td id="${rowId}-fld" style="vertical-align:top;padding-top:6px" class="st">${fld}</td>
-        <td id="${rowId}-tbl" style="padding:4px 8px;min-width:160px">${tableRows}</td>
-      </tr>`;
-    }).join('');
-
-    // Bench players
-    const bench = tb.b || [];
-    const benchRowsHtml = bench.map(p => {
-      if(!p.n) return '';
-      const player = stbLookup(stb, p.n, code);
-      const primary = player ? (player.pos||'').split('/')[0].trim() : '?';
-      const def = player ? stbDefRatings(player, primary) : null;
-      const arm = def?.arm ?? '—';
-      const rng = def?.rng ?? '—';
-      const fld = def?.fld ?? '—';
-      const ump = def?.ump ?? 0;
-      const pb  = def?.pb  ?? 0;
-      const nodata = !player ? ' <span style="color:var(--muted);font-size:.72rem">no card</span>' : '';
-      let tableRows = '';
-      if(def && arm!=='—'){
-        const tbl = stbBuildTable(primary, arm, rng, fld, ump, pb);
-        tableRows = tbl.map(row=>`<div style="display:flex;justify-content:space-between;font-family:'Roboto Mono',monospace;font-size:.75rem;padding:1px 0;border-bottom:1px solid var(--border)">
-          <span style="color:var(--dim)">${row.r}</span>
-          <span style="color:var(--text);font-weight:500">${row.res}</span>
-        </div>`).join('');
-      }
-      const dimStyle = 'color:var(--muted)';
-      const benchAllPos = player ? Object.keys(player.def||{}) : [];
-      const benchRowId = `def-bench-${code}-${p.n.replace(/\s/g,'-')}`;
-      if(player && benchAllPos.length > 1){
-        _stbDefRegistry[benchRowId] = {def: player.def||{}, ump: player.ump||0, pb: player.pb||0};
-      }
-      const benchPosButtons = benchAllPos.length > 1 ? benchAllPos.map(dpos => {
-        const isActive = dpos === primary ? 'style="background:'+color+';color:#fff"' : '';
-        return `<button onclick="stbSwitchPos('${benchRowId}','${dpos}','${color}')" class="bbk" ${isActive} style="padding:2px 7px;font-size:.75rem;margin:1px">${dpos}</button>`;
-      }).join('') : '';
-      return `<tr id="${benchRowId}" style="opacity:0.75">
-        <td style="font-family:'Roboto Mono',monospace;font-size:.78rem;${dimStyle};vertical-align:top;padding-top:6px">—</td>
-        <td style="vertical-align:top;padding-top:6px;${dimStyle}">${p.n}</td>
-        <td style="font-family:'Roboto Mono',monospace;font-size:.85rem;color:${color};vertical-align:top;padding-top:6px">
-          <div>${primary}${nodata}</div>
-          <div style="margin-top:3px">${benchPosButtons}</div>
-        </td>
-        <td id="${benchRowId}-arm" style="vertical-align:top;padding-top:6px" class="st">${arm}</td>
-        <td id="${benchRowId}-rng" style="vertical-align:top;padding-top:6px" class="st">${rng}</td>
-        <td id="${benchRowId}-fld" style="vertical-align:top;padding-top:6px" class="st">${fld}</td>
-        <td id="${benchRowId}-tbl" style="padding:4px 8px;min-width:160px">${tableRows}</td>
-      </tr>`;
-    }).filter(Boolean).join('');
-
-    const benchRows = benchRowsHtml ? `
-      <div class="sec-label" style="border-left-color:${color};margin-top:8px">Bench</div>
-      <table style="width:100%;font-size:.88rem;border-collapse:collapse">
-        <tr style="background:var(--surface2)">
-          <th style="padding:4px 8px;text-align:left;font-size:.75rem;color:var(--dim)">#</th>
-          <th style="padding:4px 8px;text-align:left;font-size:.75rem;color:var(--dim)">Player</th>
-          <th style="padding:4px 8px;text-align:left;font-size:.75rem;color:var(--dim)">Pos</th>
-          <th style="padding:4px 8px;text-align:center;font-size:.75rem;color:var(--dim)">Arm</th>
-          <th style="padding:4px 8px;text-align:center;font-size:.75rem;color:var(--dim)">Rng</th>
-          <th style="padding:4px 8px;text-align:center;font-size:.75rem;color:var(--dim)">Fld</th>
-          <th style="padding:4px 8px;text-align:left;font-size:.75rem;color:var(--dim)">Defense Table</th>
-        </tr>
-        ${benchRowsHtml}
-      </table>` : '';
-
-    return `<div class="tp" style="margin-bottom:12px">
-      <div class="tph" style="background:${color}" onclick="openTeamSchedule('${code}','box')">
-        <div class="tph-left"><div class="tph-name">${tf(code)}</div></div>
-      </div>
-      <div class="sec-label" style="border-left-color:${color}">Defense</div>
-      <table style="width:100%;font-size:.88rem;border-collapse:collapse">
-        <tr style="background:var(--surface2)">
-          <th style="padding:4px 8px;text-align:left;font-size:.75rem;color:var(--dim)">#</th>
-          <th style="padding:4px 8px;text-align:left;font-size:.75rem;color:var(--dim)">Player</th>
-          <th style="padding:4px 8px;text-align:left;font-size:.75rem;color:var(--dim)">Pos</th>
-          <th style="padding:4px 8px;text-align:center;font-size:.75rem;color:var(--dim)">Arm</th>
-          <th style="padding:4px 8px;text-align:center;font-size:.75rem;color:var(--dim)">Rng</th>
-          <th style="padding:4px 8px;text-align:center;font-size:.75rem;color:var(--dim)">Fld</th>
-          <th style="padding:4px 8px;text-align:left;font-size:.75rem;color:var(--dim)">Defense Table</th>
-        </tr>
-        ${rows}
-      </table>
-      ${benchRows}
-    </div>`;
-  }
-
-  const vb = box.vb, hb = box.hb;
-  const vc = tc(box.v), hc = tc(box.h);
-  defEl.innerHTML = teamDefPanel(box.v, vb, vc) + teamDefPanel(box.h, hb, hc);
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────

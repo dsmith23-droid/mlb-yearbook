@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Ledger — Baseball Scorecard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --field:#14332A;
+    --field-dark:#0F281F;
+    --paper:#EDE3C8;
+    --paper-line:#D8CBA6;
+    --ink:#1B2430;
+    --ink-soft:#5B5445;
+    --mustard:#D9A441;
+    --mustard-dark:#B9862F;
+    --brick:#AB3A34;
+    --chalk:#F7F2E4;
+    --safe:#3E6E52;
+    --radius:10px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--field);
+    background-image:
+      radial-gradient(circle at 50% 120%, rgba(255,255,255,0.05), transparent 60%),
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 40px);
+    color:var(--chalk);
+    font-family:'Space Mono', monospace;
+    min-height:100%;
+    padding-bottom:40px;
+  }
+  h1,h2,h3,.slab{font-family:'Zilla Slab', serif;}
+  .app{max-width:900px; margin:0 auto; padding:14px 12px 60px;}
+
+  /* Header */
+  .topbar{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:10px; padding:0 2px;}
+  .topbar h1{font-size:22px; margin:0; letter-spacing:0.5px; color:var(--chalk); font-weight:700;}
+  .topbar h1 span{color:var(--mustard);}
+  .topbar .sub{font-size:10px; color:#9FB5A9; letter-spacing:1.5px; text-transform:uppercase;}
+
+  .toolbar{display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;}
+  .btn{
+    font-family:'Space Mono', monospace; font-size:12px; font-weight:700;
+    background:var(--field-dark); color:var(--chalk); border:1px solid rgba(255,255,255,0.15);
+    padding:9px 12px; border-radius:8px; cursor:pointer; letter-spacing:0.5px;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn.primary{background:var(--mustard); color:var(--ink); border-color:var(--mustard-dark);}
+  .btn.danger{background:transparent; color:#E08B85; border-color:#6b3a37;}
+  .btn.ghost{background:transparent;}
+  .btn.small{padding:6px 9px; font-size:11px;}
+
+  /* meta card */
+  .card{background:var(--paper); color:var(--ink); border-radius:var(--radius); padding:12px; box-shadow:0 6px 18px rgba(0,0,0,0.25); margin-bottom:14px;}
+  .meta-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px 10px;}
+  .field label{display:block; font-size:9px; text-transform:uppercase; letter-spacing:1px; color:var(--ink-soft); margin-bottom:2px;}
+  .field input, .field select{
+    width:100%; border:none; border-bottom:2px solid var(--paper-line); background:transparent;
+    font-family:'Zilla Slab', serif; font-size:15px; font-weight:600; color:var(--ink); padding:3px 2px;
+  }
+  .field input:focus, .field select:focus{outline:none; border-bottom-color:var(--mustard-dark);}
+
+  /* team tabs */
+  .tabs{display:flex; gap:6px; margin-bottom:10px;}
+  .tab{
+    flex:1; text-align:center; padding:10px 6px; border-radius:8px; cursor:pointer;
+    background:var(--field-dark); border:1px solid rgba(255,255,255,0.1); font-family:'Zilla Slab',serif; font-weight:700; font-size:14px;
+  }
+  .tab.active{background:var(--paper); color:var(--ink); border-color:var(--paper);}
+  .tab .r{display:block; font-size:20px; font-family:'Space Mono',monospace; margin-top:2px;}
+
+  /* line score */
+  .linescore{background:var(--paper); color:var(--ink); border-radius:var(--radius); overflow-x:auto; margin-bottom:12px; box-shadow:0 6px 18px rgba(0,0,0,0.25);}
+  table.ls{border-collapse:collapse; width:100%; font-size:12px;}
+  table.ls th, table.ls td{padding:6px 8px; text-align:center; border-bottom:1px solid var(--paper-line); white-space:nowrap;}
+  table.ls th{font-family:'Zilla Slab',serif; font-size:11px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.5px;}
+  table.ls td.name{text-align:left; font-family:'Zilla Slab',serif; font-weight:700;}
+  table.ls td.tot{font-weight:700; background:rgba(217,164,65,0.25);}
+
+  /* scoring grid */
+  .gridwrap{background:var(--paper); border-radius:var(--radius); box-shadow:0 6px 18px rgba(0,0,0,0.25); overflow:hidden; margin-bottom:12px;}
+
+  /* Live basepath diamond */
+  .diamondcard{background:var(--paper); color:var(--ink); border-radius:var(--radius); padding:14px; box-shadow:0 6px 18px rgba(0,0,0,0.25); margin-bottom:12px;}
+  .diamondcard-hdr{display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;}
+  .diamondcard-title{font-family:'Zilla Slab',serif; font-weight:700; font-size:14px;}
+  .diamondcard-title b{color:var(--mustard-dark);}
+  .liveWrap{position:relative; width:200px; height:200px; margin:6px auto 2px;}
+  .baseSpot{position:absolute; width:40px; height:40px; margin:-20px 0 0 -20px; border:2px solid var(--paper-line); background:var(--chalk); transform:rotate(45deg);}
+  .baseSpot.home{background:var(--ink); border-color:var(--ink);}
+  .pathline{position:absolute; background:var(--paper-line); z-index:0;}
+  .runnerToken{
+    position:absolute; width:36px; height:36px; margin:-18px 0 0 -18px; border-radius:50%;
+    background:var(--mustard); border:2px solid var(--mustard-dark); color:var(--ink);
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-size:11px;
+    cursor:pointer; z-index:2; font-family:'Space Mono',monospace;
+  }
+  .runnerToken:active{transform:scale(0.94);}
+  .baseLabel{position:absolute; font-size:9px; color:var(--ink-soft); font-family:'Space Mono',monospace; text-align:center; width:30px; margin-left:-15px;}
+  .emptyBasesNote{text-align:center; font-size:11px; color:var(--ink-soft); margin-top:4px;}
+  .gridscroll{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+  table.score{border-collapse:collapse; width:100%; min-width:640px;}
+  table.score th{
+    background:var(--field-dark); color:var(--chalk); font-family:'Zilla Slab',serif; font-size:12px;
+    padding:6px 4px; position:sticky; top:0; z-index:2;
+  }
+  table.score th.inn{width:64px;}
+  table.score td{border:1px solid var(--paper-line); vertical-align:top; padding:0;}
+  .rowhead{
+    background:var(--paper); position:sticky; left:0; z-index:1; min-width:130px; max-width:130px;
+    padding:6px 8px !important; border-right:2px solid var(--ink-soft) !important;
+  }
+  .rowhead .ord{font-size:10px; color:var(--ink-soft);}
+  .rowhead .nm{font-family:'Zilla Slab',serif; font-weight:700; font-size:13px; color:var(--ink); background:transparent; border:none; width:100%; padding:1px 0;}
+  .rowhead .ps{font-family:'Space Mono',monospace; font-size:10px; color:var(--ink-soft); background:transparent; border:none; width:40px;}
+  .rowhead .rmv{float:right; color:#b06; cursor:pointer; font-size:11px; border:none; background:none;}
+
+  .cell{width:64px; height:64px; position:relative; cursor:pointer; background:var(--chalk);}
+  .cell:active{background:#e9e2cd;}
+  .padot{position:absolute; font-size:8px; top:1px; right:2px; color:var(--ink-soft);}
+  .cellcode{
+    position:absolute; bottom:2px; left:3px; font-size:10px; font-weight:700; color:var(--ink);
+    font-family:'Space Mono',monospace;
+  }
+  .cellrbi{position:absolute; top:2px; left:3px; font-size:9px; color:var(--brick); font-weight:700;}
+  svg.diamond{position:absolute; top:6px; left:50%; transform:translateX(-50%) rotate(45deg); width:30px; height:30px;}
+  .addinn{cursor:pointer; color:var(--ink-soft); font-family:'Space Mono',monospace; font-size:20px; padding:0 10px;}
+
+  .totalsrow th{background:var(--mustard); color:var(--ink);}
+
+  /* modal */
+  .overlay{position:fixed; inset:0; background:rgba(10,15,12,0.55); display:none; align-items:flex-end; justify-content:center; z-index:50;}
+  .overlay.open{display:flex;}
+  .sheet{background:var(--paper); color:var(--ink); width:100%; max-width:560px; border-radius:16px 16px 0 0; padding:16px 16px 22px; max-height:88vh; overflow-y:auto;}
+  .sheet h3{margin:0 0 10px; font-size:16px;}
+  .grp{margin-bottom:12px;}
+  .grp-label{font-size:10px; text-transform:uppercase; letter-spacing:1px; color:var(--ink-soft); margin-bottom:6px;}
+  .chips{display:flex; flex-wrap:wrap; gap:6px;}
+  .chip{
+    padding:8px 12px; border-radius:20px; border:2px solid var(--paper-line); background:var(--chalk);
+    font-family:'Space Mono',monospace; font-weight:700; font-size:12px; cursor:pointer; color:var(--ink);
+  }
+  .chip.sel{background:var(--ink); color:var(--chalk); border-color:var(--ink);}
+  .chip.out-c{border-color:#caa; }
+  .chip.hit-c.sel{background:var(--safe); border-color:var(--safe); color:var(--chalk);}
+  .chip.out-c.sel{background:var(--brick); border-color:var(--brick); color:var(--chalk);}
+  .fielders{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+  .fielders .num{width:34px; height:34px; border-radius:8px; background:var(--chalk); border:2px solid var(--paper-line); font-weight:700; cursor:pointer; font-family:'Space Mono',monospace;}
+  .fseq{font-family:'Zilla Slab',serif; font-weight:700; font-size:18px; min-width:40px;}
+  .stepper{display:flex; align-items:center; gap:10px;}
+  .stepper button{width:32px; height:32px; border-radius:8px; border:2px solid var(--paper-line); background:var(--chalk); font-weight:700; font-size:16px; cursor:pointer;}
+  .stepper .val{font-family:'Zilla Slab',serif; font-weight:700; font-size:18px; width:24px; text-align:center;}
+  .note-input{width:100%; border:2px solid var(--paper-line); border-radius:8px; padding:8px; font-family:'Space Mono',monospace; font-size:12px; background:var(--chalk); color:var(--ink);}
+  .sheet-actions{display:flex; gap:8px; margin-top:14px;}
+  .sheet-actions .btn{flex:1; text-align:center;}
+  .pa-list{display:flex; flex-direction:column; gap:6px; margin-bottom:10px;}
+  .pa-item{display:flex; justify-content:space-between; align-items:center; background:var(--chalk); border-radius:8px; padding:8px 10px; font-size:12px; cursor:pointer; border:2px solid var(--paper-line);}
+  .pa-item .del{color:#b06; font-weight:700; padding:2px 6px;}
+
+  /* games list modal */
+  .glist{display:flex; flex-direction:column; gap:8px;}
+  .gitem{display:flex; justify-content:space-between; align-items:center; background:var(--chalk); border-radius:8px; padding:10px; border:2px solid var(--paper-line);}
+  .gitem .meta{font-size:11px; color:var(--ink-soft);}
+  .gitem .name{font-family:'Zilla Slab',serif; font-weight:700; font-size:14px;}
+
+  .foot-note{font-size:10px; color:#82998c; text-align:center; margin-top:16px; line-height:1.6;}
+  ::-webkit-scrollbar{height:8px; width:8px;}
+  ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.2); border-radius:4px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div>
+      <h1>Ledger<span>.</span></h1>
+      <div class="sub">Baseball Scorecard</div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <button class="btn primary" id="btnNew">+ New Game</button>
+    <button class="btn" id="btnLoad">My Games</button>
+    <button class="btn ghost" id="btnAddInning">+ Inning</button>
+    <button class="btn ghost" id="btnAddBatter">+ Batter</button>
+  </div>
+
+  <div class="card">
+    <div class="meta-grid">
+      <div class="field"><label>Away Team</label><input id="awayName" placeholder="Visitors"></div>
+      <div class="field"><label>Home Team</label><input id="homeName" placeholder="Home"></div>
+      <div class="field"><label>Date</label><input id="gameDate" type="date"></div>
+      <div class="field"><label>Location</label><input id="gameLoc" placeholder="Field / venue"></div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" id="tabAway" data-team="away">Away<span class="r" id="awayR">0</span></div>
+    <div class="tab" id="tabHome" data-team="home">Home<span class="r" id="homeR">0</span></div>
+  </div>
+
+  <div class="diamondcard">
+    <div class="diamondcard-hdr">
+      <div class="diamondcard-title">Live Bases — <b id="liveTeamLabel">Away</b>, Inning <b id="liveInningLabel">1</b></div>
+      <div style="display:flex; gap:6px;">
+        <button class="btn small ghost" id="liveInningPrev">‹</button>
+        <button class="btn small ghost" id="liveInningNext">›</button>
+      </div>
+    </div>
+    <div class="liveWrap" id="liveDiamondWrap"></div>
+    <div class="emptyBasesNote">Tap a runner to edit that at-bat. Diamond follows the last box you scored.</div>
+  </div>
+
+  <div class="linescore">
+    <table class="ls" id="lineScoreTable"></table>
+  </div>
+
+  <div class="gridwrap">
+    <div class="gridscroll">
+      <table class="score" id="scoreTable"></table>
+    </div>
+  </div>
+
+  <div class="foot-note">Tap any box to enter the at-bat directly. Runs/hits/errors total automatically.<br>Games save to this device automatically.</div>
+</div>
+
+<!-- PA entry modal -->
+<div class="overlay" id="paOverlay">
+  <div class="sheet" id="paSheet">
+    <h3 id="paTitle">At-bat</h3>
+
+    <div class="pa-list" id="paList" style="display:none;"></div>
+
+    <div id="paEditor">
+      <div class="grp">
+        <div class="grp-label">Result</div>
+        <div class="chips" id="resultChips"></div>
+      </div>
+      <div class="grp" id="fielderGrp">
+        <div class="grp-label">Fielders (tap in order)</div>
+        <div class="fielders">
+          <div class="fseq" id="fseqDisplay">—</div>
+          <div class="num" data-n="1">1</div><div class="num" data-n="2">2</div><div class="num" data-n="3">3</div>
+          <div class="num" data-n="4">4</div><div class="num" data-n="5">5</div><div class="num" data-n="6">6</div>
+          <div class="num" data-n="7">7</div><div class="num" data-n="8">8</div><div class="num" data-n="9">9</div>
+          <button class="btn small ghost" id="fseqClear">clear</button>
+        </div>
+      </div>
+      <div class="grp">
+        <div class="grp-label">RBI</div>
+        <div class="stepper">
+          <button id="rbiMinus">−</button><div class="val" id="rbiVal">0</div><button id="rbiPlus">+</button>
+        </div>
+      </div>
+      <div class="grp">
+        <div class="grp-label">End of at-bat / inning: batter ended up</div>
+        <div class="chips" id="outcomeChips">
+          <div class="chip" data-v="1B">On 1B</div>
+          <div class="chip" data-v="2B">On 2B</div>
+          <div class="chip" data-v="3B">On 3B</div>
+          <div class="chip" data-v="scored">Scored</div>
+          <div class="chip" data-v="out">Out</div>
+        </div>
+      </div>
+      <div class="grp">
+        <div class="grp-label">Note (optional — e.g. "CS 2B", "wild pitch")</div>
+        <input class="note-input" id="paNote" placeholder="">
+      </div>
+      <div class="sheet-actions">
+        <button class="btn danger" id="btnDeletePA">Delete</button>
+        <button class="btn primary" id="btnSavePA">Save</button>
+      </div>
+      <button class="btn small ghost" id="btnAddPA" style="margin-top:10px;width:100%;">+ Batter came up again this inning</button>
+    </div>
+
+    <div class="sheet-actions" id="paCloseRow" style="display:none;">
+      <button class="btn ghost" id="btnClosePA" style="flex:1;">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Games list modal -->
+<div class="overlay" id="gamesOverlay">
+  <div class="sheet">
+    <h3>My Games</h3>
+    <div class="glist" id="gamesList"></div>
+    <div class="sheet-actions">
+      <button class="btn ghost" id="btnCloseGames" style="flex:1;">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------- Data model ----------
+game = {
+  id, meta:{away,home,date,loc},
+  innings: number,
+  teams: {
+    away: { lineup: [{id,name,pos}], cells: { "rowId_inning": [pa,...] } },
+    home: { ... }
+  }
+}
+pa = { result, fielders:"6-3", rbi:0, outcome:'1B'|'2B'|'3B'|'scored'|'out', note:"" }
+------------------------------------ */
+
+const RESULTS = [
+  {v:'1B', label:'1B', type:'hit'}, {v:'2B', label:'2B', type:'hit'}, {v:'3B', label:'3B', type:'hit'}, {v:'HR', label:'HR', type:'hit'},
+  {v:'BB', label:'BB', type:'other'}, {v:'HBP', label:'HBP', type:'other'}, {v:'K', label:'K', type:'out'}, {v:'Kc', label:'K̶', type:'out'},
+  {v:'FC', label:'FC', type:'other'}, {v:'E', label:'E', type:'other'}, {v:'SAC', label:'SAC', type:'out'}, {v:'SF', label:'SF', type:'out'},
+  {v:'OUT', label:'Out', type:'out'}, {v:'DP', label:'DP', type:'out'}, {v:'TP', label:'TP', type:'out'}
+];
+const DEFAULT_RESULT_OUTCOME = {
+  '1B':'1B','2B':'2B','3B':'3B','HR':'scored','BB':'1B','HBP':'1B','FC':'1B','E':'1B',
+  'K':'out','Kc':'out','SAC':'out','SF':'out','OUT':'out','DP':'out','TP':'out'
+};
+
+let game = null;
+let currentTeam = 'away';
+let activeCellKey = null; // rowId_inning
+let activePAIndex = null; // index within pa array, or null = list view
+let editingDraft = null;
+let liveInning = {away:1, home:1}; // which inning the live-bases diamond is showing, per side
+
+function uid(){ return Math.random().toString(36).slice(2,10); }
+
+function newLineup(){
+  const names=['Player 1','Player 2','Player 3','Player 4','Player 5','Player 6','Player 7','Player 8','Player 9'];
+  return names.map((n,i)=>({id:uid(), name:n, pos:''}));
+}
+
+function newGame(){
+  return {
+    id: uid(),
+    meta:{away:'', home:'', date:'', loc:''},
+    innings: 9,
+    teams:{
+      away:{lineup:newLineup(), cells:{}},
+      home:{lineup:newLineup(), cells:{}}
+    }
+  };
+}
+
+/* ---------- Storage ----------
+   Uses plain localStorage so this page works standalone, on your own
+   server, or side-by-side with the yearbook site — no Claude-specific
+   APIs required. */
+const storage = {
+  async get(key){
+    const v = localStorage.getItem(key);
+    return v===null ? null : {key, value:v};
+  },
+  async set(key, value){
+    localStorage.setItem(key, value);
+    return {key, value};
+  },
+  async remove(key){
+    localStorage.removeItem(key);
+  }
+};
+async function saveGame(){
+  if(!game) return;
+  try{
+    await storage.set('game:'+game.id, JSON.stringify(game));
+    const idxRes = await safeGet('games-index');
+    let idx = idxRes ? JSON.parse(idxRes.value) : [];
+    idx = idx.filter(g=>g.id!==game.id);
+    idx.unshift({id:game.id, away:game.meta.away||'Away', home:game.meta.home||'Home', date:game.meta.date||'', updated:Date.now()});
+    await storage.set('games-index', JSON.stringify(idx.slice(0,50)));
+  }catch(e){ console.error('save failed', e); }
+}
+async function safeGet(key){
+  try{ return await storage.get(key); }catch(e){ return null; }
+}
+async function loadGamesIndex(){
+  const r = await safeGet('games-index');
+  return r ? JSON.parse(r.value) : [];
+}
+async function loadGame(id){
+  const r = await safeGet('game:'+id);
+  if(r){ game = JSON.parse(r.value); liveInning = {away:1, home:1}; renderAll(); }
+}
+
+/* ---------- Rendering ---------- */
+function renderAll(){
+  document.getElementById('awayName').value = game.meta.away;
+  document.getElementById('homeName').value = game.meta.home;
+  document.getElementById('gameDate').value = game.meta.date;
+  document.getElementById('gameLoc').value = game.meta.loc;
+  renderTabs();
+  renderLineScore();
+  renderGrid();
+  renderLiveDiamond();
+}
+
+function inningRuns(team, inn){
+  const t = game.teams[team];
+  let runs=0;
+  Object.keys(t.cells).forEach(k=>{
+    const [, i] = k.split('_');
+    if(parseInt(i)===inn){
+      (t.cells[k]||[]).forEach(pa=>{ if(pa.outcome==='scored') runs++; });
+    }
+  });
+  return runs;
+}
+function teamTotals(team, g){
+  const t = (g||game).teams[team];
+  let r=0,h=0,e=0;
+  Object.values(t.cells).forEach(arr=>{
+    (arr||[]).forEach(pa=>{
+      if(pa.outcome==='scored') r++;
+      if(['1B','2B','3B','HR'].includes(pa.result)) h++;
+      if(pa.result==='E') e++;
+    });
+  });
+  return {r,h,e};
+}
+
+function renderTabs(){
+  document.getElementById('tabAway').classList.toggle('active', currentTeam==='away');
+  document.getElementById('tabHome').classList.toggle('active', currentTeam==='home');
+  document.getElementById('awayR').textContent = teamTotals('away').r;
+  document.getElementById('homeR').textContent = teamTotals('home').r;
+}
+
+/* ---------- Live bases: who's on, and how they move ---------- */
+function initials(name){
+  if(!name) return '?';
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if(parts.length===0) return '?';
+  if(parts.length===1) return parts[0].slice(0,2).toUpperCase();
+  return (parts[0][0]+parts[parts.length-1][0]).toUpperCase();
+}
+
+// Returns {1:{id,name}|null, 2:..., 3:...} — who currently occupies each base
+// for the given team/inning, based on each batter's latest recorded outcome.
+function getLiveRunners(teamObj, lineup, inning, excludeId){
+  const bases = {1:null, 2:null, 3:null};
+  lineup.forEach(p=>{
+    if(p.id===excludeId) return;
+    const arr = teamObj.cells[p.id+'_'+inning];
+    if(!arr || !arr.length) return;
+    const last = arr[arr.length-1];
+    if(last.outcome==='1B') bases[1] = {id:p.id, name:p.name};
+    if(last.outcome==='2B') bases[2] = {id:p.id, name:p.name};
+    if(last.outcome==='3B') bases[3] = {id:p.id, name:p.name};
+  });
+  return bases;
+}
+
+// Moves whoever is currently on base (as of just before this new at-bat) by
+// rewriting their own cell's last outcome, based on the new batter's result.
+// Simplified standard advancement — not every real-world judgment call
+// (e.g. holding a runner at third on a single) is modeled; tap a runner
+// afterward to correct it by hand if needed.
+function autoAdvanceRunners(teamObj, lineup, inning, result, newBatterId){
+  const runners = getLiveRunners(teamObj, lineup, inning, newBatterId);
+  function move(base, newOutcome){
+    const r = runners[base];
+    if(!r) return;
+    const arr = teamObj.cells[r.id+'_'+inning];
+    if(arr && arr.length) arr[arr.length-1].outcome = newOutcome;
+  }
+  switch(result){
+    case 'HR': case '3B':
+      move(3,'scored'); move(2,'scored'); move(1,'scored');
+      break;
+    case '2B':
+      move(3,'scored'); move(2,'scored');
+      if(runners[1]) move(1,'3B');
+      break;
+    case '1B': case 'E':
+      move(3,'scored');
+      if(runners[2]) move(2,'3B');
+      if(runners[1]) move(1,'2B');
+      break;
+    case 'BB': case 'HBP': {
+      const force1 = !!runners[1];
+      const force2 = force1 && !!runners[2];
+      const force3 = force2 && !!runners[3];
+      if(force3) move(3,'scored');
+      if(force2) move(2,'3B');
+      if(force1) move(1,'2B');
+      break;
+    }
+    case 'SAC':
+      if(runners[2]) move(2,'3B');
+      else if(runners[1]) move(1,'2B');
+      break;
+    case 'SF':
+      if(runners[3]) move(3,'scored');
+      break;
+    default:
+      break; // K, Kc, OUT, FC, DP, TP: runners hold by default
+  }
+}
+
+function renderLiveDiamond(){
+  if(!game) return;
+  const inning = Math.min(Math.max(liveInning[currentTeam]||1, 1), game.innings);
+  liveInning[currentTeam] = inning;
+  document.getElementById('liveTeamLabel').textContent = currentTeam==='away' ? 'Away' : 'Home';
+  document.getElementById('liveInningLabel').textContent = inning;
+  const t = game.teams[currentTeam];
+  const bases = getLiveRunners(t, t.lineup, inning, null);
+  const wrap = document.getElementById('liveDiamondWrap');
+  function token(base, x, y){
+    const r = bases[base];
+    if(!r) return '';
+    return `<div class="runnerToken" style="left:${x}px; top:${y}px;" data-batter="${r.id}" data-inning="${inning}" title="${escapeHtml(r.name)}">${escapeHtml(initials(r.name))}</div>`;
+  }
+  wrap.innerHTML = `
+    <div class="baseSpot" style="left:100px; top:20px;"></div>
+    <div class="baseLabel" style="left:100px; top:2px;">2B</div>
+    <div class="baseSpot" style="left:180px; top:100px;"></div>
+    <div class="baseLabel" style="left:180px; top:150px;">1B</div>
+    <div class="baseSpot" style="left:20px; top:100px;"></div>
+    <div class="baseLabel" style="left:20px; top:150px;">3B</div>
+    <div class="baseSpot home" style="left:100px; top:180px;"></div>
+    <div class="baseLabel" style="left:100px; top:190px;">HOME</div>
+    ${token(2,100,20)}
+    ${token(1,180,100)}
+    ${token(3,20,100)}
+  `;
+  wrap.querySelectorAll('.runnerToken').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      openPA(el.dataset.batter+'_'+el.dataset.inning);
+    });
+  });
+}
+
+document.getElementById('liveInningPrev').addEventListener('click', ()=>{
+  liveInning[currentTeam] = Math.max(1, (liveInning[currentTeam]||1)-1);
+  renderLiveDiamond();
+});
+document.getElementById('liveInningNext').addEventListener('click', ()=>{
+  liveInning[currentTeam] = Math.min(game.innings, (liveInning[currentTeam]||1)+1);
+  renderLiveDiamond();
+});
+
+function renderLineScore(){
+  const tbl = document.getElementById('lineScoreTable');
+  let html = '<tr><th>Team</th>';
+  for(let i=1;i<=game.innings;i++) html += `<th>${i}</th>`;
+  html += '<th class="tot">R</th><th class="tot">H</th><th class="tot">E</th></tr>';
+  ['away','home'].forEach(team=>{
+    const tot = teamTotals(team);
+    html += `<tr><td class="name">${escapeHtml(game.meta[team]||(team==='away'?'Away':'Home'))}</td>`;
+    for(let i=1;i<=game.innings;i++){
+      html += `<td>${inningRuns(team,i)}</td>`;
+    }
+    html += `<td class="tot">${tot.r}</td><td class="tot">${tot.h}</td><td class="tot">${tot.e}</td></tr>`;
+  });
+  tbl.innerHTML = html;
+}
+
+function diamondSVG(pa){
+  // Determine fill level: 0 none,1 to1B,2 to2B,3 to3B,4 scored
+  let level=0;
+  if(pa) {
+    const o = pa.outcome;
+    if(o==='1B') level=1; else if(o==='2B') level=2; else if(o==='3B') level=3; else if(o==='scored') level=4; else if(o==='out') level=0.5;
+  }
+  const isOut = pa && pa.outcome==='out';
+  const color = level===4 ? 'var(--safe)' : (isOut ? 'var(--brick)' : 'var(--ink)');
+  const fill = level>0 ? color : 'none';
+  // base path segments: home->1B->2B->3B->home, draw as square rotated via CSS
+  const seg1 = level>=1 ? color : 'var(--paper-line)'; // home to 1st (bottom to right)
+  const seg2 = level>=2 ? color : 'var(--paper-line)'; // 1st to 2nd (right to top)
+  const seg3 = level>=3 ? color : 'var(--paper-line)'; // 2nd to 3rd (top to left)
+  const seg4 = level>=4 ? color : 'var(--paper-line)'; // 3rd to home (left to bottom)
+  return `<svg class="diamond" viewBox="0 0 20 20">
+    <rect x="1" y="1" width="18" height="18" fill="none" stroke="var(--paper-line)" stroke-width="1"/>
+    <line x1="19" y1="19" x2="19" y2="1" stroke="${seg1}" stroke-width="2.5"/>
+    <line x1="19" y1="1" x2="1" y2="1" stroke="${seg2}" stroke-width="2.5"/>
+    <line x1="1" y1="1" x2="1" y2="19" stroke="${seg3}" stroke-width="2.5"/>
+    <line x1="1" y1="19" x2="19" y2="19" stroke="${seg4}" stroke-width="2.5"/>
+    ${level===4 ? `<rect x="6" y="6" width="8" height="8" fill="${color}"/>` : ''}
+    ${isOut ? `<line x1="4" y1="4" x2="16" y2="16" stroke="var(--brick)" stroke-width="2"/><line x1="16" y1="4" x2="4" y2="16" stroke="var(--brick)" stroke-width="2"/>` : ''}
+  </svg>`;
+}
+
+function cellSummary(paArr){
+  if(!paArr || paArr.length===0) return {code:'', rbi:0};
+  const rbi = paArr.reduce((a,p)=>a+(p.rbi||0),0);
+  let code;
+  if(paArr.length===1){
+    const p = paArr[0];
+    code = p.result==='OUT' && p.fielders ? p.fielders : p.result;
+  } else {
+    code = paArr.length+'AB';
+  }
+  return {code, rbi};
+}
+
+function renderGrid(){
+  const t = game.teams[currentTeam];
+  const tbl = document.getElementById('scoreTable');
+  let html = '<tr><th class="rowhead">Batter</th>';
+  for(let i=1;i<=game.innings;i++) html += `<th class="inn">${i}</th>`;
+  html += '<th></th></tr>';
+
+  t.lineup.forEach((batter,idx)=>{
+    html += `<tr><td class="rowhead">
+      <span class="ord">#${idx+1} <span class="rmv" data-batter="${batter.id}">✕</span></span><br>
+      <input class="nm" data-field="name" data-batter="${batter.id}" value="${escapeAttr(batter.name)}">
+      <input class="ps" data-field="pos" data-batter="${batter.id}" value="${escapeAttr(batter.pos)}" placeholder="pos">
+      </td>`;
+    for(let i=1;i<=game.innings;i++){
+      const key = batter.id+'_'+i;
+      const paArr = t.cells[key];
+      const {code, rbi} = cellSummary(paArr);
+      const lastPA = paArr && paArr.length ? paArr[paArr.length-1] : null;
+      html += `<td><div class="cell" data-key="${key}">
+        ${paArr && paArr.length>1 ? `<span class="padot">${paArr.length}</span>` : ''}
+        ${diamondSVG(lastPA)}
+        ${rbi>0 ? `<span class="cellrbi">${rbi}rbi</span>` : ''}
+        ${code ? `<span class="cellcode">${escapeHtml(code)}</span>` : ''}
+      </div></td>`;
+    }
+    html += '<td></td></tr>';
+  });
+  // add inning control row
+  tbl.innerHTML = html;
+
+  // bind
+  tbl.querySelectorAll('.cell').forEach(c=>{
+    c.addEventListener('click', ()=>openPA(c.dataset.key));
+  });
+  tbl.querySelectorAll('input[data-field]').forEach(inp=>{
+    inp.addEventListener('change', e=>{
+      const b = t.lineup.find(x=>x.id===e.target.dataset.batter);
+      b[e.target.dataset.field] = e.target.value;
+      saveGame();
+    });
+  });
+  tbl.querySelectorAll('.rmv').forEach(x=>{
+    x.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      if(!confirm('Remove this batter row?')) return;
+      t.lineup = t.lineup.filter(b=>b.id!==x.dataset.batter);
+      renderGrid(); saveGame();
+    });
+  });
+}
+
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escapeAttr(s){ return escapeHtml(s); }
+
+/* ---------- PA modal ---------- */
+function openPA(key){
+  activeCellKey = key;
+  const t = game.teams[currentTeam];
+  if(!t.cells[key]) t.cells[key] = [];
+  const arr = t.cells[key];
+  document.getElementById('paOverlay').classList.add('open');
+  if(arr.length > 1){
+    showPAList();
+  } else {
+    editPA(arr.length === 0 ? null : 0);
+  }
+}
+
+function showPAList(){
+  document.getElementById('paEditor').style.display='none';
+  document.getElementById('paList').style.display='block';
+  document.getElementById('paCloseRow').style.display='flex';
+  document.getElementById('paTitle').textContent = 'At-bats this inning';
+  renderPAList();
+}
+
+function renderPAList(){
+  const t = game.teams[currentTeam];
+  const arr = t.cells[activeCellKey] || [];
+  const list = document.getElementById('paList');
+  list.innerHTML = arr.map((pa,i)=>`<div class="pa-item" data-i="${i}">
+      <span>${pa.result}${pa.fielders? ' ('+pa.fielders+')':''} — ${pa.outcome}${pa.rbi? ', '+pa.rbi+' RBI':''}</span>
+      <span class="del" data-del="${i}">delete</span>
+    </div>`).join('') + `<button class="btn small ghost" id="btnAddPAFromList" style="margin-top:8px;width:100%;">+ Add another at-bat</button>`;
+  list.querySelectorAll('.pa-item').forEach(el=>{
+    el.addEventListener('click', (e)=>{
+      if(e.target.classList.contains('del')) return;
+      editPA(parseInt(el.dataset.i));
+    });
+  });
+  list.querySelectorAll('.del').forEach(el=>{
+    el.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const i = parseInt(el.dataset.del);
+      arr.splice(i,1);
+      renderGrid(); renderLineScore(); renderTabs(); renderLiveDiamond(); saveGame();
+      if(arr.length > 1) renderPAList();
+      else if(arr.length === 1) editPA(0);
+      else document.getElementById('paOverlay').classList.remove('open');
+    });
+  });
+  document.getElementById('btnAddPAFromList').addEventListener('click', ()=>editPA(null));
+}
+
+function editPA(index){
+  const t = game.teams[currentTeam];
+  const arr = t.cells[activeCellKey];
+  activePAIndex = index===null ? arr.length : index;
+  editingDraft = index===null ? {result:'', fielders:'', rbi:0, outcome:'', note:''} : Object.assign({}, arr[index]);
+  document.getElementById('paList').style.display='none';
+  document.getElementById('paCloseRow').style.display='none';
+  document.getElementById('paEditor').style.display='block';
+  document.getElementById('paTitle').textContent = 'At-bat';
+  buildEditor();
+}
+
+function buildEditor(){
+  const rc = document.getElementById('resultChips');
+  rc.innerHTML = RESULTS.map(r=>`<div class="chip ${r.type==='hit'?'hit-c':(r.type==='out'?'out-c':'')} ${editingDraft.result===r.v?'sel':''}" data-v="${r.v}">${r.label}</div>`).join('');
+  rc.querySelectorAll('.chip').forEach(c=>{
+    c.addEventListener('click', ()=>{
+      editingDraft.result = c.dataset.v;
+      editingDraft.outcome = DEFAULT_RESULT_OUTCOME[c.dataset.v] || editingDraft.outcome;
+      buildEditor();
+    });
+  });
+  document.getElementById('fseqDisplay').textContent = editingDraft.fielders || '—';
+  document.getElementById('rbiVal').textContent = editingDraft.rbi || 0;
+  document.querySelectorAll('#outcomeChips .chip').forEach(c=>{
+    c.classList.toggle('sel', c.dataset.v===editingDraft.outcome);
+  });
+  document.getElementById('paNote').value = editingDraft.note || '';
+}
+
+document.getElementById('fseqClear').addEventListener('click', ()=>{ editingDraft.fielders=''; buildEditor(); });
+document.querySelectorAll('.fielders .num').forEach(n=>{
+  n.addEventListener('click', ()=>{
+    editingDraft.fielders = (editingDraft.fielders||'') + (editingDraft.fielders? '-':'') + n.dataset.n;
+    document.getElementById('fseqDisplay').textContent = editingDraft.fielders;
+  });
+});
+document.getElementById('rbiMinus').addEventListener('click', ()=>{ editingDraft.rbi = Math.max(0,(editingDraft.rbi||0)-1); document.getElementById('rbiVal').textContent = editingDraft.rbi; });
+document.getElementById('rbiPlus').addEventListener('click', ()=>{ editingDraft.rbi = Math.min(4,(editingDraft.rbi||0)+1); document.getElementById('rbiVal').textContent = editingDraft.rbi; });
+document.getElementById('outcomeChips').addEventListener('click', (e)=>{
+  if(e.target.classList.contains('chip')){
+    editingDraft.outcome = e.target.dataset.v;
+    document.querySelectorAll('#outcomeChips .chip').forEach(c=>c.classList.toggle('sel', c===e.target));
+  }
+});
+
+function commitDraft(){
+  editingDraft.note = document.getElementById('paNote').value;
+  if(!editingDraft.result){ alert('Pick a result.'); return false; }
+  if(!editingDraft.outcome){ alert('Pick where the batter ended up.'); return false; }
+  const t = game.teams[currentTeam];
+  const arr = t.cells[activeCellKey];
+  const isNewPA = activePAIndex === arr.length;
+  arr[activePAIndex] = editingDraft;
+  if(isNewPA){
+    const cut = activeCellKey.lastIndexOf('_');
+    const batterId = activeCellKey.slice(0, cut);
+    const inning = activeCellKey.slice(cut+1);
+    autoAdvanceRunners(t, t.lineup, inning, editingDraft.result, batterId);
+    liveInning[currentTeam] = parseInt(inning);
+  }
+  renderGrid(); renderLineScore(); renderTabs(); renderLiveDiamond(); saveGame();
+  return true;
+}
+
+document.getElementById('btnAddPA').addEventListener('click', ()=>{
+  if(commitDraft()) editPA(null);
+});
+document.getElementById('btnSavePA').addEventListener('click', ()=>{
+  if(commitDraft()) document.getElementById('paOverlay').classList.remove('open');
+});
+document.getElementById('btnDeletePA').addEventListener('click', ()=>{
+  const t = game.teams[currentTeam];
+  const arr = t.cells[activeCellKey];
+  if(activePAIndex < arr.length) arr.splice(activePAIndex,1);
+  renderGrid(); renderLineScore(); renderTabs(); renderLiveDiamond(); saveGame();
+  if(arr.length > 1) showPAList();
+  else document.getElementById('paOverlay').classList.remove('open');
+});
+document.getElementById('btnClosePA').addEventListener('click', ()=>{
+  document.getElementById('paOverlay').classList.remove('open');
+});
+
+/* ---------- Top-level controls ---------- */
+document.getElementById('tabAway').addEventListener('click', ()=>{ currentTeam='away'; renderTabs(); renderGrid(); renderLiveDiamond(); });
+document.getElementById('tabHome').addEventListener('click', ()=>{ currentTeam='home'; renderTabs(); renderGrid(); renderLiveDiamond(); });
+
+['awayName','homeName','gameDate','gameLoc'].forEach(id=>{
+  document.getElementById(id).addEventListener('change', ()=>{
+    game.meta.away = document.getElementById('awayName').value;
+    game.meta.home = document.getElementById('homeName').value;
+    game.meta.date = document.getElementById('gameDate').value;
+    game.meta.loc = document.getElementById('gameLoc').value;
+    renderLineScore(); saveGame();
+  });
+});
+
+document.getElementById('btnAddInning').addEventListener('click', ()=>{
+  game.innings++;
+  renderLineScore(); renderGrid(); saveGame();
+});
+document.getElementById('btnAddBatter').addEventListener('click', ()=>{
+  const t = game.teams[currentTeam];
+  t.lineup.push({id:uid(), name:'Player '+(t.lineup.length+1), pos:''});
+  renderGrid(); saveGame();
+});
+document.getElementById('btnNew').addEventListener('click', ()=>{
+  if(!confirm('Start a new game? (Current game stays saved in My Games)')) return;
+  game = newGame();
+  currentTeam='away';
+  liveInning = {away:1, home:1};
+  renderAll(); saveGame();
+});
+document.getElementById('btnLoad').addEventListener('click', openGamesList);
+document.getElementById('btnCloseGames').addEventListener('click', ()=>{
+  document.getElementById('gamesOverlay').classList.remove('open');
+});
+
+async function openGamesList(){
+  const idx = await loadGamesIndex();
+  const list = document.getElementById('gamesList');
+  if(idx.length===0){
+    list.innerHTML = '<div style="font-size:12px;color:var(--ink-soft);">No saved games yet.</div>';
+  } else {
+    list.innerHTML = idx.map(g=>`<div class="gitem" data-id="${g.id}">
+      <div>
+        <div class="name">${escapeHtml(g.away||'Away')} @ ${escapeHtml(g.home||'Home')}</div>
+        <div class="meta">${escapeHtml(g.date||'no date')}</div>
+      </div>
+      <button class="btn small" data-open="${g.id}">Open</button>
+    </div>`).join('');
+    list.querySelectorAll('[data-open]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        await loadGame(btn.dataset.open);
+        document.getElementById('gamesOverlay').classList.remove('open');
+      });
+    });
+  }
+  document.getElementById('gamesOverlay').classList.add('open');
+}
+
+/* ---------- Import from yearbook site ---------- */
+function decodeGameParam(str){
+  try{ return JSON.parse(decodeURIComponent(escape(atob(str)))); }catch(e){ return null; }
+}
+async function tryImportFromURL(){
+  const params = new URLSearchParams(location.search);
+  const g = params.get('game');
+  if(!g) return false;
+  const data = decodeGameParam(g);
+  if(!data) return false;
+  game = newGame();
+  game.meta.away = data.away || '';
+  game.meta.home = data.home || '';
+  game.meta.date = data.date || '';
+  game.meta.loc = data.loc || '';
+  if(Array.isArray(data.awayLineup) && data.awayLineup.length){
+    game.teams.away.lineup = data.awayLineup.map(p=>({id:uid(), name:p.name||'', pos:p.pos||''}));
+  }
+  if(Array.isArray(data.homeLineup) && data.homeLineup.length){
+    game.teams.home.lineup = data.homeLineup.map(p=>({id:uid(), name:p.name||'', pos:p.pos||''}));
+  }
+  currentTeam = 'away';
+  renderAll();
+  await saveGame();
+  history.replaceState(null, '', location.pathname); // clean the long URL after import
+  return true;
+}
+
+/* ---------- Init ---------- */
+async function init(){
+  const imported = await tryImportFromURL();
+  if(imported) return;
+  const idx = await loadGamesIndex();
+  if(idx.length>0){
+    await loadGame(idx[0].id);
+  } else {
+    game = newGame();
+    renderAll();
+    saveGame();
+  }
+}
+init();
+</script>
+</body>
+</html>
