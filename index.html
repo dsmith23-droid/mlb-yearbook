@@ -130,6 +130,10 @@ body{font-family:'Archivo Narrow',sans-serif;background:var(--bg);color:var(--te
 .tph::after{content:'';position:absolute;right:0;top:0;bottom:0;width:40%;background:rgba(255,255,255,.12);clip-path:polygon(20% 0,100% 0,100% 100%,0% 100%)}
 .tph:hover{opacity:.92}
 .tph-left{display:flex;flex-direction:column;gap:2px;position:relative;z-index:1}
+.tlogo{width:auto;object-fit:contain;vertical-align:middle;margin-right:8px}
+.lt-wrap{position:relative;overflow:hidden}
+.lt-wm{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:70%;height:94%;object-fit:contain;opacity:.15;pointer-events:none;z-index:0}
+.lt-wrap .lt{position:relative;z-index:1}
 .tph-name{font-family:'Archivo',sans-serif;font-size:1rem;font-weight:800;letter-spacing:-.01em;color:#fff}
 .tph-rec{font-family:'Roboto Mono',monospace;font-size:.68rem;color:rgba(255,255,255,.7);letter-spacing:.04em}
 .tph-score{font-family:'Archivo',sans-serif;font-size:2rem;font-weight:900;color:#fff;letter-spacing:-.03em;position:relative;z-index:1;text-shadow:0 1px 3px rgba(0,0,0,.3)}
@@ -795,6 +799,25 @@ const MS=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','
 function dp(pos){if(!pos)return "";return pos==="?"?"DH":pos;}
 function fd(d){return MO[+d.slice(4,6)]+' '+parseInt(d.slice(6,8))+', '+d.slice(0,4)}
 function fds(d){return MS[+d.slice(4,6)]+' '+parseInt(d.slice(6,8))}
+let LOGO_MANIFEST={};
+fetch('logos/manifest.json?v='+Date.now()).then(r=>r.ok?r.json():{}).then(m=>{LOGO_MANIFEST=m||{};}).catch(()=>{});
+function logoUrl(code){
+  const yr=+(curSeason||0);
+  if(!yr)return '';
+  for(let y=yr;y>=Math.max(1901,yr-120);y--){
+    const f=(LOGO_MANIFEST[y]||{})[code];
+    if(f)return 'logos/'+encodeURIComponent(f);
+  }
+  return '';
+}
+function logoImg(code,h){
+  const u=logoUrl(code);
+  return u?`<img class="tlogo" src="${u}" style="height:${h||22}px" alt="" onerror="this.style.display='none'">`:'';
+}
+function logoWatermark(code){
+  const u=logoUrl(code);
+  return u?`<img class="lt-wm" src="${u}" alt="" onerror="this.style.display='none'">`:'';
+}
 function tc(code){
   const c=_ALIAS_DIV[code]?_ALIAS_DIV[code]:code;
   const entries=COLORS[c]||COLORS[code];
@@ -1246,11 +1269,11 @@ function renderBox(gid){
   document.getElementById('lst').innerHTML=`
     <tr><th>Team</th>${inH}<th class="lsrhe">R</th><th class="lsrhe">H</th><th class="lsrhe">E</th></tr>
     <tr>
-      <td onclick="openTeamSchedule('${box.v}','box')" style="border-left:3px solid ${vc};background:${vc}08">${tf(box.v)} <span style="font-family:'Roboto Mono',monospace;font-size:.65rem;color:var(--dim)">${vRec.w}-${vRec.l}</span></td>
+      <td onclick="openTeamSchedule('${box.v}','box')" style="border-left:3px solid ${vc};background:${vc}08">${logoImg(box.v,32)}${tf(box.v)} <span style="font-family:'Roboto Mono',monospace;font-size:.65rem;color:var(--dim)">${vRec.w}-${vRec.l}</span></td>
       ${inC(vb.i,false)}<td class="lsrhe" style="font-weight:700;color:var(--text)">${vb.r}</td><td class="lsrhe">${vb.h}</td><td class="lsrhe">${vb.e}</td>
     </tr>
     <tr>
-      <td onclick="openTeamSchedule('${box.h}','box')" style="border-left:3px solid ${hc};background:${hc}08">${tf(box.h)} <span style="font-family:'Roboto Mono',monospace;font-size:.65rem;color:var(--dim)">${hRec.w}-${hRec.l}</span></td>
+      <td onclick="openTeamSchedule('${box.h}','box')" style="border-left:3px solid ${hc};background:${hc}08">${logoImg(box.h,32)}${tf(box.h)} <span style="font-family:'Roboto Mono',monospace;font-size:.65rem;color:var(--dim)">${hRec.w}-${hRec.l}</span></td>
       ${inC(hb.i,true)}<td class="lsrhe" style="font-weight:700;color:var(--text)">${hb.r}</td><td class="lsrhe">${hb.h}</td><td class="lsrhe">${hb.e}</td>
     </tr>`;
 
@@ -1479,10 +1502,10 @@ function buildTP(code,tb,color,rec,date,psYear){
       <div class="tph-score" >${tb.r}</div>
     </div>
     <div class="sec-label" style="border-left-color:${color}">Lineup</div>
-    <table class="lt" style="background:${sec}18">
+    <div class="lt-wrap">${logoWatermark(code)}<table class="lt" style="background:${sec}18">
       <tr style="background:${sec}30"><th>#</th><th>Player</th><th>H-AB</th><th>2B</th><th>3B</th><th>BB</th><th>K</th><th>HR</th><th>RBI</th><th>SB</th></tr>
       ${lrows||benchRows ? lrows+benchRows : '<tr><td colspan="11" style="color:var(--muted);padding:8px;font-style:italic">No batting data available for this game</td></tr>'}
-    </table>
+    </table></div>
     <div class="sec-label" style="border-left-color:${color}">Bench</div><div class="rl" style="background:${sec}10">${rlBench(tb.b||[])}</div>
     <div class="sec-label" style="border-left-color:${color}">Bullpen</div><div class="rl" style="background:${sec}10">${rlBP(tb.bp||[])}</div>
     <div class="sec-label" style="border-left-color:${color}">Pitching</div>
@@ -1498,7 +1521,7 @@ function renderTeamSchedule(teamCode){
   const color=tc(teamCode);
   const t=D.teams[teamCode];
   const finalRec=D.records[teamCode]||{w:0,l:0};
-  document.getElementById('team-title').innerHTML=`<span style="color:${color}">${t?t.full:teamCode}</span>`;
+  document.getElementById('team-title').innerHTML=`${logoImg(teamCode,60)}<span style="color:${color}">${t?t.full:teamCode}</span>`;
   document.getElementById('team-sub').textContent=curSeason+' season · '+finalRec.w+'-'+finalRec.l;
   const tsbar=document.getElementById('team-sched-bar');
   if(tsbar)tsbar.style.background=`linear-gradient(90deg,${color},${ts(teamCode)})`;
@@ -1527,7 +1550,7 @@ function renderTeamSchedule(teamCode){
     return `<div class="sg-card" onclick="openBox('${g.gid}','team')">
       <div class="sg-date">${fds(g.date)}${gn}</div>
       <div class="sg-matchup">
-        <span class="sg-team" style="color:${oppColor}">${ha} ${tf(g.opp)}</span>
+        <span class="sg-team" style="color:${oppColor}">${ha} ${logoImg(g.opp,30)}${tf(g.opp)}</span>
         <span class="sg-score sg-${g.res}">${g.tmR}-${g.oppR}</span>
       </div>
       <div class="sg-result">
@@ -1571,7 +1594,7 @@ function renderST(asOfDate){
       const gb=i===0?'—':(((top.w-t.w)+(t.l-top.l))/2).toFixed(1);
       return `<tr>
         <td onclick="openTeamSchedule('${t.code}','standings')">
-          <span class="cdot" style="background:${tc(t.code)}"></span>${t.full}
+          <span class="cdot" style="background:${tc(t.code)}"></span>${logoImg(t.code,26)}${t.full}
         </td>
         <td>${t.w}</td><td>${t.l}</td><td>${pct}</td><td>${gb}</td>
       </tr>`;
